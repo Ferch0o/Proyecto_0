@@ -4,3 +4,18 @@ main: me.difficulty.DifficultyPlugin
 api-version: '1.21'
 author: DifficultyProject
 description: Plugin de dificultad progresiva para Minecraft 1.21
+
+commands:
+  day:
+    description: Muestra el día actual del servidor.
+    usage: /day
+
+  setday:
+    description: Cambia el día actual del servidor.
+    usage: /setday <día>
+    permission: difficulty.setday
+
+permissions:
+  difficulty.setday:
+    description: Permite modificar el día del servidor.
+    default: op
