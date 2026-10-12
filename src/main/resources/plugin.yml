@@ -1,0 +1,6 @@
+name: DifficultyPlugin
+version: '1.0'
+main: me.difficulty.DifficultyPlugin
+api-version: '1.21'
+author: DifficultyProject
+description: Plugin de dificultad progresiva para Minecraft 1.21
