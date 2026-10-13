@@ -1,6 +1,6 @@
 package me.difficulty.commands;
 
-import me.difficulty.items.CorruptedStar;
+import me.difficulty.items.day7.CorruptedStar;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

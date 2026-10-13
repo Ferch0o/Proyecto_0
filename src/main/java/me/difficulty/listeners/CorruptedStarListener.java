@@ -1,7 +1,7 @@
 package me.difficulty.listeners;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.items.CorruptedStar;
+import me.difficulty.items.day7.CorruptedStar;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;

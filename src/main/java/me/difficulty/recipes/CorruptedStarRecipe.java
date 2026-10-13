@@ -1,6 +1,6 @@
 package me.difficulty.recipes;
 
-import me.difficulty.items.CorruptedStar;
+import me.difficulty.items.day7.CorruptedStar;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ShapedRecipe;

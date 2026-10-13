@@ -4,7 +4,8 @@ import me.difficulty.commands.DayCommand;
 import me.difficulty.commands.GiveCorruptedStarCommand;
 import me.difficulty.commands.SetDayCommand;
 import me.difficulty.day.DayManager;
-import me.difficulty.items.CorruptedStar;
+import me.difficulty.items.CustomItemRegistry;
+import me.difficulty.items.day7.CorruptedStar;
 import me.difficulty.listeners.CorruptedStarListener;
 import me.difficulty.listeners.CorruptedStarRecipeBookListener;
 import me.difficulty.listeners.CorruptedStarRecipeListener;
@@ -16,15 +17,25 @@ import java.util.Objects;
 public final class DifficultyPlugin extends JavaPlugin{
     private DayManager dayManager;
     private CorruptedStar corruptedStar;
+    private CustomItemRegistry itemRegistry;
 
     @Override
     public void onEnable() {
 
         saveDefaultConfig();
 
-        dayManager = new DayManager(this);
+        dayManager =
+                new DayManager(this);
 
-        corruptedStar = new CorruptedStar(this);
+        itemRegistry =
+                new CustomItemRegistry(this);
+
+        corruptedStar =
+                new CorruptedStar(this);
+
+        itemRegistry.register(
+                corruptedStar
+        );
 
         CorruptedStarRecipe corruptedStarRecipe =
                 new CorruptedStarRecipe(
