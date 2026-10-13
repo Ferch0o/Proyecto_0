@@ -173,6 +173,20 @@ public class CorruptedStarRecipeListener implements Listener {
         return keyed.getKey().equals(recipeKey);
     }
 
+    private boolean isVanillaNetherStar(
+            ItemStack item
+    ) {
+
+        if (item == null) {
+            return false;
+        }
+
+        if (item.getType() != Material.NETHER_STAR) {
+            return false;
+        }
+
+        return !corruptedStar.isCorruptedStar(item);
+    }
     /*
      * Cantidades necesarias:
      *
@@ -193,7 +207,7 @@ public class CorruptedStarRecipeListener implements Listener {
                 && hasItem(matrix[2], Material.DIAMOND, 5)
 
                 && hasItem(matrix[3], Material.RABBIT_FOOT, 3)
-                && hasItem(matrix[4], Material.NETHER_STAR, 1)
+                && isVanillaNetherStar(matrix[4])
                 && hasItem(matrix[5], Material.FERMENTED_SPIDER_EYE, 32)
 
                 && hasItem(matrix[6], Material.DIAMOND, 5)

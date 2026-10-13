@@ -2,9 +2,12 @@ package me.difficulty.listeners;
 
 import me.difficulty.day.DayManager;
 import me.difficulty.items.day7.CorruptedStar;
+import me.difficulty.utils.InteractionPriority;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -44,7 +47,19 @@ public class CorruptedStarListener implements Listener {
             return;
         }
 
-        event.setCancelled(true);
+        /*
+         * Si estamos haciendo clic derecho sobre
+         * una mesa de crafteo, la mesa tiene prioridad.
+         */
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK
+                && InteractionPriority.shouldBlockHavePriority(
+                event.getClickedBlock()
+        )) {
+
+            return;
+        }
+
+        event.setUseItemInHand(Event.Result.DENY);
 
         Player player = event.getPlayer();
 
@@ -59,9 +74,9 @@ public class CorruptedStarListener implements Listener {
         }
 
         // Comprobar cooldown
-        if (player.hasCooldown(event.getItem().getType())) {
+        if (player.hasCooldown(event.getItem())) {
 
-            int ticks = player.getCooldown(event.getItem().getType());
+            int ticks = player.getCooldown(event.getItem());
 
             int seconds = (int) Math.ceil(ticks / 20.0);
 
@@ -106,7 +121,7 @@ public class CorruptedStarListener implements Listener {
 
         // Cooldown de 60 segundos
         player.setCooldown(
-                event.getItem().getType(),
+                event.getItem(),
                 60 * 20
         );
 

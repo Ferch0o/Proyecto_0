@@ -3,6 +3,8 @@ package me.difficulty.recipes;
 import me.difficulty.items.day7.CorruptedStar;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -40,7 +42,7 @@ public class CorruptedStarRecipe {
         recipe.setIngredient('D', Material.DIAMOND);
         recipe.setIngredient('F', Material.ECHO_SHARD);
         recipe.setIngredient('P', Material.RABBIT_FOOT);
-        recipe.setIngredient('N', Material.NETHER_STAR);
+        recipe.setIngredient('N', new RecipeChoice.ExactChoice(new ItemStack(Material.NETHER_STAR)));
         recipe.setIngredient('S', Material.FERMENTED_SPIDER_EYE);
 
         plugin.getServer().addRecipe(recipe);

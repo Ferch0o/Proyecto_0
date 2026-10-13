@@ -1,6 +1,7 @@
 package me.difficulty.commands;
 
 import me.difficulty.day.DayManager;
+import me.difficulty.recipes.RecipeUnlockManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,9 +11,11 @@ import org.jetbrains.annotations.NotNull;
 public class SetDayCommand implements CommandExecutor {
 
     private final DayManager dayManager;
+    private final RecipeUnlockManager recipeUnlockManager;
 
-    public SetDayCommand(DayManager dayManager) {
+    public SetDayCommand(DayManager dayManager, RecipeUnlockManager recipeUnlockManager){
         this.dayManager = dayManager;
+        this.recipeUnlockManager = recipeUnlockManager;
     }
 
     @Override
@@ -51,6 +54,7 @@ public class SetDayCommand implements CommandExecutor {
         }
 
         dayManager.setCurrentDay(day);
+        recipeUnlockManager.updateAllPlayers();
 
         sender.sendMessage(
                 ChatColor.GREEN

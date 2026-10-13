@@ -59,49 +59,108 @@ public class CorruptedStarRecipeBookListener implements Listener {
         }
 
         // Por seguridad, de momento exigimos que la mesa esté vacía
-        if (!isMatrixEmpty(craftingInventory.getMatrix())) {
+        ItemStack[] currentMatrix =
+                craftingInventory.getMatrix();
+
+        /*
+         * Devuelve:
+         *
+         * 0  = mesa vacía
+         * 1  = ingredientes para 1 crafteo
+         * 2  = ingredientes para 2 crafteos
+         * -1 = hay otros materiales o cantidades incompatibles
+         */
+        int loadedCrafts =
+                getLoadedCrafts(currentMatrix);
+
+        if (loadedCrafts == -1) {
 
             player.sendMessage(
                     ChatColor.RED
-                            + "Vacía la mesa de crafteo antes de usar esta receta."
+                            + "La mesa contiene materiales que no pertenecen a esta receta."
             );
+
             return;
         }
 
         /*
-         * Si hace clic normal:
-         * colocamos materiales para 1 receta.
+         * Solo caben 2 recetas simultáneamente,
+         * porque cada una necesita 32 ojos fermentados.
          *
-         * Si usa la opción de fabricar el máximo:
-         * calculamos cuántas recetas caben.
+         * 32 x 2 = 64
          */
-        int crafts;
+        int availableSpace =
+                2 - loadedCrafts;
 
-        if (event.isMakeAll()) {
-            crafts = calculateMaximumCrafts(player);
-        } else {
-            crafts = 1;
-        }
-
-        if (crafts <= 0 || !hasMaterials(player, crafts)) {
+        if (availableSpace <= 0) {
 
             player.sendMessage(
                     ChatColor.RED
-                            + "No tienes suficientes materiales para fabricar la Estrella Corrupta."
+                            + "La mesa ya contiene la cantidad máxima de esta receta."
             );
 
             return;
         }
 
-        // Quitamos los materiales del inventario
-        removeMaterials(player, crafts);
+        int craftsToAdd;
 
-        // Los colocamos manualmente en la mesa
-        ItemStack[] matrix = createMatrix(crafts);
+        if (event.isMakeAll()) {
 
-        craftingInventory.setMatrix(matrix);
+            /*
+             * Shift + clic:
+             * añadir todo lo posible.
+             */
+            craftsToAdd =
+                    Math.min(
+                            availableSpace,
+                            calculateMaximumCrafts(player)
+                    );
 
-        // Mostramos inmediatamente el resultado
+        } else {
+
+            /*
+             * Clic normal:
+             * añadir una receta más.
+             */
+            craftsToAdd = 1;
+        }
+
+        if (craftsToAdd <= 0
+                || !hasMaterials(player, craftsToAdd)) {
+
+            player.sendMessage(
+                    ChatColor.RED
+                            + "No tienes suficientes materiales para fabricar otra Estrella Corrupta."
+            );
+
+            return;
+        }
+
+        /*
+         * Quitamos solamente los materiales
+         * que vamos a añadir ahora.
+         */
+        removeMaterials(
+                player,
+                craftsToAdd
+        );
+
+        /*
+         * Cantidad total que quedará en la mesa.
+         */
+        int totalCrafts =
+                loadedCrafts + craftsToAdd;
+
+        /*
+         * Reconstruimos la matriz con la cantidad total.
+         */
+        ItemStack[] newMatrix =
+                createMatrix(totalCrafts);
+
+        craftingInventory.setMatrix(
+                newMatrix
+        );
+
         craftingInventory.setResult(
                 corruptedStar.createItem()
         );
@@ -119,6 +178,155 @@ public class CorruptedStarRecipeBookListener implements Listener {
         return true;
     }
 
+    private boolean hasExactItem(
+            ItemStack item,
+            Material material,
+            int amount
+    ) {
+
+        return item != null
+                && item.getType() == material
+                && item.getAmount() == amount;
+    }
+
+    private boolean isVanillaNetherStar(
+            ItemStack item,
+            int amount
+    ) {
+
+        if (item == null) {
+            return false;
+        }
+
+        if (item.getType() != Material.NETHER_STAR) {
+            return false;
+        }
+
+        if (item.getAmount() != amount) {
+            return false;
+        }
+
+        return !corruptedStar.isCorruptedStar(item);
+    }
+
+    private int getLoadedCrafts(
+            ItemStack[] matrix
+    ) {
+
+        /*
+         * Mesa vacía.
+         */
+        if (isMatrixEmpty(matrix)) {
+            return 0;
+        }
+
+        if (matrix.length < 9) {
+            return -1;
+        }
+
+        /*
+         * Probamos si contiene exactamente
+         * ingredientes para 1 o 2 recetas.
+         */
+        for (int crafts = 1;
+             crafts <= 2;
+             crafts++) {
+
+            boolean matches =
+
+                    hasExactItem(
+                            matrix[0],
+                            Material.DIAMOND,
+                            5 * crafts
+                    )
+
+                            && hasExactItem(
+                            matrix[1],
+                            Material.ECHO_SHARD,
+                            3 * crafts
+                    )
+
+                            && hasExactItem(
+                            matrix[2],
+                            Material.DIAMOND,
+                            5 * crafts
+                    )
+
+                            && hasExactItem(
+                            matrix[3],
+                            Material.RABBIT_FOOT,
+                            3 * crafts
+                    )
+
+                            && isVanillaNetherStar(
+                            matrix[4],
+                            crafts
+                    )
+
+                            && hasExactItem(
+                            matrix[5],
+                            Material.FERMENTED_SPIDER_EYE,
+                            32 * crafts
+                    )
+
+                            && hasExactItem(
+                            matrix[6],
+                            Material.DIAMOND,
+                            5 * crafts
+                    )
+
+                            && hasExactItem(
+                            matrix[7],
+                            Material.ECHO_SHARD,
+                            3 * crafts
+                    )
+
+                            && hasExactItem(
+                            matrix[8],
+                            Material.DIAMOND,
+                            5 * crafts
+                    );
+
+            if (matches) {
+                return crafts;
+            }
+        }
+
+        /*
+         * Hay algo en la mesa,
+         * pero no corresponde exactamente
+         * a nuestra receta.
+         */
+        return -1;
+    }
+
+    private int countVanillaNetherStars(
+            Player player
+    ) {
+
+        int amount = 0;
+
+        for (ItemStack item :
+                player.getInventory().getStorageContents()) {
+
+            if (item == null) {
+                continue;
+            }
+
+            if (item.getType() != Material.NETHER_STAR) {
+                continue;
+            }
+
+            if (corruptedStar.isCorruptedStar(item)) {
+                continue;
+            }
+
+            amount += item.getAmount();
+        }
+
+        return amount;
+    }
+
     private boolean hasMaterials(Player player, int crafts) {
 
         return countMaterial(player, Material.DIAMOND)
@@ -130,7 +338,7 @@ public class CorruptedStarRecipeBookListener implements Listener {
                 && countMaterial(player, Material.RABBIT_FOOT)
                 >= 3 * crafts
 
-                && countMaterial(player, Material.NETHER_STAR)
+                && countVanillaNetherStars(player)
                 >= crafts
 
                 && countMaterial(player, Material.FERMENTED_SPIDER_EYE)
@@ -149,7 +357,7 @@ public class CorruptedStarRecipeBookListener implements Listener {
                 countMaterial(player, Material.RABBIT_FOOT) / 3;
 
         int netherStars =
-                countMaterial(player, Material.NETHER_STAR);
+                countVanillaNetherStars(player);
 
         int spiderEyes =
                 countMaterial(
@@ -225,9 +433,8 @@ public class CorruptedStarRecipeBookListener implements Listener {
                 3 * crafts
         );
 
-        removeMaterial(
+        removeVanillaNetherStars(
                 player,
-                Material.NETHER_STAR,
                 crafts
         );
 
@@ -255,6 +462,54 @@ public class CorruptedStarRecipeBookListener implements Listener {
 
             if (item == null
                     || item.getType() != material) {
+                continue;
+            }
+
+            if (item.getAmount() <= amount) {
+
+                amount -= item.getAmount();
+                inventory.setItem(slot, null);
+
+            } else {
+
+                item.setAmount(
+                        item.getAmount() - amount
+                );
+
+                amount = 0;
+            }
+
+            if (amount <= 0) {
+                return;
+            }
+        }
+    }
+
+    private void removeVanillaNetherStars(
+            Player player,
+            int amount
+    ) {
+
+        PlayerInventory inventory =
+                player.getInventory();
+
+        for (int slot = 0;
+             slot < inventory.getStorageContents().length;
+             slot++) {
+
+            ItemStack item =
+                    inventory.getItem(slot);
+
+            if (item == null) {
+                continue;
+            }
+
+            if (item.getType() != Material.NETHER_STAR) {
+                continue;
+            }
+
+            // NO tocar Estrellas Corruptas
+            if (corruptedStar.isCorruptedStar(item)) {
                 continue;
             }
 
