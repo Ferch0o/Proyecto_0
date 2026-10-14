@@ -17,6 +17,38 @@ commands:
     description: Entrega una Estrella Corrupta para pruebas.
     usage: /givecorruptedstar
     permission: difficulty.admin
+  spawninfrazombie:
+    description: Genera un Infrazombie para pruebas.
+    usage: /spawninfrazombie
+    permission: difficulty.admin
+  spawncorruptedzombie:
+    description: Genera un Zombie Corrupto para pruebas.
+    usage: /spawncorruptedzombie
+    permission: difficulty.admin
+  spawnscavenger:
+    description: Genera un Carroñero para pruebas.
+    usage: /spawnscavenger
+    permission: difficulty.admin
+  spawnelementalskeleton:
+    description: Genera un Esqueleto Elemental para pruebas.
+    usage: /spawnelementalskeleton
+    permission: difficulty.admin
+  spawngladiator:
+    description: Genera un Gladiador para pruebas.
+    usage: /spawngladiator
+    permission: difficulty.admin
+  spawnfuturisticcreeper:
+    description: Genera un Creeper Futurista para pruebas.
+    usage: /spawnfuturisticcreeper
+    permission: difficulty.admin
+  spawnspeedspider:
+    description: Genera una Araña Velocista para pruebas.
+    usage: /spawnspeedspider
+    permission: difficulty.admin
+  spawnabyssspider:
+    description: Genera una Araña del Abismo para pruebas.
+    usage: /spawnabyssspider
+    permission: difficulty.admin
 
 permissions:
   difficulty.setday:
