@@ -49,6 +49,24 @@ commands:
     description: Genera una Araña del Abismo para pruebas.
     usage: /spawnabyssspider
     permission: difficulty.admin
+  spawnweaver:
+    description: Genera una Tejedora para pruebas.
+    usage: /spawnweaver
+    permission: difficulty.admin
+  spawngoliath:
+    description: Genera una Goliat para pruebas.
+    usage: /spawngoliath
+    permission: difficulty.admin
+  storm:
+    description: Controla la Tormenta.
+    usage: /storm <start|stop>
+    permission: difficulty.admin
+
+  sharedcure:
+    description: Comparte descuentos de aldeanos curados anteriormente.
+    usage: /sharedcure add
+    permission: difficulty.sharedcure.admin
+
 
 permissions:
   difficulty.setday:
@@ -56,4 +74,7 @@ permissions:
     default: op
   difficulty.admin:
     description: Permite utilizar comandos de desarrollo del plugin.
+    default: op
+  difficulty.sharedcure.admin:
+    description: Permite habilitar descuentos compartidos.
     default: op

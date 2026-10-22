@@ -12,6 +12,24 @@ public final class ItemIds {
     public static final String CORRUPTED_STAR = "corrupted_star";
     public static final int CORRUPTED_STAR_MODEL = 1001;
 
+    /*
+     * ========================================
+     * DIA 10
+     * Rango de modelos: 1050 - 1099
+     * ========================================
+     */
+
+    public static final String CORRUPTED_INK = "corrupted_ink";
+    public static final int CORRUPTED_INK_MODEL = 1051;
+
+
+    public static final String MINOTAUR_HORN = "minotaur_horn";
+    public static final int MINOTAUR_HORN_MODEL = 1052;
+
+
+    public static final String EXPLOSIVE_CROSSBOW = "explosive_crossbow";
+    public static final int EXPLOSIVE_CROSSBOW_MODEL = 1053;
+
 
     /*
      * DIA 17

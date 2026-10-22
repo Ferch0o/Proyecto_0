@@ -1,31 +1,69 @@
 package me.difficulty.recipes;
 
 import me.difficulty.day.DayManager;
+
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+
 public class RecipeUnlockManager {
 
+
     private final JavaPlugin plugin;
+
     private final DayManager dayManager;
+
+
+    /*
+     * ========================================
+     * RECETAS
+     * ========================================
+     */
+
     private final NamespacedKey corruptedStarRecipeKey;
+
+    private final NamespacedKey explosiveCrossbowRecipeKey;
+
 
     public RecipeUnlockManager(
             JavaPlugin plugin,
             DayManager dayManager,
-            NamespacedKey corruptedStarRecipeKey
+            NamespacedKey corruptedStarRecipeKey,
+            NamespacedKey explosiveCrossbowRecipeKey
     ) {
-        this.plugin = plugin;
-        this.dayManager = dayManager;
-        this.corruptedStarRecipeKey = corruptedStarRecipeKey;
+
+        this.plugin =
+                plugin;
+
+        this.dayManager =
+                dayManager;
+
+        this.corruptedStarRecipeKey =
+                corruptedStarRecipeKey;
+
+        this.explosiveCrossbowRecipeKey =
+                explosiveCrossbowRecipeKey;
     }
 
+
     /*
-     * Comprueba qué recetas debe conocer
-     * un jugador dependiendo del día.
+     * ========================================
+     * ACTUALIZAR RECETAS DEL JUGADOR
+     * ========================================
      */
-    public void updatePlayer(Player player) {
+
+    public void updatePlayer(
+            Player player
+    ) {
+
+
+        /*
+         * ========================================
+         * ESTRELLA CORRUPTA
+         * DÍA 7+
+         * ========================================
+         */
 
         if (dayManager.isAtLeast(7)) {
 
@@ -39,18 +77,46 @@ public class RecipeUnlockManager {
                     corruptedStarRecipeKey
             );
         }
+
+
+        /*
+         * ========================================
+         * BALLESTA EXPLOSIVA
+         * DÍA 10+
+         * ========================================
+         */
+
+        if (dayManager.isAtLeast(10)) {
+
+            player.discoverRecipe(
+                    explosiveCrossbowRecipeKey
+            );
+
+        } else {
+
+            player.undiscoverRecipe(
+                    explosiveCrossbowRecipeKey
+            );
+        }
     }
 
+
     /*
-     * Actualiza las recetas de todos
-     * los jugadores conectados.
+     * ========================================
+     * ACTUALIZAR TODOS LOS JUGADORES
+     * ========================================
      */
+
     public void updateAllPlayers() {
 
-        for (Player player :
-                plugin.getServer().getOnlinePlayers()) {
 
-            updatePlayer(player);
+        for (Player player :
+                plugin.getServer()
+                        .getOnlinePlayers()) {
+
+            updatePlayer(
+                    player
+            );
         }
     }
 }

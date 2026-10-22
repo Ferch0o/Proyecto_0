@@ -4,7 +4,6 @@ import me.difficulty.day.DayManager;
 import me.difficulty.items.day7.CorruptedStar;
 import me.difficulty.utils.InteractionPriority;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
