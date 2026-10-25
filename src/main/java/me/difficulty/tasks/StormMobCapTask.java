@@ -64,7 +64,7 @@ public class StormMobCapTask
          * ========================================
          */
 
-        if (stormManager.isActive()) {
+        if (stormManager.hasDay10Effects()) {
 
             applyStormMobCap();
 

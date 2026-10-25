@@ -200,7 +200,7 @@ public class StormMobEffectTask extends BukkitRunnable {
                  * ====================================
                  */
 
-                if (stormManager.isActive()) {
+                if (stormManager.hasDay10Effects()) {
 
                     applyStormBoost(
                             mob

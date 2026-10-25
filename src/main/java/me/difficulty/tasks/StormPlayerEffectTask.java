@@ -58,7 +58,7 @@ public class StormPlayerEffectTask
          * Solo funciona durante
          * nuestra Tormenta.
          */
-        if (!stormManager.isActive()) {
+        if (!stormManager.hasDay10Effects()) {
             return;
         }
 

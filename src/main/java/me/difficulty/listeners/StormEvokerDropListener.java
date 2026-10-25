@@ -38,7 +38,7 @@ public class StormEvokerDropListener
         /*
          * Solo durante nuestra Tormenta.
          */
-        if (!stormManager.isActive()) {
+        if (!stormManager.hasDay10Effects()) {
             return;
         }
 

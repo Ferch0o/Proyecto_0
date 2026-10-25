@@ -247,6 +247,34 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
+
+        /*
+         * ========================================
+         * CALIDAD DE VIDA
+         * FUEGO AMIGO DESACTIVADO
+         * ========================================
+         *
+         * Disponible desde el Día 0.
+         * Afecta a todos los jugadores.
+         */
+
+        getServer()
+                .getPluginManager()
+                .registerEvents(
+                        new FriendlyFireProtectionListener(this),
+                        this
+                );
+
+        getServer()
+                .getPluginManager()
+                .registerEvents(
+                        new StormDeathListener(
+                                dayManager,
+                                stormManager
+                        ),
+                        this
+                );
+
         getServer()
                 .getPluginManager()
                 .registerEvents(
@@ -611,6 +639,16 @@ public final class DifficultyPlugin extends JavaPlugin {
                 20L,
                 20L
         );
+
+        new StormNaturalTask(
+                dayManager,
+                stormManager
+        ).runTaskTimer(
+                this,
+                20L,
+                20L
+        );
+
 
         new StormMobEffectTask(
                 this,

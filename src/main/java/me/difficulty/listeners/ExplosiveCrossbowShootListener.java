@@ -63,7 +63,7 @@ public class ExplosiveCrossbowShootListener
      * No genera fuego.
      */
     private static final float EXPLOSION_POWER =
-            2.0F;
+            1.5F;
 
 
     /*

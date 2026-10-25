@@ -1,3 +1,4 @@
+
 package me.difficulty.day;
 
 import org.bukkit.plugin.java.JavaPlugin;
@@ -10,7 +11,12 @@ public class DayManager {
     public DayManager(JavaPlugin plugin) {
         this.plugin = plugin;
 
-        this.currentDay = plugin.getConfig().getInt("current-day", 1);
+        // Día inicial para servidores nuevos.
+        // Respeta el día guardado en servidores existentes.
+        this.currentDay = Math.max(
+                0,
+                plugin.getConfig().getInt("current-day", 0)
+        );
     }
 
     public int getCurrentDay() {
@@ -19,7 +25,7 @@ public class DayManager {
 
     public void setCurrentDay(int day) {
 
-        if (day < 1) {
+        if (day < 0) {
             return;
         }
 

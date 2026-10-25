@@ -63,7 +63,7 @@ public class StormEnderPearlListener
          * ========================================
          */
 
-        if (!stormManager.isActive()) {
+        if (!stormManager.hasDay10Effects()) {
             return;
         }
 

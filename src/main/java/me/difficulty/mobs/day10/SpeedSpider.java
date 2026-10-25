@@ -10,8 +10,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 public class SpeedSpider extends CustomMob {
 
     public SpeedSpider(
@@ -74,26 +72,23 @@ public class SpeedSpider extends CustomMob {
                 )
         );
 
-
         /*
          * ========================================
-         * 10% DE PROBABILIDAD DE INVISIBILIDAD
+         * INVISIBILIDAD PERMANENTE
          * ========================================
+         *
+         * Todas las Arañas Velocistas
+         * serán invisibles.
          */
 
-        if (ThreadLocalRandom
-                .current()
-                .nextInt(100) < 10) {
-
-            spider.addPotionEffect(
-                    new PotionEffect(
-                            PotionEffectType.INVISIBILITY,
-                            PotionEffect.INFINITE_DURATION,
-                            0,
-                            false,
-                            false
-                    )
-            );
-        }
+        spider.addPotionEffect(
+                new PotionEffect(
+                        PotionEffectType.INVISIBILITY,
+                        PotionEffect.INFINITE_DURATION,
+                        0,
+                        false,
+                        false
+                )
+        );
     }
 }

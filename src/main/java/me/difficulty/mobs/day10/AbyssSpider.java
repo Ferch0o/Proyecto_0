@@ -69,31 +69,23 @@ public class AbyssSpider extends CustomMob {
 
         if (maxHealth != null) {
 
-            maxHealth.setBaseValue(
-                    60.0
-            );
+            maxHealth.setBaseValue(30.0);
 
-            spider.setHealth(
-                    60.0
-            );
+            spider.setHealth(30.0);
         }
 
 
         /*
          * ========================================
-         * FUERZA III
+         * FUERZA VI
          * ========================================
-         *
-         * 0 = I
-         * 1 = II
-         * 2 = III
          */
 
         spider.addPotionEffect(
                 new PotionEffect(
                         PotionEffectType.STRENGTH,
                         PotionEffect.INFINITE_DURATION,
-                        3,
+                        5,
                         false,
                         false
                 )
@@ -118,7 +110,7 @@ public class AbyssSpider extends CustomMob {
 
         /*
          * ========================================
-         * RESISTENCIA V
+         * RESISTENCIA I
          * ========================================
          */
 
@@ -126,7 +118,7 @@ public class AbyssSpider extends CustomMob {
                 new PotionEffect(
                         PotionEffectType.RESISTANCE,
                         PotionEffect.INFINITE_DURATION,
-                        2,
+                        0,
                         false,
                         false
                 )

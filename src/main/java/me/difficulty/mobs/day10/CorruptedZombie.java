@@ -106,7 +106,7 @@ public class CorruptedZombie extends CustomMob {
                 new PotionEffect(
                         PotionEffectType.RESISTANCE,
                         PotionEffect.INFINITE_DURATION,
-                        1,
+                        2,
                         false,
                         false
                 )
@@ -201,29 +201,22 @@ public class CorruptedZombie extends CustomMob {
 
             ItemStack sword =
                     new ItemStack(
-                            Material.IRON_SWORD
+                            Material.NETHERITE_SWORD
                     );
 
-            ItemMeta swordMeta =
-                    sword.getItemMeta();
+            ItemMeta swordMeta = sword.getItemMeta();
 
             swordMeta.addEnchant(
                     Enchantment.SHARPNESS,
-                    3,
+                    2,
                     true
             );
 
-            sword.setItemMeta(
-                    swordMeta
-            );
+            sword.setItemMeta(swordMeta);
 
-            equipment.setItemInMainHand(
-                    sword
-            );
+            equipment.setItemInMainHand(sword);
 
-            equipment.setItemInMainHandDropChance(
-                    0.0f
-            );
+            equipment.setItemInMainHandDropChance(0.0f);
         }
     }
 }

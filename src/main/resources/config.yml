@@ -1,6 +1,7 @@
-current-day: 1
+current-day: 0
 
 storm:
   active: false
   remaining-seconds: 0
+  total-seconds: 0
   start-day: 0

@@ -45,11 +45,9 @@ public class StormDiamondDropListener
      * ========================================
      */
 
-    private static final int MIN_DIAMONDS =
-            1;
+    private static final int MIN_DIAMONDS = 2;
 
-    private static final int MAX_DIAMONDS =
-            7;
+    private static final int MAX_DIAMONDS = 7;
 
 
     /*
@@ -120,7 +118,7 @@ public class StormDiamondDropListener
          * ========================================
          */
 
-        if (!stormManager.isActive()) {
+        if (!stormManager.hasDay10Effects()) {
             return;
         }
 

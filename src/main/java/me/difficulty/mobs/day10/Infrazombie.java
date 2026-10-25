@@ -74,7 +74,7 @@ public class Infrazombie extends CustomMob {
                 new PotionEffect(
                         PotionEffectType.SPEED,
                         PotionEffect.INFINITE_DURATION,
-                        5,
+                        4,
                         false,
                         false
                 )

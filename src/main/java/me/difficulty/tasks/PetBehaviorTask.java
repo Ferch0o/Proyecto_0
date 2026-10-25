@@ -730,19 +730,16 @@ public class PetBehaviorTask extends BukkitRunnable {
 
     /*
      * ========================================
-     * FUERZA IV
+     * FUERZA II
      * ========================================
      */
 
-    private void addStrength(
-            LivingEntity entity
-    ) {
-
+    private void addStrength(LivingEntity entity) {
         entity.addPotionEffect(
                 new PotionEffect(
                         PotionEffectType.STRENGTH,
                         40,
-                        2,
+                        1,
                         false,
                         true
                 )

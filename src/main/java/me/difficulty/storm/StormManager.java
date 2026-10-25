@@ -25,6 +25,8 @@ public class StormManager {
 
     private long remainingSeconds;
 
+    private long totalStormSeconds;
+
     private int startDay;
 
 
@@ -100,113 +102,187 @@ public class StormManager {
                 );
 
 
+// Recuperar la duración total de la tormenta.
+//
+// Si el servidor tenía una tormenta guardada
+// con la versión anterior, recuperamos un
+// total compatible con ese guardado.
+
+        long legacyTotal = Math.max(
+                remainingSeconds,
+                Math.max(1, startDay) * 3600L
+        );
+
+        totalStormSeconds = config.getLong(
+                "storm.total-seconds",
+                legacyTotal
+        );
+
+        if (active) {
+            totalStormSeconds = Math.max(
+                    totalStormSeconds,
+                    remainingSeconds
+            );
+        } else {
+            totalStormSeconds = 0L;
+        }
+
         /*
          * Seguridad.
          */
-        if (active
-                && remainingSeconds <= 0) {
+        if (active && remainingSeconds <= 0) {
 
             active = false;
 
             remainingSeconds = 0L;
 
-            startDay = 0;
+            totalStormSeconds = 0L;
 
+            startDay = 0;
 
             saveState();
         }
     }
 
-
     /*
      * ========================================
-     * INICIAR TORMENTA
+     * INICIAR TORMENTA CON COMANDO
      * ========================================
+     *
+     * Conserva el comportamiento de /storm start.
+     *
+     * Las muertes y tormentas naturales usarán
+     * addStormTime() directamente.
      */
 
     public boolean startStorm() {
 
-        /*
-         * Ya existe una Tormenta.
-         */
         if (active) {
             return false;
         }
 
+        long seconds =
+                Math.max(
+                        1,
+                        dayManager.getCurrentDay()
+                ) * 3600L;
 
-        /*
-         * Guardamos el Día exacto
-         * en el que comenzó.
-         */
-        startDay =
-                dayManager.getCurrentDay();
-
-
-        /*
-         * ========================================
-         * DURACIÓN
-         * ========================================
-         *
-         * Día 10
-         * → 10 horas
-         *
-         * Día 20
-         * → 20 horas
-         *
-         * 1 hora = 3600 segundos
-         */
-
-        remainingSeconds =
-                startDay * 3600L;
-
-
-        active = true;
-
-
-        /*
-         * ========================================
-         * CLIMA
-         * ========================================
-         */
-
-        keepStormWeatherActive();
-
-
-        /*
-         * ========================================
-         * BOSS BAR
-         * ========================================
-         */
-
-        createBossBar();
-
-        updateBossBar();
-
-
-        /*
-         * Guardamos inmediatamente.
-         */
-        saveState();
-
-
-        /*
-         * Aviso global.
-         */
-        Bukkit.broadcastMessage(
-                "§4§l¡LA TORMENTA HA COMENZADO!"
+        addStormTime(
+                seconds,
+                "Comando administrativo"
         );
-
-
-        Bukkit.broadcastMessage(
-                "§cDuración: §f"
-                        + startDay
-                        + " horas."
-        );
-
 
         return true;
     }
 
+
+    /*
+     * ========================================
+     * AÑADIR TIEMPO DE TORMENTA
+     * ========================================
+     *
+     * Funciona si:
+     *
+     * - No hay tormenta.
+     * - Ya existe una tormenta.
+     *
+     * Nunca reinicia el tiempo acumulado.
+     */
+
+    public void addStormTime(
+            long seconds,
+            String reason
+    ) {
+
+        if (seconds <= 0) {
+            return;
+        }
+
+        boolean wasActive = active;
+
+        /*
+         * Primera activación.
+         */
+
+        if (!active) {
+
+            active = true;
+
+            startDay =
+                    dayManager.getCurrentDay();
+
+            remainingSeconds = 0L;
+            totalStormSeconds = 0L;
+        }
+
+        /*
+         * Acumular la nueva duración.
+         */
+
+        remainingSeconds += seconds;
+        totalStormSeconds += seconds;
+
+        /*
+         * Mantener clima y BossBar.
+         */
+
+        keepStormWeatherActive();
+
+        createBossBar();
+        updateBossBar();
+
+        /*
+         * Guardar inmediatamente el nuevo tiempo.
+         */
+
+        saveState();
+
+        /*
+         * Anunciar el evento.
+         */
+
+        if (wasActive) {
+
+            Bukkit.broadcastMessage(
+                    "§6§l¡LA TORMENTA SE HA EXTENDIDO!"
+            );
+
+        } else {
+
+            Bukkit.broadcastMessage(
+                    "§4§l¡LA TORMENTA HA COMENZADO!"
+            );
+        }
+
+        Bukkit.broadcastMessage(
+                "§eCausa: §f" + reason
+        );
+
+        Bukkit.broadcastMessage(
+                "§eTiempo añadido: §f"
+                        + formatAddedTime(seconds)
+        );
+
+        Bukkit.broadcastMessage(
+                "§eTiempo restante: §f"
+                        + getFormattedRemainingTime()
+        );
+    }
+
+
+    /*
+     * ========================================
+     * FORMATEAR TIEMPO AÑADIDO
+     * ========================================
+     */
+
+    private String formatAddedTime(long seconds) {
+
+        long hours = seconds / 3600;
+        long minutes = (seconds % 3600) / 60;
+
+        return hours + "h " + minutes + "min";
+    }
 
     /*
      * ========================================
@@ -224,6 +300,8 @@ public class StormManager {
         active = false;
 
         remainingSeconds = 0L;
+
+        totalStormSeconds = 0L;
 
         startDay = 0;
 
@@ -342,6 +420,8 @@ public class StormManager {
         active = false;
 
         remainingSeconds = 0L;
+
+        totalStormSeconds = 0L;
 
         startDay = 0;
 
@@ -551,21 +631,8 @@ public class StormManager {
      */
 
     private long getTotalStormSeconds() {
-
-        /*
-         * La duración total está determinada
-         * por el Día en que comenzó.
-         *
-         * Ejemplo:
-         *
-         * Día 10
-         * 10 * 3600
-         * = 36000 segundos.
-         */
-
-        return startDay * 3600L;
+        return totalStormSeconds;
     }
-
 
     /*
      * ========================================
@@ -673,7 +740,6 @@ public class StormManager {
         FileConfiguration config =
                 plugin.getConfig();
 
-
         config.set(
                 "storm.active",
                 active
@@ -685,6 +751,10 @@ public class StormManager {
                 remainingSeconds
         );
 
+        config.set(
+                "storm.total-seconds",
+                totalStormSeconds
+        );
 
         config.set(
                 "storm.start-day",
@@ -750,5 +820,18 @@ public class StormManager {
                 minutes,
                 seconds
         );
+    }
+
+    /*
+     * ========================================
+     * CAMBIOS ESPECIALES DE TORMENTA
+     * ========================================
+     *
+     * Antes del Día 10 la tormenta
+     * es solamente climatológica.
+     */
+
+    public boolean hasDay10Effects() {
+        return active && dayManager.isAtLeast(10);
     }
 }

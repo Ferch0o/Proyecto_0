@@ -51,28 +51,22 @@ public class Goliath extends CustomMob {
         );
 
 
+
         /*
          * ========================================
-         * SALTO V
+         * RESISTENCIA V
          * ========================================
-         *
-         * 0 = I
-         * 1 = II
-         * 2 = III
-         * 3 = IV
-         * 4 = V
          */
 
         spider.addPotionEffect(
                 new PotionEffect(
-                        PotionEffectType.JUMP_BOOST,
+                        PotionEffectType.RESISTANCE,
                         PotionEffect.INFINITE_DURATION,
                         4,
                         false,
                         false
                 )
         );
-
 
         /*
          * ========================================

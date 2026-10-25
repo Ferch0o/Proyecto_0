@@ -111,7 +111,7 @@ public class StormExtraSpawnTask
     public void run() {
 
 
-        if (!stormManager.isActive()) {
+        if (!stormManager.hasDay10Effects()) {
             return;
         }
 

@@ -46,9 +46,9 @@ public class SetDayCommand implements CommandExecutor {
             return true;
         }
 
-        if (day < 1) {
+        if (day < 0) {
             sender.sendMessage(
-                    ChatColor.RED + "El día debe ser mayor o igual a 1."
+                    ChatColor.RED + "El día debe ser mayor o igual a 0."
             );
             return true;
         }

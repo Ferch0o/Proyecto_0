@@ -35,7 +35,7 @@ public class StormCreeperListener implements Listener {
         /*
          * Solo durante nuestra Tormenta.
          */
-        if (!stormManager.isActive()) {
+        if (!stormManager.hasDay10Effects()) {
             return;
         }
 
