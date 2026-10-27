@@ -1,4 +1,4 @@
-package me.difficulty.listeners;
+package me.difficulty.features.storm.listeners;
 
 import me.difficulty.storm.StormManager;
 import org.bukkit.entity.Creeper;

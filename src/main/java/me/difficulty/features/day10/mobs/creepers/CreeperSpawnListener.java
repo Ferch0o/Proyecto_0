@@ -1,7 +1,6 @@
-package me.difficulty.listeners;
+package me.difficulty.features.day10.mobs.creepers;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.mobs.day10.FuturisticCreeper;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;

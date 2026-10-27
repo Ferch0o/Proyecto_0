@@ -1,7 +1,6 @@
-package me.difficulty.commands;
+package me.difficulty.features.day10.mobs.creepers;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.mobs.day10.FuturisticCreeper;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
