@@ -1,9 +1,8 @@
-package me.difficulty.tasks;
+package me.difficulty.features.day10.mobs.skeletons;
 
 import me.difficulty.day.DayManager;
 import me.difficulty.mobs.CustomMobRegistry;
 import me.difficulty.mobs.MobIds;
-import me.difficulty.mobs.day10.Gladiator;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;

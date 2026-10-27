@@ -1,5 +1,7 @@
 package me.difficulty.mobs.day10;
 
+import me.difficulty.features.day10.mobs.skeletons.ElementalSkeleton;
+import me.difficulty.features.day10.mobs.skeletons.Gladiator;
 import me.difficulty.mobs.CustomMob;
 import me.difficulty.mobs.MobIds;
 import net.kyori.adventure.text.Component;

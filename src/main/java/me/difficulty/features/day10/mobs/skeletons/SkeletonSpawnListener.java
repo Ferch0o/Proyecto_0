@@ -1,8 +1,6 @@
-package me.difficulty.listeners;
+package me.difficulty.features.day10.mobs.skeletons;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.mobs.day10.ElementalSkeleton;
-import me.difficulty.mobs.day10.Gladiator;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.event.EventHandler;
