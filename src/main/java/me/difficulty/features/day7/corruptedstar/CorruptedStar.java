@@ -1,4 +1,4 @@
-package me.difficulty.items.day7;
+package me.difficulty.features.day7.corruptedstar;
 
 import me.difficulty.items.CustomItem;
 import me.difficulty.items.ItemIds;

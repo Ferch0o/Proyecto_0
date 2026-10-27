@@ -2,7 +2,6 @@ package me.difficulty.features.day7.corruptedstar;
 
 import com.destroystokyo.paper.event.player.PlayerRecipeBookClickEvent;
 import me.difficulty.day.DayManager;
-import me.difficulty.items.day7.CorruptedStar;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
