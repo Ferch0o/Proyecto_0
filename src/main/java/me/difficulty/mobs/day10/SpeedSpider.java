@@ -1,36 +1,32 @@
+
 package me.difficulty.mobs.day10;
 
 import me.difficulty.mobs.CustomMob;
 import me.difficulty.mobs.MobIds;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Spider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public class SpeedSpider extends CustomMob {
 
-    public SpeedSpider(
-            JavaPlugin plugin
-    ) {
-
-        super(
-                plugin,
-                MobIds.SPEED_SPIDER
-        );
+    public SpeedSpider(JavaPlugin plugin) {
+        super(plugin, MobIds.SPEED_SPIDER);
     }
 
     @Override
-    protected void configure(
-            LivingEntity entity
-    ) {
+    protected void configure(LivingEntity entity) {
 
         if (!(entity instanceof Spider spider)) {
             return;
         }
-
 
         /*
          * ========================================
@@ -45,28 +41,21 @@ public class SpeedSpider extends CustomMob {
                 )
         );
 
-        spider.setCustomNameVisible(
-                true
-        );
-
+        spider.setCustomNameVisible(true);
 
         /*
          * ========================================
-         * VELOCIDAD III
+         * VELOCIDAD IV
          * ========================================
          *
-         * amplifier:
-         *
-         * 0 = Velocidad I
-         * 1 = Velocidad II
-         * 2 = Velocidad III
+         * Amplificador 3 = nivel IV.
          */
 
         spider.addPotionEffect(
                 new PotionEffect(
                         PotionEffectType.SPEED,
                         PotionEffect.INFINITE_DURATION,
-                        2,
+                        3,
                         false,
                         false
                 )
@@ -76,9 +65,6 @@ public class SpeedSpider extends CustomMob {
          * ========================================
          * INVISIBILIDAD PERMANENTE
          * ========================================
-         *
-         * Todas las Arañas Velocistas
-         * serán invisibles.
          */
 
         spider.addPotionEffect(
@@ -90,5 +76,28 @@ public class SpeedSpider extends CustomMob {
                         false
                 )
         );
+
+        /*
+         * ========================================
+         * 50% DE PROBABILIDAD DE GLOWING
+         * ========================================
+         *
+         * Se mantiene invisible, pero
+         * se podrá ver su contorno.
+         */
+
+        if (ThreadLocalRandom.current()
+                .nextInt(100) < 50) {
+
+            spider.addPotionEffect(
+                    new PotionEffect(
+                            PotionEffectType.GLOWING,
+                            PotionEffect.INFINITE_DURATION,
+                            0,
+                            false,
+                            false
+                    )
+            );
+        }
     }
 }

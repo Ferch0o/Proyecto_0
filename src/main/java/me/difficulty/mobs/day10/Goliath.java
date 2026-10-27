@@ -1,9 +1,14 @@
+
 package me.difficulty.mobs.day10;
 
 import me.difficulty.mobs.CustomMob;
 import me.difficulty.mobs.MobIds;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Spider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,26 +17,16 @@ import org.bukkit.potion.PotionEffectType;
 
 public class Goliath extends CustomMob {
 
-    public Goliath(
-            JavaPlugin plugin
-    ) {
-
-        super(
-                plugin,
-                MobIds.GOLIATH
-        );
+    public Goliath(JavaPlugin plugin) {
+        super(plugin, MobIds.GOLIATH);
     }
 
-
     @Override
-    protected void configure(
-            LivingEntity entity
-    ) {
+    protected void configure(LivingEntity entity) {
 
         if (!(entity instanceof Spider spider)) {
             return;
         }
-
 
         /*
          * ========================================
@@ -46,23 +41,55 @@ public class Goliath extends CustomMob {
                 )
         );
 
-        spider.setCustomNameVisible(
-                true
-        );
-
-
+        spider.setCustomNameVisible(true);
 
         /*
          * ========================================
-         * RESISTENCIA V
+         * VIDA: 160 PUNTOS
+         * 80 CORAZONES
          * ========================================
+         */
+
+        AttributeInstance maxHealth =
+                spider.getAttribute(Attribute.MAX_HEALTH);
+
+        if (maxHealth != null) {
+
+            maxHealth.setBaseValue(160.0);
+            spider.setHealth(160.0);
+        }
+
+        /*
+         * ========================================
+         * FUERZA III
+         * ========================================
+         *
+         * Amplificador 2.
+         */
+
+        spider.addPotionEffect(
+                new PotionEffect(
+                        PotionEffectType.STRENGTH,
+                        PotionEffect.INFINITE_DURATION,
+                        2,
+                        false,
+                        false
+                )
+        );
+
+        /*
+         * ========================================
+         * RESISTENCIA I
+         * ========================================
+         *
+         * Amplificador 0.
          */
 
         spider.addPotionEffect(
                 new PotionEffect(
                         PotionEffectType.RESISTANCE,
                         PotionEffect.INFINITE_DURATION,
-                        4,
+                        0,
                         false,
                         false
                 )

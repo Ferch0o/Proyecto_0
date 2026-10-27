@@ -1,10 +1,15 @@
+
 package me.difficulty.mobs.day10;
 
 import me.difficulty.mobs.CustomMob;
 import me.difficulty.mobs.MobIds;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
@@ -15,25 +20,16 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class ElementalSkeleton extends CustomMob {
 
-    public ElementalSkeleton(
-            JavaPlugin plugin
-    ) {
-
-        super(
-                plugin,
-                MobIds.ELEMENTAL_SKELETON
-        );
+    public ElementalSkeleton(JavaPlugin plugin) {
+        super(plugin, MobIds.ELEMENTAL_SKELETON);
     }
 
     @Override
-    protected void configure(
-            LivingEntity entity
-    ) {
+    protected void configure(LivingEntity entity) {
 
         if (!(entity instanceof Skeleton skeleton)) {
             return;
         }
-
 
         /*
          * ========================================
@@ -48,10 +44,22 @@ public class ElementalSkeleton extends CustomMob {
                 )
         );
 
-        skeleton.setCustomNameVisible(
-                true
-        );
+        skeleton.setCustomNameVisible(true);
 
+        /*
+         * ========================================
+         * VIDA: 40 PUNTOS
+         * 20 CORAZONES
+         * ========================================
+         */
+
+        AttributeInstance maxHealth =
+                skeleton.getAttribute(Attribute.MAX_HEALTH);
+
+        if (maxHealth != null) {
+            maxHealth.setBaseValue(40.0);
+            skeleton.setHealth(40.0);
+        }
 
         /*
          * ========================================
@@ -66,132 +74,85 @@ public class ElementalSkeleton extends CustomMob {
             return;
         }
 
-
         /*
          * ========================================
-         * ARCO
-         *
-         * Fuego X
-         * Retroceso II
+         * ARCO CON FUEGO X
+         * SIN RETROCESO
          * ========================================
          */
 
-        ItemStack bow =
-                new ItemStack(
-                        Material.BOW
-                );
+        ItemStack bow = new ItemStack(Material.BOW);
+        ItemMeta bowMeta = bow.getItemMeta();
 
-        ItemMeta bowMeta =
-                bow.getItemMeta();
+        if (bowMeta != null) {
 
-        bowMeta.addEnchant(
-                Enchantment.FLAME,
-                10,
-                true
-        );
+            bowMeta.addEnchant(
+                    Enchantment.FLAME,
+                    10,
+                    true
+            );
 
-        bowMeta.addEnchant(
-                Enchantment.PUNCH,
-                2,
-                true
-        );
+            bow.setItemMeta(bowMeta);
+        }
 
-        bow.setItemMeta(
-                bowMeta
-        );
-
-        equipment.setItemInMainHand(
-                bow
-        );
-
-        equipment.setItemInMainHandDropChance(
-                0.0f
-        );
-
+        equipment.setItemInMainHand(bow);
+        equipment.setItemInMainHandDropChance(0.0f);
 
         /*
          * ========================================
          * ARMADURA DE HIERRO
-         *
-         * Protección V en todas las piezas.
+         * PROTECCIÓN II
          * ========================================
          */
 
         equipment.setHelmet(
-                createArmor(
-                        Material.IRON_HELMET
-                )
+                createArmor(Material.IRON_HELMET)
         );
 
         equipment.setChestplate(
-                createArmor(
-                        Material.IRON_CHESTPLATE
-                )
+                createArmor(Material.IRON_CHESTPLATE)
         );
 
         equipment.setLeggings(
-                createArmor(
-                        Material.IRON_LEGGINGS
-                )
+                createArmor(Material.IRON_LEGGINGS)
         );
 
         equipment.setBoots(
-                createArmor(
-                        Material.IRON_BOOTS
-                )
+                createArmor(Material.IRON_BOOTS)
         );
-
 
         /*
-         * No dropear automáticamente
-         * la armadura.
+         * EVITAR DROPS DE EQUIPAMIENTO
          */
 
-        equipment.setHelmetDropChance(
-                0.0f
-        );
-
-        equipment.setChestplateDropChance(
-                0.0f
-        );
-
-        equipment.setLeggingsDropChance(
-                0.0f
-        );
-
-        equipment.setBootsDropChance(
-                0.0f
-        );
+        equipment.setHelmetDropChance(0.0f);
+        equipment.setChestplateDropChance(0.0f);
+        equipment.setLeggingsDropChance(0.0f);
+        equipment.setBootsDropChance(0.0f);
     }
-
 
     /*
      * ========================================
-     * CREAR PIEZA DE ARMADURA
+     * CREAR ARMADURA
+     * PROTECCIÓN II
      * ========================================
      */
 
-    private ItemStack createArmor(
-            Material material
-    ) {
+    private ItemStack createArmor(Material material) {
 
-        ItemStack armor =
-                new ItemStack(
-                        material
-                );
+        ItemStack armor = new ItemStack(material);
+        ItemMeta meta = armor.getItemMeta();
 
-        ItemMeta meta =
-                armor.getItemMeta();
+        if (meta != null) {
 
-        meta.addEnchant(
-                Enchantment.PROTECTION,
-                4,
-                true
-        );
+            meta.addEnchant(
+                    Enchantment.PROTECTION,
+                    2,
+                    true
+            );
 
-        armor.setItemMeta(
-                meta
-        );
+            armor.setItemMeta(meta);
+        }
 
         return armor;
     }

@@ -1,9 +1,12 @@
+
 package me.difficulty.mobs.day10;
 
 import me.difficulty.mobs.CustomMob;
 import me.difficulty.mobs.MobIds;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -19,20 +22,12 @@ import org.bukkit.potion.PotionEffectType;
 
 public class CorruptedZombie extends CustomMob {
 
-    public CorruptedZombie(
-            JavaPlugin plugin
-    ) {
-
-        super(
-                plugin,
-                MobIds.CORRUPTED_ZOMBIE
-        );
+    public CorruptedZombie(JavaPlugin plugin) {
+        super(plugin, MobIds.CORRUPTED_ZOMBIE);
     }
 
     @Override
-    protected void configure(
-            LivingEntity entity
-    ) {
+    protected void configure(LivingEntity entity) {
 
         if (!(entity instanceof Zombie zombie)) {
             return;
@@ -53,36 +48,26 @@ public class CorruptedZombie extends CustomMob {
 
         zombie.setCustomNameVisible(true);
 
-
         /*
          * ========================================
-         * VIDA
+         * VIDA: 50 PUNTOS = 25 CORAZONES
          * ========================================
-         *
-         * 40 puntos de vida = 20 corazones.
          */
 
         AttributeInstance maxHealth =
-                zombie.getAttribute(
-                        Attribute.MAX_HEALTH
-                );
+                zombie.getAttribute(Attribute.MAX_HEALTH);
 
         if (maxHealth != null) {
-
-            maxHealth.setBaseValue(
-                    40.0
-            );
-
-            zombie.setHealth(
-                    40.0
-            );
+            maxHealth.setBaseValue(50.0);
+            zombie.setHealth(50.0);
         }
-
 
         /*
          * ========================================
          * LENTITUD I
          * ========================================
+         *
+         * Ya no tiene Resistencia permanente.
          */
 
         zombie.addPotionEffect(
@@ -95,33 +80,10 @@ public class CorruptedZombie extends CustomMob {
                 )
         );
 
-
         /*
          * ========================================
-         * RESISTENCIA III
+         * RESISTENCIA AL EMPUJE: 100%
          * ========================================
-         */
-
-        zombie.addPotionEffect(
-                new PotionEffect(
-                        PotionEffectType.RESISTANCE,
-                        PotionEffect.INFINITE_DURATION,
-                        2,
-                        false,
-                        false
-                )
-        );
-
-
-        /*
-         * ========================================
-         * RESISTENCIA AL EMPUJE
-         * ========================================
-         *
-         * 1.0 = 100 %.
-         *
-         * El TXT solo especifica que es resistente
-         * al empuje, no un porcentaje concreto.
          */
 
         AttributeInstance knockbackResistance =
@@ -130,81 +92,73 @@ public class CorruptedZombie extends CustomMob {
                 );
 
         if (knockbackResistance != null) {
-
-            knockbackResistance.setBaseValue(
-                    1.0
-            );
+            knockbackResistance.setBaseValue(1.0);
         }
-
 
         /*
          * ========================================
-         * ARMADURA DE CUERO COMPLETA
+         * EQUIPAMIENTO
          * ========================================
          */
 
-        EntityEquipment equipment =
-                zombie.getEquipment();
+        EntityEquipment equipment = zombie.getEquipment();
 
-        if (equipment != null) {
+        if (equipment == null) {
+            return;
+        }
 
-            equipment.setHelmet(
-                    new ItemStack(
-                            Material.LEATHER_HELMET
-                    )
-            );
+        /*
+         * ========================================
+         * NETHERITE COMPLETA
+         * ========================================
+         */
 
-            equipment.setChestplate(
-                    new ItemStack(
-                            Material.LEATHER_CHESTPLATE
-                    )
-            );
+        equipment.setHelmet(
+                createProtectionArmor(
+                        Material.NETHERITE_HELMET
+                )
+        );
 
-            equipment.setLeggings(
-                    new ItemStack(
-                            Material.LEATHER_LEGGINGS
-                    )
-            );
+        equipment.setChestplate(
+                createProtectionArmor(
+                        Material.NETHERITE_CHESTPLATE
+                )
+        );
 
-            equipment.setBoots(
-                    new ItemStack(
-                            Material.LEATHER_BOOTS
-                    )
-            );
+        equipment.setLeggings(
+                createProtectionArmor(
+                        Material.NETHERITE_LEGGINGS
+                )
+        );
 
+        equipment.setBoots(
+                createProtectionArmor(
+                        Material.NETHERITE_BOOTS
+                )
+        );
 
-            /*
-             * Evitamos que la armadura
-             * se dropee normalmente.
-             */
-            equipment.setHelmetDropChance(
-                    0.0f
-            );
+        /*
+         * No soltar la armadura.
+         */
 
-            equipment.setChestplateDropChance(
-                    0.0f
-            );
+        equipment.setHelmetDropChance(0.0f);
+        equipment.setChestplateDropChance(0.0f);
+        equipment.setLeggingsDropChance(0.0f);
+        equipment.setBootsDropChance(0.0f);
 
-            equipment.setLeggingsDropChance(
-                    0.0f
-            );
+        /*
+         * ========================================
+         * ESPADA DE NETHERITE
+         * FILO II
+         * ========================================
+         */
 
-            equipment.setBootsDropChance(
-                    0.0f
-            );
+        ItemStack sword =
+                new ItemStack(Material.NETHERITE_SWORD);
 
-            /*
-             * ========================================
-             * ESPADA DE HIERRO CON FILO III
-             * ========================================
-             */
+        ItemMeta swordMeta = sword.getItemMeta();
 
-            ItemStack sword =
-                    new ItemStack(
-                            Material.NETHERITE_SWORD
-                    );
-
-            ItemMeta swordMeta = sword.getItemMeta();
+        if (swordMeta != null) {
 
             swordMeta.addEnchant(
                     Enchantment.SHARPNESS,
@@ -213,10 +167,13 @@ public class CorruptedZombie extends CustomMob {
             );
 
             sword.setItemMeta(swordMeta);
-
-            equipment.setItemInMainHand(sword);
-
-            equipment.setItemInMainHandDropChance(0.0f);
         }
+
+        equipment.setItemInMainHand(sword);
+        equipment.setItemInMainHandDropChance(0.0f);
+    }
+
+    private ItemStack createProtectionArmor(Material material) {
+        return new ItemStack(material);
     }
 }

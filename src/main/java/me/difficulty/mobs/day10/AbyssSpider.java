@@ -1,9 +1,12 @@
+
 package me.difficulty.mobs.day10;
 
 import me.difficulty.mobs.CustomMob;
 import me.difficulty.mobs.MobIds;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
@@ -14,26 +17,16 @@ import org.bukkit.potion.PotionEffectType;
 
 public class AbyssSpider extends CustomMob {
 
-    public AbyssSpider(
-            JavaPlugin plugin
-    ) {
-
-        super(
-                plugin,
-                MobIds.ABYSS_SPIDER
-        );
+    public AbyssSpider(JavaPlugin plugin) {
+        super(plugin, MobIds.ABYSS_SPIDER);
     }
 
-
     @Override
-    protected void configure(
-            LivingEntity entity
-    ) {
+    protected void configure(LivingEntity entity) {
 
         if (!(entity instanceof Spider spider)) {
             return;
         }
-
 
         /*
          * ========================================
@@ -48,32 +41,23 @@ public class AbyssSpider extends CustomMob {
                 )
         );
 
-        spider.setCustomNameVisible(
-                true
-        );
-
+        spider.setCustomNameVisible(true);
 
         /*
          * ========================================
-         * VIDA
+         * VIDA: 70 PUNTOS
+         * 35 CORAZONES
          * ========================================
-         *
-         * 30 puntos de vida
-         * = 15 corazones.
          */
 
         AttributeInstance maxHealth =
-                spider.getAttribute(
-                        Attribute.MAX_HEALTH
-                );
+                spider.getAttribute(Attribute.MAX_HEALTH);
 
         if (maxHealth != null) {
 
-            maxHealth.setBaseValue(30.0);
-
-            spider.setHealth(30.0);
+            maxHealth.setBaseValue(70.0);
+            spider.setHealth(70.0);
         }
-
 
         /*
          * ========================================
@@ -90,7 +74,6 @@ public class AbyssSpider extends CustomMob {
                         false
                 )
         );
-
 
         /*
          * ========================================
@@ -109,19 +92,11 @@ public class AbyssSpider extends CustomMob {
         );
 
         /*
-         * ========================================
-         * RESISTENCIA I
-         * ========================================
+         * Sin Resistencia permanente.
+         *
+         * Durante Tormenta del Día 10
+         * recibirá Resistencia I desde
+         * el sistema global.
          */
-
-        spider.addPotionEffect(
-                new PotionEffect(
-                        PotionEffectType.RESISTANCE,
-                        PotionEffect.INFINITE_DURATION,
-                        0,
-                        false,
-                        false
-                )
-        );
     }
 }

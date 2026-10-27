@@ -250,6 +250,23 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         /*
          * ========================================
+         * BOSSBAR DE TORMENTA
+         * RECONEXIÓN DE JUGADORES
+         * ========================================
+         */
+
+        getServer()
+                .getPluginManager()
+                .registerEvents(
+                        new StormBossBarListener(
+                                this,
+                                stormManager
+                        ),
+                        this
+                );
+
+        /*
+         * ========================================
          * CALIDAD DE VIDA
          * FUEGO AMIGO DESACTIVADO
          * ========================================
@@ -471,7 +488,7 @@ public final class DifficultyPlugin extends JavaPlugin {
         getServer()
                 .getPluginManager()
                 .registerEvents(
-                        new CreeperPotionCloudListener(),
+                        new CreeperPotionCloudListener(stormManager),
                         this
                 );
 

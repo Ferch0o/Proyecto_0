@@ -138,7 +138,7 @@ public class Scavenger extends CustomMob {
 
         /*
          * ========================================
-         * HACHA DE DIAMANTE + FILO V
+         * HACHA DE DIAMANTE + FILO XV
          * ========================================
          */
 
@@ -152,7 +152,7 @@ public class Scavenger extends CustomMob {
 
         axeMeta.addEnchant(
                 Enchantment.SHARPNESS,
-                20,
+                15,
                 true
         );
 

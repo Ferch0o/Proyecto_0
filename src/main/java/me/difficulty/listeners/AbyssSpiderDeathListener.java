@@ -81,14 +81,6 @@ public class AbyssSpiderDeathListener
          * ========================================
          * PROBABILIDAD
          * ========================================
-         *
-         * 0 - 94
-         * → 95%
-         * → 3 Arañas de Cueva
-         *
-         * 95 - 99
-         * → 5%
-         * → 1 Goliat
          */
 
         int roll =
@@ -97,7 +89,7 @@ public class AbyssSpiderDeathListener
                         .nextInt(100);
 
 
-        if (roll < 95) {
+        if (roll < 90) {
 
             spawnCaveSpiders(
                     spider.getLocation()

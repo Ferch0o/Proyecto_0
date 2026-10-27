@@ -151,10 +151,11 @@ public class GoliathListener
     public void onGoliathDeath(
             EntityDeathEvent event
     ) {
+        if (!dayManager.isAtLeast(10)) {
+            return;
+        }
 
-        if (!(event.getEntity()
-                instanceof Spider spider)) {
-
+        if (!(event.getEntity() instanceof Spider spider)) {
             return;
         }
 

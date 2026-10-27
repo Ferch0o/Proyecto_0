@@ -112,12 +112,6 @@ public class Weaver extends CustomMob {
          * ========================================
          * TIPO DE ESQUELETO
          * ========================================
-         *
-         * Mantenemos las mismas probabilidades
-         * que el spawn normal:
-         *
-         * 60% → Elemental
-         * 40% → Gladiador
          */
 
         int roll =
@@ -126,17 +120,10 @@ public class Weaver extends CustomMob {
                         .nextInt(100);
 
 
-        if (roll < 60) {
-
-            elementalSkeleton.apply(
-                    skeleton
-            );
-
+        if (roll < 85) {
+            elementalSkeleton.apply(skeleton);
         } else {
-
-            gladiator.apply(
-                    skeleton
-            );
+            gladiator.apply(skeleton);
         }
 
 

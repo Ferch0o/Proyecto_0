@@ -130,21 +130,12 @@ public class WeaverRiderCombatListener
             player.addPotionEffect(
                     new PotionEffect(
                             PotionEffectType.MINING_FATIGUE,
-
-                            /*
-                             * 15 segundos.
-                             */
-                            15 * 20,
-
-                            /*
-                             * 0 = Fatiga Minera I.
-                             */
+                            60 * 20,
                             0
                     )
             );
         }
     }
-
 
     /*
      * ========================================

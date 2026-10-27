@@ -1,4 +1,7 @@
+
 package me.difficulty.listeners;
+
+import me.difficulty.storm.StormManager;
 
 import org.bukkit.entity.Creeper;
 import org.bukkit.event.EventHandler;
@@ -8,30 +11,16 @@ import org.bukkit.potion.PotionEffect;
 
 import java.util.ArrayList;
 
-public class CreeperPotionCloudListener implements Listener {
+public class CreeperPotionCloudListener
+        implements Listener {
 
+    private final StormManager stormManager;
 
-    /*
-     * ========================================
-     * EVITAR NUBES DE POCIONES DE CREEPERS
-     * ========================================
-     *
-     * Antes de que un Creeper explote,
-     * eliminamos TODOS sus efectos de poción.
-     *
-     * De esta manera no importa si tiene:
-     *
-     * - Fuerza
-     * - Resistencia
-     * - Velocidad
-     * - Veneno
-     * - Invisibilidad
-     * - efectos futuros
-     * - etc.
-     *
-     * Nunca podrá dejar una nube persistente
-     * al explotar.
-     */
+    public CreeperPotionCloudListener(
+            StormManager stormManager
+    ) {
+        this.stormManager = stormManager;
+    }
 
     @EventHandler(ignoreCancelled = true)
     public void onCreeperPrime(
@@ -39,29 +28,21 @@ public class CreeperPotionCloudListener implements Listener {
     ) {
 
         /*
-         * Solo Creepers.
-         *
-         * El Creeper Futurista también entra,
-         * porque sigue siendo una entidad
-         * Creeper.
+         * SOLO TORMENTAS DEL DÍA 10+
          */
-        if (!(event.getEntity()
-                instanceof Creeper creeper)) {
-
+        if (!stormManager.hasDay10Effects()) {
             return;
         }
 
+        if (!(event.getEntity()
+                instanceof Creeper creeper)) {
+            return;
+        }
 
         /*
-         * ========================================
-         * ELIMINAR TODOS LOS EFECTOS
-         * ========================================
-         *
-         * Creamos una copia de la colección
-         * antes de eliminar para evitar
-         * modificarla mientras la recorremos.
+         * Evitar nubes de efectos
+         * provocadas por creepers.
          */
-
         for (PotionEffect effect :
                 new ArrayList<>(
                         creeper.getActivePotionEffects()

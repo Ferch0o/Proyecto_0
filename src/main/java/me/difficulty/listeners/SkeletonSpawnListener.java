@@ -109,18 +109,12 @@ public class SkeletonSpawnListener
                         .nextInt(100);
 
 
-        if (roll < 60) {
-
-            elementalSkeleton.apply(
-                    skeleton
-            );
-
+        if (roll < 85) {
+            elementalSkeleton.apply(skeleton);
             return;
         }
 
 
-        gladiator.apply(
-                skeleton
-        );
+        gladiator.apply(skeleton);
     }
 }

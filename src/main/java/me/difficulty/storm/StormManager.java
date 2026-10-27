@@ -601,6 +601,66 @@ public class StormManager {
 
     /*
      * ========================================
+     * RESTAURAR BOSSBAR AL ENTRAR
+     * ========================================
+     *
+     * Reconecta un jugador a la barra
+     * que ya existe, sin reiniciar
+     * la tormenta ni modificar su tiempo.
+     */
+
+    public void showBossBarFor(Player player) {
+
+        if (!active || !player.isOnline()) {
+            return;
+        }
+
+        if (bossBar == null) {
+            createBossBar();
+        }
+
+        if (bossBar == null) {
+            return;
+        }
+
+        /*
+         * Forzar una nueva asociación.
+         *
+         * Esto evita que una referencia
+         * antigua impida mostrar la barra
+         * en una conexión nueva.
+         */
+
+        bossBar.removePlayer(player);
+        bossBar.addPlayer(player);
+
+        bossBar.setVisible(true);
+
+        // Sincronizar tiempo y progreso.
+        updateBossBar();
+    }
+
+
+    /*
+     * ========================================
+     * RETIRAR BOSSBAR AL DESCONECTARSE
+     * ========================================
+     *
+     * Evitar conservar al jugador
+     * en la lista de espectadores.
+     */
+
+    public void removeBossBarFor(Player player) {
+
+        if (bossBar == null) {
+            return;
+        }
+
+        bossBar.removePlayer(player);
+    }
+
+    /*
+     * ========================================
      * QUITAR BOSS BAR
      * ========================================
      */
