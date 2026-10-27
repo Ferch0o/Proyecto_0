@@ -1,5 +1,5 @@
 
-package me.difficulty.listeners;
+package me.difficulty.features.qualityoflife.friendlyfire;
 
 import org.bukkit.World;
 

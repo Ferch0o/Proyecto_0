@@ -1,4 +1,4 @@
-package me.difficulty.listeners;
+package me.difficulty.features.day7.corruptedstar;
 
 import me.difficulty.day.DayManager;
 import me.difficulty.items.day7.CorruptedStar;

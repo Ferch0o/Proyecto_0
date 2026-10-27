@@ -1,4 +1,4 @@
-package me.difficulty.listeners;
+package me.difficulty.features.day7.corruptedstar;
 
 import com.destroystokyo.paper.event.player.PlayerRecipeBookClickEvent;
 import me.difficulty.day.DayManager;

@@ -2,6 +2,10 @@ package me.difficulty;
 
 import me.difficulty.commands.*;
 import me.difficulty.day.DayManager;
+import me.difficulty.features.day7.corruptedstar.CorruptedStarListener;
+import me.difficulty.features.day7.corruptedstar.CorruptedStarRecipeBookListener;
+import me.difficulty.features.day7.corruptedstar.CorruptedStarRecipeListener;
+import me.difficulty.features.qualityoflife.friendlyfire.FriendlyFireProtectionListener;
 import me.difficulty.items.CustomItemRegistry;
 import me.difficulty.items.day10.CorruptedInk;
 import me.difficulty.items.day10.ExplosiveCrossbow;
