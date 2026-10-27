@@ -1,4 +1,4 @@
-package me.difficulty.mobs.day10;
+package me.difficulty.features.day10.mobs.spiders;
 
 import me.difficulty.features.day10.mobs.skeletons.ElementalSkeleton;
 import me.difficulty.features.day10.mobs.skeletons.Gladiator;

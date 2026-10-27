@@ -1,4 +1,4 @@
-package me.difficulty.tasks;
+package me.difficulty.features.day10.mobs.spiders;
 
 import me.difficulty.day.DayManager;
 import me.difficulty.mobs.CustomMobRegistry;

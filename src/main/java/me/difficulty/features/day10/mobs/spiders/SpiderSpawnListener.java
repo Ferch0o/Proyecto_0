@@ -1,10 +1,6 @@
-package me.difficulty.listeners;
+package me.difficulty.features.day10.mobs.spiders;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.mobs.day10.AbyssSpider;
-import me.difficulty.mobs.day10.Goliath;
-import me.difficulty.mobs.day10.SpeedSpider;
-import me.difficulty.mobs.day10.Weaver;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Spider;
 import org.bukkit.event.EventHandler;

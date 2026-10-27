@@ -1,7 +1,6 @@
-package me.difficulty.commands;
+package me.difficulty.features.day10.mobs.spiders;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.mobs.day10.Goliath;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,23 +9,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Spider;
 import org.jetbrains.annotations.NotNull;
 
-public class SpawnGoliathCommand
+public class SpawnWeaverCommand
         implements CommandExecutor {
 
-    private final Goliath goliath;
+    private final Weaver weaver;
     private final DayManager dayManager;
 
 
-    public SpawnGoliathCommand(
-            Goliath goliath,
+    public SpawnWeaverCommand(
+            Weaver weaver,
             DayManager dayManager
     ) {
 
-        this.goliath =
-                goliath;
-
-        this.dayManager =
-                dayManager;
+        this.weaver = weaver;
+        this.dayManager = dayManager;
     }
 
 
@@ -74,13 +70,13 @@ public class SpawnGoliathCommand
                 );
 
 
-        goliath.apply(
+        weaver.apply(
                 spider
         );
 
 
         player.sendMessage(
-                "§aGoliat creada."
+                "§aTejedora creada."
         );
 
         return true;

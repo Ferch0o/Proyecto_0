@@ -1,9 +1,8 @@
-package me.difficulty.listeners;
+package me.difficulty.features.day10.mobs.spiders;
 
 import me.difficulty.day.DayManager;
 import me.difficulty.mobs.CustomMobRegistry;
 import me.difficulty.mobs.MobIds;
-import me.difficulty.mobs.day10.Goliath;
 import org.bukkit.Location;
 import org.bukkit.entity.CaveSpider;
 import org.bukkit.entity.Spider;

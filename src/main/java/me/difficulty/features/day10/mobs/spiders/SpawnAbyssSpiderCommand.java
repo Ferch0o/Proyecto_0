@@ -1,7 +1,6 @@
-package me.difficulty.commands;
+package me.difficulty.features.day10.mobs.spiders;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.mobs.day10.Weaver;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,20 +9,23 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Spider;
 import org.jetbrains.annotations.NotNull;
 
-public class SpawnWeaverCommand
+public class SpawnAbyssSpiderCommand
         implements CommandExecutor {
 
-    private final Weaver weaver;
+    private final AbyssSpider abyssSpider;
     private final DayManager dayManager;
 
 
-    public SpawnWeaverCommand(
-            Weaver weaver,
+    public SpawnAbyssSpiderCommand(
+            AbyssSpider abyssSpider,
             DayManager dayManager
     ) {
 
-        this.weaver = weaver;
-        this.dayManager = dayManager;
+        this.abyssSpider =
+                abyssSpider;
+
+        this.dayManager =
+                dayManager;
     }
 
 
@@ -71,13 +73,13 @@ public class SpawnWeaverCommand
                 );
 
 
-        weaver.apply(
+        abyssSpider.apply(
                 spider
         );
 
 
         player.sendMessage(
-                "§aTejedora creada."
+                "§aAraña del Abismo creada."
         );
 
         return true;

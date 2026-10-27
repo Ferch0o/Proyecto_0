@@ -1,7 +1,6 @@
-package me.difficulty.commands;
+package me.difficulty.features.day10.mobs.spiders;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.mobs.day10.AbyssSpider;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,20 +9,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Spider;
 import org.jetbrains.annotations.NotNull;
 
-public class SpawnAbyssSpiderCommand
+public class SpawnGoliathCommand
         implements CommandExecutor {
 
-    private final AbyssSpider abyssSpider;
+    private final Goliath goliath;
     private final DayManager dayManager;
 
 
-    public SpawnAbyssSpiderCommand(
-            AbyssSpider abyssSpider,
+    public SpawnGoliathCommand(
+            Goliath goliath,
             DayManager dayManager
     ) {
 
-        this.abyssSpider =
-                abyssSpider;
+        this.goliath =
+                goliath;
 
         this.dayManager =
                 dayManager;
@@ -74,13 +73,13 @@ public class SpawnAbyssSpiderCommand
                 );
 
 
-        abyssSpider.apply(
+        goliath.apply(
                 spider
         );
 
 
         player.sendMessage(
-                "§aAraña del Abismo creada."
+                "§aGoliat creada."
         );
 
         return true;
