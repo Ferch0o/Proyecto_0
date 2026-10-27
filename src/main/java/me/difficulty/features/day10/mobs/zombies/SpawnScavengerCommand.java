@@ -1,7 +1,6 @@
-package me.difficulty.commands;
+package me.difficulty.features.day10.mobs.zombies;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.mobs.day10.Scavenger;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

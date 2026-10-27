@@ -1,4 +1,4 @@
-package me.difficulty.mobs.day10;
+package me.difficulty.features.day10.mobs.zombies;
 
 import me.difficulty.mobs.CustomMob;
 import me.difficulty.mobs.MobIds;

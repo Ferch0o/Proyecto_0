@@ -1,4 +1,4 @@
-package me.difficulty.listeners;
+package me.difficulty.features.day10.mobs.zombies;
 
 import me.difficulty.day.DayManager;
 import me.difficulty.mobs.CustomMobRegistry;

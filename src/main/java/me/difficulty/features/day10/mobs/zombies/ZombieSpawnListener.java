@@ -1,9 +1,6 @@
-package me.difficulty.listeners;
+package me.difficulty.features.day10.mobs.zombies;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.mobs.day10.CorruptedZombie;
-import me.difficulty.mobs.day10.Infrazombie;
-import me.difficulty.mobs.day10.Scavenger;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
