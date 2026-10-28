@@ -319,37 +319,12 @@ public final class DifficultyPlugin extends JavaPlugin {
                         this
                 );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CorruptedStarListener(
-                                corruptedStar,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CorruptedStarRecipeListener(
-                                corruptedStarRecipe.getRecipeKey(),
-                                corruptedStar,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CorruptedStarRecipeBookListener(
-                                corruptedStarRecipe.getRecipeKey(),
-                                corruptedStar,
-                                dayManager
-                        ),
-                        this
-                );
+        new Day7Bootstrap(
+                this,
+                dayManager,
+                corruptedStar,
+                corruptedStarRecipe
+        ).registerListeners();
 
         getServer()
                 .getPluginManager()
