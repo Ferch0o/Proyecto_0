@@ -1,7 +1,7 @@
 package me.difficulty.commands;
 
-import me.difficulty.day.DayManager;
-import me.difficulty.recipes.RecipeUnlockManager;
+import me.difficulty.core.day.DayManager;
+import me.difficulty.core.recipes.RecipeUnlockManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

@@ -1,7 +1,7 @@
 package me.difficulty.features.day7.corruptedstar;
 
-import me.difficulty.items.CustomItem;
-import me.difficulty.items.ItemIds;
+import me.difficulty.core.items.CustomItem;
+import me.difficulty.core.items.ItemIds;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;

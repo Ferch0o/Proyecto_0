@@ -1,7 +1,7 @@
 package me.difficulty.features.day10.items.explosivecrossbow;
 
-import me.difficulty.items.CustomItem;
-import me.difficulty.items.ItemIds;
+import me.difficulty.core.items.CustomItem;
+import me.difficulty.core.items.ItemIds;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

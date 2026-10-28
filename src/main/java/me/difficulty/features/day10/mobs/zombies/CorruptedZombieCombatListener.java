@@ -1,8 +1,8 @@
 package me.difficulty.features.day10.mobs.zombies;
 
-import me.difficulty.day.DayManager;
-import me.difficulty.mobs.CustomMobRegistry;
-import me.difficulty.mobs.MobIds;
+import me.difficulty.core.day.DayManager;
+import me.difficulty.core.mobs.CustomMobRegistry;
+import me.difficulty.core.mobs.MobIds;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;

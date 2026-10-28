@@ -1,6 +1,6 @@
 package me.difficulty.features.day10.items.corruptedink;
 
-import me.difficulty.day.DayManager;
+import me.difficulty.core.day.DayManager;
 
 import org.bukkit.entity.GlowSquid;
 

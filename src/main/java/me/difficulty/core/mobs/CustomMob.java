@@ -1,4 +1,4 @@
-package me.difficulty.mobs;
+package me.difficulty.core.mobs;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;

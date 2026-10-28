@@ -1,4 +1,4 @@
-package me.difficulty.items;
+package me.difficulty.core.items;
 
 public final class ItemIds {
 

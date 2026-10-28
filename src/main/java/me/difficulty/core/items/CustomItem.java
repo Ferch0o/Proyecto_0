@@ -1,4 +1,4 @@
-package me.difficulty.items;
+package me.difficulty.core.items;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;

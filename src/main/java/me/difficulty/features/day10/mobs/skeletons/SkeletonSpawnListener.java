@@ -1,6 +1,6 @@
 package me.difficulty.features.day10.mobs.skeletons;
 
-import me.difficulty.day.DayManager;
+import me.difficulty.core.day.DayManager;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.event.EventHandler;

@@ -1,7 +1,7 @@
 package me.difficulty.features.day10.mobs.creepers;
 
-import me.difficulty.mobs.CustomMob;
-import me.difficulty.mobs.MobIds;
+import me.difficulty.core.mobs.CustomMob;
+import me.difficulty.core.mobs.MobIds;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Creeper;

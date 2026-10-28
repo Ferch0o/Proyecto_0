@@ -1,5 +1,5 @@
 
-package me.difficulty.day;
+package me.difficulty.core.day;
 
 import org.bukkit.plugin.java.JavaPlugin;
 

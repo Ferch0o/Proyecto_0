@@ -1,7 +1,7 @@
 
 package me.difficulty.features.storm.day7;
 
-import me.difficulty.day.DayManager;
+import me.difficulty.core.day.DayManager;
 import me.difficulty.features.storm.core.StormManager;
 
 import org.bukkit.scheduler.BukkitRunnable;

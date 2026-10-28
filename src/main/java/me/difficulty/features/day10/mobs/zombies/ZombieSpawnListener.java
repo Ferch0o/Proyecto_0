@@ -1,6 +1,6 @@
 package me.difficulty.features.day10.mobs.zombies;
 
-import me.difficulty.day.DayManager;
+import me.difficulty.core.day.DayManager;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;

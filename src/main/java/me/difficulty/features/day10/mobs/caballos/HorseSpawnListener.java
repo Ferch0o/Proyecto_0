@@ -1,6 +1,6 @@
 package me.difficulty.features.day10.mobs.caballos;
 
-import me.difficulty.day.DayManager;
+import me.difficulty.core.day.DayManager;
 import org.bukkit.entity.Horse;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

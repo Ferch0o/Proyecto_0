@@ -1,6 +1,6 @@
 package me.difficulty.features.day7.corruptedstar;
 
-import me.difficulty.day.DayManager;
+import me.difficulty.core.day.DayManager;
 import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;

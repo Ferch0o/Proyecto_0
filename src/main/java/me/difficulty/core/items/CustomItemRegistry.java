@@ -1,4 +1,4 @@
-package me.difficulty.items;
+package me.difficulty.core.items;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;

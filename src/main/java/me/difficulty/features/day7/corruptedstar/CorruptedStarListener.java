@@ -1,6 +1,6 @@
 package me.difficulty.features.day7.corruptedstar;
 
-import me.difficulty.day.DayManager;
+import me.difficulty.core.day.DayManager;
 import me.difficulty.utils.InteractionPriority;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;

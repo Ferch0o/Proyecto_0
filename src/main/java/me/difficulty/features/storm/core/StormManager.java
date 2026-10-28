@@ -1,6 +1,6 @@
 package me.difficulty.features.storm.core;
 
-import me.difficulty.day.DayManager;
+import me.difficulty.core.day.DayManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.boss.BarColor;

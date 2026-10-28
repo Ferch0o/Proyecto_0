@@ -1,6 +1,6 @@
 package me.difficulty.features.pets;
 
-import me.difficulty.day.DayManager;
+import me.difficulty.core.day.DayManager;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;

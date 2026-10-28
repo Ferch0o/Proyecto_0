@@ -1,6 +1,6 @@
 package me.difficulty.features.day10.mobs.spiders;
 
-import me.difficulty.day.DayManager;
+import me.difficulty.core.day.DayManager;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;

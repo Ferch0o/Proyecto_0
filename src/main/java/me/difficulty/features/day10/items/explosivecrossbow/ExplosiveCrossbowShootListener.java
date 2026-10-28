@@ -1,6 +1,6 @@
 package me.difficulty.features.day10.items.explosivecrossbow;
 
-import me.difficulty.day.DayManager;
+import me.difficulty.core.day.DayManager;
 
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;

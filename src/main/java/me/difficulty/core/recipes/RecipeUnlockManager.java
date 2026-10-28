@@ -1,6 +1,6 @@
-package me.difficulty.recipes;
+package me.difficulty.core.recipes;
 
-import me.difficulty.day.DayManager;
+import me.difficulty.core.day.DayManager;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;

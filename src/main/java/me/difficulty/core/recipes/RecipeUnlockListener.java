@@ -1,6 +1,5 @@
-package me.difficulty.listeners;
+package me.difficulty.core.recipes;
 
-import me.difficulty.recipes.RecipeUnlockManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;

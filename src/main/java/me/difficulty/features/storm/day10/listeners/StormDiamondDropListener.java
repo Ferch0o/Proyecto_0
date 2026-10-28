@@ -1,7 +1,7 @@
 package me.difficulty.features.storm.day10.listeners;
 
 import me.difficulty.DifficultyPlugin;
-import me.difficulty.mobs.MobIds;
+import me.difficulty.core.mobs.MobIds;
 import me.difficulty.features.storm.core.StormManager;
 
 import org.bukkit.Material;

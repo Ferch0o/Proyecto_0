@@ -2,8 +2,8 @@ package me.difficulty.features.day10.mobs.spiders;
 
 import me.difficulty.features.day10.mobs.skeletons.ElementalSkeleton;
 import me.difficulty.features.day10.mobs.skeletons.Gladiator;
-import me.difficulty.mobs.CustomMob;
-import me.difficulty.mobs.MobIds;
+import me.difficulty.core.mobs.CustomMob;
+import me.difficulty.core.mobs.MobIds;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.NamespacedKey;

@@ -1,6 +1,6 @@
 package me.difficulty.features.day10.mobs.golems;
 
-import me.difficulty.day.DayManager;
+import me.difficulty.core.day.DayManager;
 import org.bukkit.Material;
 import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.LivingEntity;

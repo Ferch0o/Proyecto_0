@@ -1,4 +1,4 @@
-package me.difficulty.mobs;
+package me.difficulty.core.mobs;
 
 public final class MobIds {
 
