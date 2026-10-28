@@ -1,4 +1,4 @@
-package me.difficulty.listeners;
+package me.difficulty.features.day10.mobs.caballos;
 
 import me.difficulty.day.DayManager;
 import org.bukkit.entity.Horse;
