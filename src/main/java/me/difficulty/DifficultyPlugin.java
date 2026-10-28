@@ -1,6 +1,6 @@
 package me.difficulty;
 
-import me.difficulty.bootstrap.QualityOfLifeBootstrap;
+import me.difficulty.bootstrap.*;
 import me.difficulty.commands.*;
 import me.difficulty.core.day.DayManager;
 import me.difficulty.core.recipes.RecipeUnlockListener;
@@ -24,9 +24,6 @@ import me.difficulty.features.day7.corruptedstar.GiveCorruptedStarCommand;
 import me.difficulty.features.pets.PetBehaviorTask;
 import me.difficulty.features.pets.PetCombatListener;
 import me.difficulty.features.pets.WolfControlListener;
-import me.difficulty.features.qualityoflife.aldeanos.SharedCureCommand;
-import me.difficulty.features.qualityoflife.aldeanos.SharedVillagerCureListener;
-import me.difficulty.features.qualityoflife.friendlyfire.FriendlyFireProtectionListener;
 import me.difficulty.features.storm.core.StormTimerTask;
 import me.difficulty.features.storm.core.commands.StormCommand;
 import me.difficulty.features.storm.core.listeners.StormBossBarListener;
@@ -96,20 +93,21 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        dayManager =
-                new DayManager(this);
 
-        stormManager =
-                new StormManager(
-                        this,
-                        dayManager
-                );
+        CoreBootstrap coreBootstrap = new CoreBootstrap(this);
 
-        itemRegistry =
-                new CustomItemRegistry(this);
+        // 1. Sistema de días
+        dayManager = coreBootstrap.createDayManager();
 
-        mobRegistry =
-                new CustomMobRegistry(this);
+        // 2. Sistema de Tormenta
+        stormManager = new StormManager(this, dayManager);
+
+        // 3. Registros compartidos
+        CoreBootstrap.Registries registries = coreBootstrap.createRegistries();
+
+        itemRegistry = registries.itemRegistry();
+        mobRegistry = registries.mobRegistry();
+
 
         /*
          * ========================================
