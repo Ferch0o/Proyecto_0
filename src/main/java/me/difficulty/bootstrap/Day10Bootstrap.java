@@ -4,6 +4,7 @@ package me.difficulty.bootstrap;
 import me.difficulty.DifficultyPlugin;
 import me.difficulty.core.items.CustomItemRegistry;
 import me.difficulty.features.day10.items.corruptedink.CorruptedInk;
+import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbowRecipe;
 import me.difficulty.features.day10.items.minotaurhorn.MinotaurHorn;
 import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbow;
 import me.difficulty.core.mobs.CustomMobRegistry;
@@ -137,4 +138,20 @@ public final class Day10Bootstrap {
             Goliath goliath
     ) {
     }
+
+    // CREAR RECETA DE LA BALLESTA EXPLOSIVA
+    public ExplosiveCrossbowRecipe createRecipe(Items items) {
+        return new ExplosiveCrossbowRecipe(
+                plugin,
+                items.explosiveCrossbow(),
+                items.corruptedInk(),
+                items.minotaurHorn()
+        );
+    }
+
+    // REGISTRAR LA RECETA EN MINECRAFT
+    public void registerRecipe(ExplosiveCrossbowRecipe recipe) {
+        recipe.register();
+    }
+
 }

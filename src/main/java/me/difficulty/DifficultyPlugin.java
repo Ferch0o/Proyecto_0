@@ -159,14 +159,7 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         day7Bootstrap.createRecipe();
 
-        ExplosiveCrossbowRecipe explosiveCrossbowRecipe =
-                new ExplosiveCrossbowRecipe(
-                        this,
-                        explosiveCrossbow,
-                        corruptedInk,
-                        minotaurHorn
-                );
-
+        ExplosiveCrossbowRecipe explosiveCrossbowRecipe = day10Bootstrap.createRecipe(day10Items);
         /*
          * IMPORTANTE:
          *
@@ -174,8 +167,7 @@ public final class DifficultyPlugin extends JavaPlugin {
          * en Minecraft.
          */
         day7Bootstrap.registerRecipe();
-
-        explosiveCrossbowRecipe.register();
+        day10Bootstrap.registerRecipe(explosiveCrossbowRecipe);
         /*
          * ========================================
          * 5. DESBLOQUEO DE RECETAS
