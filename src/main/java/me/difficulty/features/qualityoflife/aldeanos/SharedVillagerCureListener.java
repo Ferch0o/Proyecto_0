@@ -1,5 +1,5 @@
 
-package me.difficulty.listeners;
+package me.difficulty.features.qualityoflife.aldeanos;
 
 import com.destroystokyo.paper.entity.villager.Reputation;
 import com.destroystokyo.paper.entity.villager.ReputationType;

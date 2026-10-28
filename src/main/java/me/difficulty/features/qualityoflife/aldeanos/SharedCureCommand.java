@@ -1,7 +1,5 @@
 
-package me.difficulty.commands;
-
-import me.difficulty.listeners.SharedVillagerCureListener;
+package me.difficulty.features.qualityoflife.aldeanos;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
