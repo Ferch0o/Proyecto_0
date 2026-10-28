@@ -131,79 +131,25 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        infrazombie =
-                new Infrazombie(this);
+        Day10Bootstrap.Mobs day10Mobs = day10Bootstrap.registerMobs(mobRegistry);
 
-        mobRegistry.register(
-                infrazombie
-        );
+        // ZOMBIS
+        infrazombie = day10Mobs.infrazombie();
+        corruptedZombie = day10Mobs.corruptedZombie();
+        scavenger = day10Mobs.scavenger();
 
-        corruptedZombie =
-                new CorruptedZombie(this);
+        // ESQUELETOS
+        elementalSkeleton = day10Mobs.elementalSkeleton();
+        gladiator = day10Mobs.gladiator();
 
-        mobRegistry.register(
-                corruptedZombie
-        );
+        // CREEPER
+        futuristicCreeper = day10Mobs.futuristicCreeper();
 
-        scavenger =
-                new Scavenger(this);
-
-        mobRegistry.register(
-                scavenger
-        );
-
-        elementalSkeleton =
-                new ElementalSkeleton(this);
-
-        mobRegistry.register(
-                elementalSkeleton
-        );
-
-        gladiator =
-                new Gladiator(this);
-
-        mobRegistry.register(
-                gladiator
-        );
-
-        futuristicCreeper =
-                new FuturisticCreeper(this);
-
-        mobRegistry.register(
-                futuristicCreeper
-        );
-
-        speedSpider =
-                new SpeedSpider(this);
-
-        mobRegistry.register(
-                speedSpider
-        );
-
-        abyssSpider =
-                new AbyssSpider(this);
-
-        mobRegistry.register(
-                abyssSpider
-        );
-
-        weaver =
-                new Weaver(
-                        this,
-                        elementalSkeleton,
-                        gladiator
-                );
-
-        mobRegistry.register(
-                weaver
-        );
-
-        goliath =
-                new Goliath(this);
-
-        mobRegistry.register(
-                goliath
-        );
+        // ARAÑAS
+        speedSpider = day10Mobs.speedSpider();
+        abyssSpider = day10Mobs.abyssSpider();
+        weaver = day10Mobs.weaver();
+        goliath = day10Mobs.goliath();
 
         /*
          * ========================================
