@@ -1,7 +1,6 @@
-package me.difficulty.listeners;
+package me.difficulty.features.day10.items.minotaurhorn;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.items.day10.MinotaurHorn;
 
 import org.bukkit.entity.Ravager;
 

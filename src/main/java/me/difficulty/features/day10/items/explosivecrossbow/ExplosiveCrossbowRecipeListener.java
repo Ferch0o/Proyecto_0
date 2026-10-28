@@ -1,10 +1,9 @@
-package me.difficulty.listeners;
+package me.difficulty.features.day10.items.explosivecrossbow;
 
 import me.difficulty.day.DayManager;
 
-import me.difficulty.items.day10.CorruptedInk;
-import me.difficulty.items.day10.ExplosiveCrossbow;
-import me.difficulty.items.day10.MinotaurHorn;
+import me.difficulty.features.day10.items.corruptedink.CorruptedInk;
+import me.difficulty.features.day10.items.minotaurhorn.MinotaurHorn;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;

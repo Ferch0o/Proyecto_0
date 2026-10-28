@@ -1,7 +1,7 @@
-package me.difficulty.listeners;
+package me.difficulty.features.day10.items;
 
-import me.difficulty.items.day10.CorruptedInk;
-import me.difficulty.items.day10.MinotaurHorn;
+import me.difficulty.features.day10.items.corruptedink.CorruptedInk;
+import me.difficulty.features.day10.items.minotaurhorn.MinotaurHorn;
 
 import org.bukkit.event.Event;
 import org.bukkit.Keyed;

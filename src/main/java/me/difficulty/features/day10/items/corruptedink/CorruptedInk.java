@@ -1,4 +1,4 @@
-package me.difficulty.items.day10;
+package me.difficulty.features.day10.items.corruptedink;
 
 import me.difficulty.items.CustomItem;
 import me.difficulty.items.ItemIds;
@@ -14,18 +14,18 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.List;
 
 
-public class MinotaurHorn extends CustomItem {
+public class CorruptedInk extends CustomItem {
 
 
-    public MinotaurHorn(
+    public CorruptedInk(
             JavaPlugin plugin
     ) {
 
         super(
                 plugin,
-                ItemIds.MINOTAUR_HORN,
-                Material.RESIN_CLUMP,
-                ItemIds.MINOTAUR_HORN_MODEL
+                ItemIds.CORRUPTED_INK,
+                Material.GLOW_INK_SAC,
+                ItemIds.CORRUPTED_INK_MODEL
         );
     }
 
@@ -34,8 +34,8 @@ public class MinotaurHorn extends CustomItem {
     protected Component getDisplayName() {
 
         return Component.text(
-                        "Cuerno de Minotauro",
-                        NamedTextColor.GOLD
+                        "Tinta Corrupta",
+                        NamedTextColor.DARK_AQUA
                 )
                 .decoration(
                         TextDecoration.ITALIC,
@@ -50,8 +50,17 @@ public class MinotaurHorn extends CustomItem {
         return List.of(
 
                 Component.text(
-                                "Un fragmento endurecido obtenido de un Ravager.",
+                                "Una tinta alterada por una energía corrupta.",
                                 NamedTextColor.GRAY
+                        )
+                        .decoration(
+                                TextDecoration.ITALIC,
+                                false
+                        ),
+
+                Component.text(
+                                "Obtenida de los Glow Squids.",
+                                NamedTextColor.DARK_GRAY
                         )
                         .decoration(
                                 TextDecoration.ITALIC,
@@ -70,7 +79,7 @@ public class MinotaurHorn extends CustomItem {
     }
 
 
-    public boolean isMinotaurHorn(
+    public boolean isCorruptedInk(
             ItemStack item
     ) {
 

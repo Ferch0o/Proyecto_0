@@ -1,4 +1,4 @@
-package me.difficulty.items.day10;
+package me.difficulty.features.day10.items.explosivecrossbow;
 
 import me.difficulty.items.CustomItem;
 import me.difficulty.items.ItemIds;

@@ -1,7 +1,6 @@
-package me.difficulty.listeners;
+package me.difficulty.features.day10.items.corruptedink;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.items.day10.CorruptedInk;
 
 import org.bukkit.entity.GlowSquid;
 
