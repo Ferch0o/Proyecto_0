@@ -1,5 +1,6 @@
 package me.difficulty;
 
+import me.difficulty.bootstrap.QualityOfLifeBootstrap;
 import me.difficulty.commands.*;
 import me.difficulty.core.day.DayManager;
 import me.difficulty.core.recipes.RecipeUnlockListener;
@@ -86,6 +87,8 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         saveDefaultConfig();
 
+        QualityOfLifeBootstrap qualityOfLifeBootstrap =
+                new QualityOfLifeBootstrap(this);
 
         /*
          * ========================================
@@ -306,12 +309,7 @@ public final class DifficultyPlugin extends JavaPlugin {
          * Afecta a todos los jugadores.
          */
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new FriendlyFireProtectionListener(this),
-                        this
-                );
+        qualityOfLifeBootstrap.registerFriendlyFire();
 
         getServer()
                 .getPluginManager()
@@ -628,15 +626,7 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        SharedVillagerCureListener sharedVillagerCureListener =
-                new SharedVillagerCureListener(this);
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        sharedVillagerCureListener,
-                        this
-                );
+        qualityOfLifeBootstrap.registerVillagerListener();
 
         /*
          * ========================================
@@ -891,14 +881,7 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        Objects.requireNonNull(
-                getCommand("sharedcure")
-        ).setExecutor(
-                new SharedCureCommand(
-                        sharedVillagerCureListener
-                )
-        );
-
+        qualityOfLifeBootstrap.registerVillagerCommand();
 
         /*
          * ========================================
