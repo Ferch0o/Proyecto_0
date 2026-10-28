@@ -17,10 +17,6 @@ import me.difficulty.features.day10.mobs.golems.IronGolemListener;
 import me.difficulty.features.day10.mobs.skeletons.*;
 import me.difficulty.features.day10.mobs.spiders.*;
 import me.difficulty.features.day10.mobs.zombies.*;
-import me.difficulty.features.day7.corruptedstar.CorruptedStarListener;
-import me.difficulty.features.day7.corruptedstar.CorruptedStarRecipeBookListener;
-import me.difficulty.features.day7.corruptedstar.CorruptedStarRecipeListener;
-import me.difficulty.features.day7.corruptedstar.GiveCorruptedStarCommand;
 import me.difficulty.features.pets.PetBehaviorTask;
 import me.difficulty.features.pets.PetCombatListener;
 import me.difficulty.features.pets.WolfControlListener;
@@ -39,7 +35,6 @@ import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbow;
 import me.difficulty.features.day10.items.minotaurhorn.MinotaurHorn;
 import me.difficulty.features.day7.corruptedstar.CorruptedStar;
 import me.difficulty.core.mobs.CustomMobRegistry;
-import me.difficulty.features.day7.corruptedstar.CorruptedStarRecipe;
 import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbowRecipe;
 import me.difficulty.core.recipes.RecipeUnlockManager;
 import me.difficulty.features.storm.core.StormManager;
@@ -115,12 +110,8 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        corruptedStar =
-                new CorruptedStar(this);
-
-        itemRegistry.register(
-                corruptedStar
-        );
+        Day7Bootstrap day7Bootstrap = new Day7Bootstrap(this, dayManager);
+        day7Bootstrap.registerItem(itemRegistry);
 
         corruptedInk =
                 new CorruptedInk(
@@ -235,11 +226,7 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        CorruptedStarRecipe corruptedStarRecipe =
-                new CorruptedStarRecipe(
-                        this,
-                        corruptedStar
-                );
+        day7Bootstrap.createRecipe();
 
         ExplosiveCrossbowRecipe explosiveCrossbowRecipe =
                 new ExplosiveCrossbowRecipe(
@@ -255,7 +242,7 @@ public final class DifficultyPlugin extends JavaPlugin {
          * Primero registramos la receta
          * en Minecraft.
          */
-        corruptedStarRecipe.register();
+        day7Bootstrap.registerRecipe();
 
         explosiveCrossbowRecipe.register();
         /*
@@ -268,7 +255,7 @@ public final class DifficultyPlugin extends JavaPlugin {
                 new RecipeUnlockManager(
                         this,
                         dayManager,
-                        corruptedStarRecipe.getRecipeKey(),
+                        day7Bootstrap.getRecipe().getRecipeKey(),
                         explosiveCrossbowRecipe.getRecipeKey()
                 );
 
@@ -319,12 +306,7 @@ public final class DifficultyPlugin extends JavaPlugin {
                         this
                 );
 
-        new Day7Bootstrap(
-                this,
-                dayManager,
-                corruptedStar,
-                corruptedStarRecipe
-        ).registerListeners();
+        day7Bootstrap.registerListeners();
 
         getServer()
                 .getPluginManager()
@@ -730,13 +712,7 @@ public final class DifficultyPlugin extends JavaPlugin {
                 )
         );
 
-        Objects.requireNonNull(
-                getCommand("givecorruptedstar")
-        ).setExecutor(
-                new GiveCorruptedStarCommand(
-                        corruptedStar
-                )
-        );
+        day7Bootstrap.registerCommand();
 
         Objects.requireNonNull(
                 getCommand("spawninfrazombie")

@@ -1,41 +1,65 @@
 
 package me.difficulty.bootstrap;
 
+import me.difficulty.DifficultyPlugin;
 import me.difficulty.core.day.DayManager;
-import me.difficulty.features.day7.corruptedstar.CorruptedStar;
-import me.difficulty.features.day7.corruptedstar.CorruptedStarListener;
-import me.difficulty.features.day7.corruptedstar.CorruptedStarRecipe;
-import me.difficulty.features.day7.corruptedstar.CorruptedStarRecipeListener;
-import me.difficulty.features.day7.corruptedstar.CorruptedStarRecipeBookListener;
+import me.difficulty.core.items.CustomItemRegistry;
+import me.difficulty.features.day7.corruptedstar.*;
 
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Objects;
 
 public final class Day7Bootstrap {
 
-    private final JavaPlugin plugin;
+    private final DifficultyPlugin plugin;
     private final DayManager dayManager;
-    private final CorruptedStar corruptedStar;
-    private final CorruptedStarRecipe corruptedStarRecipe;
+
+    private CorruptedStar corruptedStar;
+    private CorruptedStarRecipe corruptedStarRecipe;
 
     public Day7Bootstrap(
-            JavaPlugin plugin,
-            DayManager dayManager,
-            CorruptedStar corruptedStar,
-            CorruptedStarRecipe corruptedStarRecipe
+            DifficultyPlugin plugin,
+            DayManager dayManager
     ) {
         this.plugin = plugin;
         this.dayManager = dayManager;
-        this.corruptedStar = corruptedStar;
-        this.corruptedStarRecipe = corruptedStarRecipe;
     }
 
+    // 1. CREAR Y REGISTRAR EL ITEM
+    public void registerItem(CustomItemRegistry itemRegistry) {
+
+        corruptedStar = new CorruptedStar(plugin);
+
+        itemRegistry.register(corruptedStar);
+    }
+
+    // 2. CREAR LA RECETA
+    public void createRecipe() {
+
+        corruptedStarRecipe = new CorruptedStarRecipe(
+                plugin,
+                corruptedStar
+        );
+    }
+
+    // 3. REGISTRAR LA RECETA
+    public void registerRecipe() {
+
+        corruptedStarRecipe.register();
+    }
+
+    // Acceso a la receta para el sistema general
+    public CorruptedStarRecipe getRecipe() {
+        return corruptedStarRecipe;
+    }
+
+    // 4. REGISTRAR LISTENERS
     public void registerListeners() {
 
         PluginManager pm =
                 plugin.getServer().getPluginManager();
 
-        // Uso de la Estrella Corrupta
         pm.registerEvents(
                 new CorruptedStarListener(
                         corruptedStar,
@@ -44,7 +68,6 @@ public final class Day7Bootstrap {
                 plugin
         );
 
-        // Protección de su receta
         pm.registerEvents(
                 new CorruptedStarRecipeListener(
                         corruptedStarRecipe.getRecipeKey(),
@@ -54,7 +77,6 @@ public final class Day7Bootstrap {
                 plugin
         );
 
-        // Integración con el libro de recetas
         pm.registerEvents(
                 new CorruptedStarRecipeBookListener(
                         corruptedStarRecipe.getRecipeKey(),
@@ -62,6 +84,23 @@ public final class Day7Bootstrap {
                         dayManager
                 ),
                 plugin
+        );
+
+        pm.registerEvents(
+                new CorruptedStarCooldownPersistenceListener(plugin),
+                plugin
+        );
+    }
+
+    // 5. REGISTRAR COMANDO
+    public void registerCommand() {
+
+        Objects.requireNonNull(
+                plugin.getCommand("givecorruptedstar")
+        ).setExecutor(
+                new GiveCorruptedStarCommand(
+                        corruptedStar
+                )
         );
     }
 }
