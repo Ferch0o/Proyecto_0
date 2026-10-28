@@ -113,32 +113,17 @@ public final class DifficultyPlugin extends JavaPlugin {
         Day7Bootstrap day7Bootstrap = new Day7Bootstrap(this, dayManager);
         day7Bootstrap.registerItem(itemRegistry);
 
-        corruptedInk =
-                new CorruptedInk(
-                        this
-                );
 
-        itemRegistry.register(
-                corruptedInk
-        );
+        Day10Bootstrap day10Bootstrap = new Day10Bootstrap(this);
 
-        minotaurHorn =
-                new MinotaurHorn(
-                        this
-                );
+        // Crear y registrar los tres items del dia 10
+        Day10Bootstrap.Items day10Items =
+                day10Bootstrap.registerItems(itemRegistry);
 
-        itemRegistry.register(
-                minotaurHorn
-        );
-
-        explosiveCrossbow =
-                new ExplosiveCrossbow(
-                        this
-                );
-
-        itemRegistry.register(
-                explosiveCrossbow
-        );
+        // Conservar las referencias utilizadas por el plugin
+        corruptedInk = day10Items.corruptedInk();
+        minotaurHorn = day10Items.minotaurHorn();
+        explosiveCrossbow = day10Items.explosiveCrossbow();
 
         /*
          * ========================================
