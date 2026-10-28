@@ -1,6 +1,6 @@
-package me.difficulty.features.storm.listeners;
+package me.difficulty.features.storm.day10.listeners;
 
-import me.difficulty.storm.StormManager;
+import me.difficulty.features.storm.core.StormManager;
 import org.bukkit.entity.Creeper;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

@@ -1,6 +1,6 @@
-package me.difficulty.commands;
+package me.difficulty.features.storm.core.commands;
 
-import me.difficulty.storm.StormManager;
+import me.difficulty.features.storm.core.StormManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

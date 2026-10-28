@@ -1,8 +1,8 @@
 
-package me.difficulty.tasks;
+package me.difficulty.features.storm.day7;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.storm.StormManager;
+import me.difficulty.features.storm.core.StormManager;
 
 import org.bukkit.scheduler.BukkitRunnable;
 

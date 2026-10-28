@@ -1,6 +1,5 @@
-package me.difficulty.tasks;
+package me.difficulty.features.storm.core;
 
-import me.difficulty.storm.StormManager;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class StormTimerTask

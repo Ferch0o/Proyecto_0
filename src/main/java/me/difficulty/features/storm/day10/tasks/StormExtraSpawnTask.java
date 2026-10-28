@@ -1,8 +1,8 @@
 
-package me.difficulty.tasks;
+package me.difficulty.features.storm.day10.tasks;
 
 import me.difficulty.DifficultyPlugin;
-import me.difficulty.storm.StormManager;
+import me.difficulty.features.storm.core.StormManager;
 
 import org.bukkit.*;
 

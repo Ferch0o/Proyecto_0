@@ -1,6 +1,6 @@
-package me.difficulty.listeners;
+package me.difficulty.features.storm.day10.listeners;
 
-import me.difficulty.storm.StormManager;
+import me.difficulty.features.storm.core.StormManager;
 
 import org.bukkit.Particle;
 import org.bukkit.Sound;

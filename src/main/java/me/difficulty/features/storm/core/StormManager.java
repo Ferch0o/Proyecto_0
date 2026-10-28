@@ -1,4 +1,4 @@
-package me.difficulty.storm;
+package me.difficulty.features.storm.core;
 
 import me.difficulty.day.DayManager;
 import org.bukkit.Bukkit;

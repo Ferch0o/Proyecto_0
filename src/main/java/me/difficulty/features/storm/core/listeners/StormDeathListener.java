@@ -1,8 +1,8 @@
 
-package me.difficulty.listeners;
+package me.difficulty.features.storm.core.listeners;
 
 import me.difficulty.day.DayManager;
-import me.difficulty.storm.StormManager;
+import me.difficulty.features.storm.core.StormManager;
 
 import org.bukkit.entity.Player;
 

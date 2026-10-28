@@ -1,7 +1,7 @@
 
-package me.difficulty.listeners;
+package me.difficulty.features.storm.core.listeners;
 
-import me.difficulty.storm.StormManager;
+import me.difficulty.features.storm.core.StormManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

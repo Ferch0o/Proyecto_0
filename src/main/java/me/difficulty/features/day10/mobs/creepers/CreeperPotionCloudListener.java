@@ -1,7 +1,7 @@
 
 package me.difficulty.features.day10.mobs.creepers;
 
-import me.difficulty.storm.StormManager;
+import me.difficulty.features.storm.core.StormManager;
 
 import org.bukkit.entity.Creeper;
 import org.bukkit.event.EventHandler;
