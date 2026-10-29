@@ -240,148 +240,29 @@ public final class DifficultyPlugin extends JavaPlugin {
                         this
                 );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CorruptedZombieCombatListener(
-                                mobRegistry,
-                                dayManager
-                        ),
-                        this
-                );
+        day10Bootstrap.registerZombieAndSkeletonListeners(
+                dayManager,
+                mobRegistry,
+                day10Mobs
+        );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new ZombieSpawnListener(
-                                dayManager,
-                                infrazombie,
-                                corruptedZombie,
-                                scavenger
-                        ),
-                        this
-                );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new ElementalSkeletonCombatListener(
-                                mobRegistry,
-                                dayManager
-                        ),
-                        this
-                );
+        day10Bootstrap.registerCreeperListeners(
+                dayManager,
+                mobRegistry,
+                day10Mobs
+        );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new SkeletonSpawnListener(
-                                dayManager,
-                                elementalSkeleton,
-                                gladiator
-                        ),
-                        this
-                );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new FuturisticCreeperExplosionListener(
-                                dayManager,
-                                mobRegistry
-                        ),
-                        this
-                );
+        day10Bootstrap.registerSpiderListeners(
+                dayManager,
+                mobRegistry,
+                day10Mobs
+        );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CreeperSpawnListener(
-                                dayManager,
-                                futuristicCreeper
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new WeaverRiderCombatListener(
-                                weaver,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new GoliathListener(
-                                mobRegistry,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new AbyssSpiderDeathListener(
-                                mobRegistry,
-                                dayManager,
-                                goliath
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new SpiderSpawnListener(
-                                dayManager,
-                                speedSpider,
-                                abyssSpider,
-                                weaver,
-                                goliath
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new IronGolemListener(
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new HorseSpawnListener(
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new PetCombatListener(
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new WolfControlListener(
-                                dayManager
-                        ),
-                        this
-                );
+        day10Bootstrap.registerOtherCreatureListeners(
+                dayManager
+        );
 
         getServer()
                 .getPluginManager()
@@ -427,75 +308,11 @@ public final class DifficultyPlugin extends JavaPlugin {
                         this
                 );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CorruptedInkDropListener(
-                                corruptedInk,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new MinotaurHornDropListener(
-                                minotaurHorn,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new Day10MaterialProtectionListener(
-                                explosiveCrossbowRecipe.getRecipeKey(),
-                                corruptedInk,
-                                minotaurHorn
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new ExplosiveCrossbowRecipeListener(
-                                this,
-                                explosiveCrossbowRecipe.getRecipeKey(),
-                                corruptedInk,
-                                minotaurHorn,
-                                explosiveCrossbow,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new ExplosiveCrossbowRecipeBookListener(
-                                this,
-                                explosiveCrossbowRecipe.getRecipeKey(),
-                                corruptedInk,
-                                minotaurHorn,
-                                explosiveCrossbow,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new ExplosiveCrossbowShootListener(
-                                this,
-                                explosiveCrossbow,
-                                dayManager
-                        ),
-                        this
-                );
+        day10Bootstrap.registerItemListeners(
+                dayManager,
+                day10Items,
+                explosiveCrossbowRecipe
+        );
 
         /*
          * ========================================
@@ -512,40 +329,10 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        new GladiatorWeaponTask(
-                this,
+        day10Bootstrap.registerCreatureTasks(
                 dayManager,
                 mobRegistry,
-                gladiator
-        ).runTaskTimer(
-                this,
-                0L,
-                10L
-        );
-
-        new SpeedSpiderClimbTask(
-                dayManager,
-                mobRegistry
-        ).runTaskTimer(
-                this,
-                0L,
-                2L
-        );
-
-        new HorseEffectTask(
-                dayManager
-        ).runTaskTimer(
-                this,
-                0L,
-                10L
-        );
-
-        new PetBehaviorTask(
-                dayManager
-        ).runTaskTimer(
-                this,
-                0L,
-                5L
+                day10Mobs
         );
 
         new StormTimerTask(
