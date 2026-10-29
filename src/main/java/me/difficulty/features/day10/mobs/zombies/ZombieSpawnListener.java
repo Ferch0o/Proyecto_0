@@ -29,7 +29,7 @@ public class ZombieSpawnListener implements Listener {
         this.scavenger = scavenger;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onZombieSpawn(
             CreatureSpawnEvent event
     ) {
@@ -97,57 +97,41 @@ public class ZombieSpawnListener implements Listener {
                 (Zombie) event.getEntity();
 
 
-        /*
-         * ========================================
-         * SELECCIÓN DE VARIANTE
-         * ========================================
-         */
-
-        int roll =
-                ThreadLocalRandom
-                        .current()
-                        .nextInt(100);
-
 
         /*
-         * 0 - 39
+         * ========================================
+         * DISTRIBUCION DIA 10
+         * ========================================
          *
-         * 40 números = 40 %
+         * El Zombie Gigante ya tiene reservado
+         * el 5% de los spawns naturales elegibles.
+         *
+         * El 95% restante se distribuye:
+         *
+         * 40 partes -> Infrazombie
+         * 30 partes -> Zombie Corrupto
+         * 25 partes -> Carroñero
+         *
+         * TOTAL: 95 partes
          */
 
+        int roll = ThreadLocalRandom
+                .current()
+                .nextInt(95);
+
+        // 0 - 39: 40 partes
         if (roll < 40) {
-
-            infrazombie.apply(
-                    zombie
-            );
-
+            infrazombie.apply(zombie);
             return;
         }
 
-
-        /*
-         * 40 - 74
-         *
-         * 35 números = 35 %
-         */
-
-        if (roll < 75) {
-
-            corruptedZombie.apply(
-                    zombie
-            );
-
+        // 40 - 69: 30 partes
+        if (roll < 70) {
+            corruptedZombie.apply(zombie);
             return;
         }
 
-        /*
-         * 75 - 99
-         *
-         * 25 números = 25 %
-         */
-
-        scavenger.apply(
-                zombie
-        );
+        // 70 - 94: 25 partes
+        scavenger.apply(zombie);
     }
 }
