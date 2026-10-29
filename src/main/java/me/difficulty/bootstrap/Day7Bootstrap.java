@@ -4,7 +4,10 @@ package me.difficulty.bootstrap;
 import me.difficulty.DifficultyPlugin;
 import me.difficulty.core.day.DayManager;
 import me.difficulty.core.items.CustomItemRegistry;
+import me.difficulty.core.mobs.CustomMobRegistry;
+
 import me.difficulty.features.day7.corruptedstar.*;
+import me.difficulty.features.day7.gigante.*;
 
 import org.bukkit.plugin.PluginManager;
 
@@ -18,6 +21,8 @@ public final class Day7Bootstrap {
     private CorruptedStar corruptedStar;
     private CorruptedStarRecipe corruptedStarRecipe;
 
+    private GiantZombie giantZombie;
+
     public Day7Bootstrap(
             DifficultyPlugin plugin,
             DayManager dayManager
@@ -26,15 +31,61 @@ public final class Day7Bootstrap {
         this.dayManager = dayManager;
     }
 
-    // 1. CREAR Y REGISTRAR EL ITEM
-    public void registerItem(CustomItemRegistry itemRegistry) {
+    // ========================================
+    // MOBS DEL DIA 7
+    // ========================================
+
+    public void registerMob(CustomMobRegistry mobRegistry) {
+
+        giantZombie = new GiantZombie(plugin);
+        mobRegistry.register(giantZombie);
+    }
+
+    // ========================================
+    // TAREAS DEL ZOMBIE GIGANTE
+    // ========================================
+
+    public void registerGiantTasks(
+            CustomMobRegistry mobRegistry
+    ) {
+
+        // Persecucion
+        plugin.getServer().getScheduler().runTaskTimer(
+                plugin,
+                new GiantAiTask(
+                        plugin,
+                        dayManager,
+                        mobRegistry
+                ),
+                20L,
+                20L
+        );
+
+        // Combate
+        plugin.getServer().getScheduler().runTaskTimer(
+                plugin,
+                new GiantCombatTask(
+                        plugin,
+                        dayManager,
+                        mobRegistry
+                ),
+                5L,
+                5L
+        );
+    }
+
+    // ========================================
+    // ESTRELLA CORRUPTA
+    // ========================================
+
+    public void registerItem(
+            CustomItemRegistry itemRegistry
+    ) {
 
         corruptedStar = new CorruptedStar(plugin);
-
         itemRegistry.register(corruptedStar);
     }
 
-    // 2. CREAR LA RECETA
     public void createRecipe() {
 
         corruptedStarRecipe = new CorruptedStarRecipe(
@@ -43,23 +94,24 @@ public final class Day7Bootstrap {
         );
     }
 
-    // 3. REGISTRAR LA RECETA
     public void registerRecipe() {
-
         corruptedStarRecipe.register();
     }
 
-    // Acceso a la receta para el sistema general
     public CorruptedStarRecipe getRecipe() {
         return corruptedStarRecipe;
     }
 
-    // 4. REGISTRAR LISTENERS
+    // ========================================
+    // LISTENERS
+    // ========================================
+
     public void registerListeners() {
 
         PluginManager pm =
                 plugin.getServer().getPluginManager();
 
+        // Estrella Corrupta
         pm.registerEvents(
                 new CorruptedStarListener(
                         corruptedStar,
@@ -87,12 +139,36 @@ public final class Day7Bootstrap {
         );
 
         pm.registerEvents(
-                new CorruptedStarCooldownPersistenceListener(plugin),
+                new CorruptedStarCooldownPersistenceListener(
+                        plugin
+                ),
+                plugin
+        );
+
+        // Generacion natural del Gigante
+        pm.registerEvents(
+                new GiantSpawnListener(
+                        plugin,
+                        dayManager,
+                        giantZombie
+                ),
+                plugin
+        );
+
+        // Recompensa del Gigante
+        pm.registerEvents(
+                new GiantDropListener(
+                        dayManager,
+                        giantZombie
+                ),
                 plugin
         );
     }
 
-    // 5. REGISTRAR COMANDO
+    // ========================================
+    // COMANDOS
+    // ========================================
+
     public void registerCommand() {
 
         Objects.requireNonNull(
@@ -100,6 +176,15 @@ public final class Day7Bootstrap {
         ).setExecutor(
                 new GiveCorruptedStarCommand(
                         corruptedStar
+                )
+        );
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawngiant")
+        ).setExecutor(
+                new SpawnGiantCommand(
+                        giantZombie,
+                        dayManager
                 )
         );
     }

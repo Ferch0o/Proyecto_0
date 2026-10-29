@@ -17,6 +17,11 @@ commands:
     description: Entrega una Estrella Corrupta para pruebas.
     usage: /givecorruptedstar
     permission: difficulty.admin
+  spawngiant:
+    description: Genera un Zombie Gigante para pruebas.
+    usage: /spawngiant
+    permission: difficulty.admin
+
   spawninfrazombie:
     description: Genera un Infrazombie para pruebas.
     usage: /spawninfrazombie

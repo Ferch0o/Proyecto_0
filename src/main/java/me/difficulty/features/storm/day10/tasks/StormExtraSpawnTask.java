@@ -253,20 +253,19 @@ public class StormExtraSpawnTask extends BukkitRunnable {
         Entity spawnedEntity = world.spawnEntity(
                 spawnLocation,
                 selectedType,
-                CreatureSpawnEvent.SpawnReason.NATURAL
+                CreatureSpawnEvent.SpawnReason.NATURAL,
+                entity -> entity.getPersistentDataContainer().set(
+                        stormExtraMobKey,
+                        PersistentDataType.BYTE,
+                        (byte) 1
+                )
         );
 
-        /*
-         * ========================================
-         * IDENTIFICAR MOB EXTRA
-         * ========================================
-         */
-
-        spawnedEntity.getPersistentDataContainer().set(
-                stormExtraMobKey,
-                PersistentDataType.BYTE,
-                (byte) 1
-        );
+        // Si otro listener cancela la generacion,
+        // no contar este mob como generado.
+        if (!spawnedEntity.isValid()) {
+            return;
+        }
 
         /*
          * Actualizar el contador temporal.

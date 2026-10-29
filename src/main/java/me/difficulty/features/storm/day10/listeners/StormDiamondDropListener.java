@@ -56,30 +56,37 @@ public class StormDiamondDropListener
      * ========================================
      */
 
+
+    /*
+     * ========================================
+     * MOBS CUSTOM QUE DAN DIAMANTES
+     * DURANTE LA TORMENTA DEL DIA 10+
+     * ========================================
+     */
+
     private static final Set<String> DAY_10_MOBS =
             Set.of(
+                    // ZOMBIE GIGANTE - DIA 7
+                    MobIds.GIANT_ZOMBIE,
 
+                    // ZOMBIES - DIA 10
                     MobIds.INFRAZOMBIE,
-
                     MobIds.CORRUPTED_ZOMBIE,
-
                     MobIds.SCAVENGER,
 
+                    // SKELETONS - DIA 10
                     MobIds.ELEMENTAL_SKELETON,
-
                     MobIds.GLADIATOR,
 
+                    // CREEPER - DIA 10
                     MobIds.FUTURISTIC_CREEPER,
 
+                    // SPIDERS - DIA 10
                     MobIds.SPEED_SPIDER,
-
                     MobIds.ABYSS_SPIDER,
-
                     MobIds.WEAVER,
-
                     MobIds.GOLIATH
             );
-
 
     public StormDiamondDropListener(
             DifficultyPlugin plugin,
