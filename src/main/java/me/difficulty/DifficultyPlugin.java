@@ -4,22 +4,10 @@ import me.difficulty.bootstrap.*;
 import me.difficulty.commands.*;
 import me.difficulty.core.day.DayManager;
 import me.difficulty.core.recipes.RecipeUnlockListener;
-import me.difficulty.features.day10.items.Day10MaterialProtectionListener;
-import me.difficulty.features.day10.items.corruptedink.CorruptedInkDropListener;
-import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbowRecipeBookListener;
-import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbowRecipeListener;
-import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbowShootListener;
-import me.difficulty.features.day10.items.minotaurhorn.MinotaurHornDropListener;
-import me.difficulty.features.day10.mobs.caballos.HorseEffectTask;
-import me.difficulty.features.day10.mobs.caballos.HorseSpawnListener;
 import me.difficulty.features.day10.mobs.creepers.*;
-import me.difficulty.features.day10.mobs.golems.IronGolemListener;
 import me.difficulty.features.day10.mobs.skeletons.*;
 import me.difficulty.features.day10.mobs.spiders.*;
 import me.difficulty.features.day10.mobs.zombies.*;
-import me.difficulty.features.pets.PetBehaviorTask;
-import me.difficulty.features.pets.PetCombatListener;
-import me.difficulty.features.pets.WolfControlListener;
 import me.difficulty.features.storm.core.StormTimerTask;
 import me.difficulty.features.storm.core.commands.StormCommand;
 import me.difficulty.features.storm.core.listeners.StormBossBarListener;
@@ -45,28 +33,16 @@ import java.util.Objects;
 
 public final class DifficultyPlugin extends JavaPlugin {
 
+
     private DayManager dayManager;
     private CustomItemRegistry itemRegistry;
-    private CorruptedStar corruptedStar;
     private RecipeUnlockManager recipeUnlockManager;
     private CustomMobRegistry mobRegistry;
-    private Infrazombie infrazombie;
-    private CorruptedZombie corruptedZombie;
-    private Scavenger scavenger;
-    private ElementalSkeleton elementalSkeleton;
-    private Gladiator gladiator;
-    private FuturisticCreeper futuristicCreeper;
-    private SpeedSpider speedSpider;
-    private AbyssSpider abyssSpider;
-    private Weaver weaver;
-    private Goliath goliath;
+
     private StormManager stormManager;
     private StormMobCapTask stormMobCapTask;
     private StormExtraSpawnTask stormExtraSpawnTask;
     private StormPlayerEffectTask stormPlayerEffectTask;
-    private CorruptedInk corruptedInk;
-    private MinotaurHorn minotaurHorn;
-    private ExplosiveCrossbow explosiveCrossbow;
 
     @Override
     public void onEnable() {
@@ -120,11 +96,6 @@ public final class DifficultyPlugin extends JavaPlugin {
         Day10Bootstrap.Items day10Items =
                 day10Bootstrap.registerItems(itemRegistry);
 
-        // Conservar las referencias utilizadas por el plugin
-        corruptedInk = day10Items.corruptedInk();
-        minotaurHorn = day10Items.minotaurHorn();
-        explosiveCrossbow = day10Items.explosiveCrossbow();
-
         /*
          * ========================================
          * 4. MOBS PERSONALIZADOS
@@ -132,24 +103,6 @@ public final class DifficultyPlugin extends JavaPlugin {
          */
 
         Day10Bootstrap.Mobs day10Mobs = day10Bootstrap.registerMobs(mobRegistry);
-
-        // ZOMBIS
-        infrazombie = day10Mobs.infrazombie();
-        corruptedZombie = day10Mobs.corruptedZombie();
-        scavenger = day10Mobs.scavenger();
-
-        // ESQUELETOS
-        elementalSkeleton = day10Mobs.elementalSkeleton();
-        gladiator = day10Mobs.gladiator();
-
-        // CREEPER
-        futuristicCreeper = day10Mobs.futuristicCreeper();
-
-        // ARAÑAS
-        speedSpider = day10Mobs.speedSpider();
-        abyssSpider = day10Mobs.abyssSpider();
-        weaver = day10Mobs.weaver();
-        goliath = day10Mobs.goliath();
 
         /*
          * ========================================

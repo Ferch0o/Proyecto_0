@@ -2,6 +2,9 @@
 package me.difficulty.bootstrap;
 
 import me.difficulty.DifficultyPlugin;
+import me.difficulty.bootstrap.day10.Day10CommandRegistrar;
+import me.difficulty.bootstrap.day10.Day10TaskRegistrar;
+import me.difficulty.bootstrap.day10.Day10ZombieSkeletonListenerRegistrar;
 import me.difficulty.core.items.CustomItemRegistry;
 import me.difficulty.features.day10.items.Day10MaterialProtectionListener;
 import me.difficulty.features.day10.items.corruptedink.*;
@@ -161,7 +164,6 @@ public final class Day10Bootstrap {
         recipe.register();
     }
 
-
     // ========================================
     // LISTENERS DIA 10 - ZOMBIS Y ESQUELETOS
     // ========================================
@@ -172,57 +174,14 @@ public final class Day10Bootstrap {
             Mobs mobs
     ) {
 
-        PluginManager pm =
-                plugin.getServer().getPluginManager();
-
-        // ========================================
-        // ZOMBIS
-        // ========================================
-
-        // Combate del Zombie Corrupto
-        pm.registerEvents(
-                new CorruptedZombieCombatListener(
-                        mobRegistry,
-                        dayManager
-                ),
+        new Day10ZombieSkeletonListenerRegistrar(
                 plugin
-        );
-
-        // Generacion de los tres zombies
-        pm.registerEvents(
-                new ZombieSpawnListener(
-                        dayManager,
-                        mobs.infrazombie(),
-                        mobs.corruptedZombie(),
-                        mobs.scavenger()
-                ),
-                plugin
-        );
-
-        // ========================================
-        // ESQUELETOS
-        // ========================================
-
-        // Combate del Esqueleto Elemental
-        pm.registerEvents(
-                new ElementalSkeletonCombatListener(
-                        mobRegistry,
-                        dayManager
-                ),
-                plugin
-        );
-
-        // Generacion de los dos esqueletos
-        pm.registerEvents(
-                new SkeletonSpawnListener(
-                        dayManager,
-                        mobs.elementalSkeleton(),
-                        mobs.gladiator()
-                ),
-                plugin
+        ).register(
+                dayManager,
+                mobRegistry,
+                mobs
         );
     }
-
 
     // ========================================
     // LISTENERS DIA 10 - CREEPERS
@@ -453,7 +412,6 @@ public final class Day10Bootstrap {
         );
     }
 
-
     // ========================================
     // TASKS - CRIATURAS DEL DIA 10 Y MASCOTAS
     // ========================================
@@ -464,59 +422,12 @@ public final class Day10Bootstrap {
             Mobs mobs
     ) {
 
-        // ========================================
-        // GLADIADOR - CAMBIO DE ARMAS
-        // ========================================
-
-        new GladiatorWeaponTask(
-                plugin,
+        new Day10TaskRegistrar(plugin).register(
                 dayManager,
                 mobRegistry,
-                mobs.gladiator()
-        ).runTaskTimer(
-                plugin,
-                0L,
-                10L
-        );
-
-        // ========================================
-        // ARANA VELOZ - ESCALADA
-        // ========================================
-
-        new SpeedSpiderClimbTask(
-                dayManager,
-                mobRegistry
-        ).runTaskTimer(
-                plugin,
-                0L,
-                2L
-        );
-
-        // ========================================
-        // CABALLOS - EFECTOS
-        // ========================================
-
-        new HorseEffectTask(
-                dayManager
-        ).runTaskTimer(
-                plugin,
-                0L,
-                10L
-        );
-
-        // ========================================
-        // MASCOTAS - COMPORTAMIENTO
-        // ========================================
-
-        new PetBehaviorTask(
-                dayManager
-        ).runTaskTimer(
-                plugin,
-                0L,
-                5L
+                mobs
         );
     }
-
 
     // ========================================
     // COMANDOS - MOBS DEL DIA 10
@@ -527,110 +438,9 @@ public final class Day10Bootstrap {
             Mobs mobs
     ) {
 
-        // ========================================
-        // ZOMBIS
-        // ========================================
-
-        Objects.requireNonNull(
-                plugin.getCommand("spawninfrazombie")
-        ).setExecutor(
-                new SpawnInfrazombieCommand(
-                        mobs.infrazombie(),
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                plugin.getCommand("spawncorruptedzombie")
-        ).setExecutor(
-                new SpawnCorruptedZombieCommand(
-                        mobs.corruptedZombie(),
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                plugin.getCommand("spawnscavenger")
-        ).setExecutor(
-                new SpawnScavengerCommand(
-                        mobs.scavenger(),
-                        dayManager
-                )
-        );
-
-        // ========================================
-        // ESQUELETOS
-        // ========================================
-
-        Objects.requireNonNull(
-                plugin.getCommand("spawnelementalskeleton")
-        ).setExecutor(
-                new SpawnElementalSkeletonCommand(
-                        mobs.elementalSkeleton(),
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                plugin.getCommand("spawngladiator")
-        ).setExecutor(
-                new SpawnGladiatorCommand(
-                        mobs.gladiator(),
-                        dayManager
-                )
-        );
-
-        // ========================================
-        // CREEPER FUTURISTA
-        // ========================================
-
-        Objects.requireNonNull(
-                plugin.getCommand("spawnfuturisticcreeper")
-        ).setExecutor(
-                new SpawnFuturisticCreeperCommand(
-                        mobs.futuristicCreeper(),
-                        dayManager
-                )
-        );
-
-        // ========================================
-        // ARANAS
-        // ========================================
-
-        Objects.requireNonNull(
-                plugin.getCommand("spawnspeedspider")
-        ).setExecutor(
-                new SpawnSpeedSpiderCommand(
-                        mobs.speedSpider(),
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                plugin.getCommand("spawnabyssspider")
-        ).setExecutor(
-                new SpawnAbyssSpiderCommand(
-                        mobs.abyssSpider(),
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                plugin.getCommand("spawnweaver")
-        ).setExecutor(
-                new SpawnWeaverCommand(
-                        mobs.weaver(),
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                plugin.getCommand("spawngoliath")
-        ).setExecutor(
-                new SpawnGoliathCommand(
-                        mobs.goliath(),
-                        dayManager
-                )
+        new Day10CommandRegistrar(plugin).register(
+                dayManager,
+                mobs
         );
     }
 }
