@@ -1,48 +1,26 @@
 package me.difficulty;
 
 import me.difficulty.bootstrap.*;
+import me.difficulty.bootstrap.storm.StormBootstrap;
 import me.difficulty.commands.*;
 import me.difficulty.core.day.DayManager;
 import me.difficulty.core.recipes.RecipeUnlockListener;
-import me.difficulty.features.day10.mobs.creepers.*;
-import me.difficulty.features.day10.mobs.skeletons.*;
-import me.difficulty.features.day10.mobs.spiders.*;
-import me.difficulty.features.day10.mobs.zombies.*;
-import me.difficulty.features.storm.core.StormTimerTask;
-import me.difficulty.features.storm.core.commands.StormCommand;
-import me.difficulty.features.storm.core.listeners.StormBossBarListener;
-import me.difficulty.features.storm.core.listeners.StormDeathListener;
-import me.difficulty.features.storm.day10.listeners.StormDiamondDropListener;
-import me.difficulty.features.storm.day10.listeners.StormEnderPearlListener;
-import me.difficulty.features.storm.day10.listeners.StormEvokerDropListener;
-import me.difficulty.features.storm.day7.StormNaturalTask;
-import me.difficulty.features.storm.day10.listeners.StormCreeperListener;
 import me.difficulty.core.items.CustomItemRegistry;
-import me.difficulty.features.day10.items.corruptedink.CorruptedInk;
-import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbow;
-import me.difficulty.features.day10.items.minotaurhorn.MinotaurHorn;
-import me.difficulty.features.day7.corruptedstar.CorruptedStar;
 import me.difficulty.core.mobs.CustomMobRegistry;
 import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbowRecipe;
 import me.difficulty.core.recipes.RecipeUnlockManager;
-import me.difficulty.features.storm.core.StormManager;
-import me.difficulty.features.storm.day10.tasks.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
 
 public final class DifficultyPlugin extends JavaPlugin {
 
-
     private DayManager dayManager;
     private CustomItemRegistry itemRegistry;
     private RecipeUnlockManager recipeUnlockManager;
     private CustomMobRegistry mobRegistry;
 
-    private StormManager stormManager;
-    private StormMobCapTask stormMobCapTask;
-    private StormExtraSpawnTask stormExtraSpawnTask;
-    private StormPlayerEffectTask stormPlayerEffectTask;
+    private StormBootstrap stormBootstrap;
 
     @Override
     public void onEnable() {
@@ -64,21 +42,22 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-
         CoreBootstrap coreBootstrap = new CoreBootstrap(this);
 
         // 1. Sistema de días
         dayManager = coreBootstrap.createDayManager();
 
         // 2. Sistema de Tormenta
-        stormManager = new StormManager(this, dayManager);
+        stormBootstrap = new StormBootstrap(
+                this,
+                dayManager
+        );
 
         // 3. Registros compartidos
         CoreBootstrap.Registries registries = coreBootstrap.createRegistries();
 
         itemRegistry = registries.itemRegistry();
         mobRegistry = registries.mobRegistry();
-
 
         /*
          * ========================================
@@ -88,7 +67,6 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         Day7Bootstrap day7Bootstrap = new Day7Bootstrap(this, dayManager);
         day7Bootstrap.registerItem(itemRegistry);
-
 
         Day10Bootstrap day10Bootstrap = new Day10Bootstrap(this);
 
@@ -111,16 +89,18 @@ public final class DifficultyPlugin extends JavaPlugin {
          */
 
         day7Bootstrap.createRecipe();
-
         ExplosiveCrossbowRecipe explosiveCrossbowRecipe = day10Bootstrap.createRecipe(day10Items);
+
         /*
          * IMPORTANTE:
          *
          * Primero registramos la receta
          * en Minecraft.
          */
+
         day7Bootstrap.registerRecipe();
         day10Bootstrap.registerRecipe(explosiveCrossbowRecipe);
+
         /*
          * ========================================
          * 5. DESBLOQUEO DE RECETAS
@@ -135,13 +115,11 @@ public final class DifficultyPlugin extends JavaPlugin {
                         explosiveCrossbowRecipe.getRecipeKey()
                 );
 
-
         /*
          * ========================================
          * 6. LISTENERS
          * ========================================
          */
-
 
         /*
          * ========================================
@@ -150,15 +128,7 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new StormBossBarListener(
-                                this,
-                                stormManager
-                        ),
-                        this
-                );
+        stormBootstrap.registerBossBarListener();
 
         /*
          * ========================================
@@ -172,15 +142,7 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         qualityOfLifeBootstrap.registerFriendlyFire();
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new StormDeathListener(
-                                dayManager,
-                                stormManager
-                        ),
-                        this
-                );
+        stormBootstrap.registerDeathListener();
 
         day7Bootstrap.registerListeners();
 
@@ -217,49 +179,7 @@ public final class DifficultyPlugin extends JavaPlugin {
                 dayManager
         );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new StormCreeperListener(
-                                stormManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CreeperPotionCloudListener(stormManager),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new StormEvokerDropListener(
-                                stormManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new StormEnderPearlListener(
-                                stormManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new StormDiamondDropListener(
-                                this,
-                                stormManager
-                        ),
-                        this
-                );
+        stormBootstrap.registerDay10Listeners();
 
         day10Bootstrap.registerItemListeners(
                 dayManager,
@@ -288,69 +208,7 @@ public final class DifficultyPlugin extends JavaPlugin {
                 day10Mobs
         );
 
-        new StormTimerTask(
-                stormManager
-        ).runTaskTimer(
-                this,
-                20L,
-                20L
-        );
-
-        new StormNaturalTask(
-                dayManager,
-                stormManager
-        ).runTaskTimer(
-                this,
-                20L,
-                20L
-        );
-
-
-        new StormMobEffectTask(
-                this,
-                stormManager
-        ).runTaskTimer(
-                this,
-                0L,
-                5L
-        );
-
-        stormMobCapTask =
-                new StormMobCapTask(
-                        stormManager
-                );
-
-
-        stormMobCapTask.runTaskTimer(
-                this,
-                20L,
-                20L
-        );
-
-        stormExtraSpawnTask =
-                new StormExtraSpawnTask(
-                        this,
-                        stormManager
-                );
-
-
-        stormExtraSpawnTask.runTaskTimer(
-                this,
-                20L,
-                20L
-        );
-
-        stormPlayerEffectTask =
-                new StormPlayerEffectTask(
-                        stormManager
-                );
-
-
-        stormPlayerEffectTask.runTaskTimer(
-                this,
-                200L,
-                200L
-        );
+        stormBootstrap.registerTasks();
 
         /*
          * ========================================
@@ -382,25 +240,7 @@ public final class DifficultyPlugin extends JavaPlugin {
                 day10Mobs
         );
 
-        StormCommand stormCommand =
-                new StormCommand(
-                        stormManager
-                );
-
-
-        Objects.requireNonNull(
-                getCommand("storm")
-        ).setExecutor(
-                stormCommand
-        );
-
-
-        Objects.requireNonNull(
-                getCommand("storm")
-        ).setTabCompleter(
-                stormCommand
-        );
-
+        stormBootstrap.registerCommand();
 
         /*
          * ========================================
@@ -436,12 +276,8 @@ public final class DifficultyPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
 
-        if (stormMobCapTask != null) {
-            stormMobCapTask.shutdown();
-        }
-
-        if (stormManager != null) {
-            stormManager.saveState();
+        if (stormBootstrap != null) {
+            stormBootstrap.shutdown();
         }
 
         getLogger().info(
