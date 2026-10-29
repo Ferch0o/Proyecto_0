@@ -6,6 +6,13 @@ public final class MobIds {
     }
 
     // =========================
+    // DÍA 7 - ZOMBIE GIGANTE
+    // =========================
+
+    public static final String GIANT_ZOMBIE =
+            "giant_zombie";
+
+    // =========================
     // DÍA 10 - ZOMBIES
     // =========================
 
