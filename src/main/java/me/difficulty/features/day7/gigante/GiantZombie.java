@@ -44,7 +44,7 @@ public final class GiantZombie extends CustomMob {
         giant.setCustomNameVisible(true);
 
         // Lentitud II permanente
-        giant.addPotionEffect(
+        /*giant.addPotionEffect(
                 new PotionEffect(
                         PotionEffectType.SLOWNESS,
                         PotionEffect.INFINITE_DURATION,
@@ -52,7 +52,7 @@ public final class GiantZombie extends CustomMob {
                         false,
                         false
                 )
-        );
+        );*/
 
         // Permitir superar escalones de un bloque
         AttributeInstance stepHeight =
