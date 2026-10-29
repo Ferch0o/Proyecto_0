@@ -4,8 +4,13 @@ package me.difficulty.bootstrap;
 import me.difficulty.DifficultyPlugin;
 import me.difficulty.core.day.DayManager;
 import me.difficulty.core.items.CustomItemRegistry;
+import me.difficulty.core.mobs.CustomMobRegistry;
 import me.difficulty.features.day7.corruptedstar.*;
 
+import me.difficulty.features.day7.gigante.GiantAiTask;
+import me.difficulty.features.day7.gigante.GiantCombatTask;
+import me.difficulty.features.day7.gigante.GiantZombie;
+import me.difficulty.features.day7.gigante.SpawnGiantCommand;
 import org.bukkit.plugin.PluginManager;
 
 import java.util.Objects;
@@ -17,6 +22,7 @@ public final class Day7Bootstrap {
 
     private CorruptedStar corruptedStar;
     private CorruptedStarRecipe corruptedStarRecipe;
+    private GiantZombie giantZombie;
 
     public Day7Bootstrap(
             DifficultyPlugin plugin,
@@ -24,6 +30,44 @@ public final class Day7Bootstrap {
     ) {
         this.plugin = plugin;
         this.dayManager = dayManager;
+    }
+
+    // REGISTRAR ZOMBIE GIGANTE DEL DIA 7
+    public void registerMob(CustomMobRegistry mobRegistry) {
+
+        giantZombie = new GiantZombie(plugin);
+
+        mobRegistry.register(giantZombie);
+    }
+
+    // REGISTRAR TAREAS DEL ZOMBIE GIGANTE
+    public void registerGiantTasks(
+            CustomMobRegistry mobRegistry
+    ) {
+
+        // IA DE MOVIMIENTO Y PERSECUCION
+        plugin.getServer().getScheduler().runTaskTimer(
+                plugin,
+                new GiantAiTask(
+                        plugin,
+                        dayManager,
+                        mobRegistry
+                ),
+                20L,
+                20L
+        );
+
+        // IA DE COMBATE
+        plugin.getServer().getScheduler().runTaskTimer(
+                plugin,
+                new GiantCombatTask(
+                        plugin,
+                        dayManager,
+                        mobRegistry
+                ),
+                5L,
+                5L
+        );
     }
 
     // 1. CREAR Y REGISTRAR EL ITEM
@@ -102,5 +146,17 @@ public final class Day7Bootstrap {
                         corruptedStar
                 )
         );
+
+
+        // COMANDO /spawngiant
+        Objects.requireNonNull(
+                plugin.getCommand("spawngiant")
+        ).setExecutor(
+                new SpawnGiantCommand(
+                        giantZombie,
+                        dayManager
+                )
+        );
+
     }
 }

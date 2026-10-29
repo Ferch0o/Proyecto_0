@@ -67,12 +67,11 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         Day7Bootstrap day7Bootstrap = new Day7Bootstrap(this, dayManager);
         day7Bootstrap.registerItem(itemRegistry);
+        day7Bootstrap.registerMob(mobRegistry);
 
         Day10Bootstrap day10Bootstrap = new Day10Bootstrap(this);
-
         // Crear y registrar los tres items del dia 10
-        Day10Bootstrap.Items day10Items =
-                day10Bootstrap.registerItems(itemRegistry);
+        Day10Bootstrap.Items day10Items = day10Bootstrap.registerItems(itemRegistry);
 
         /*
          * ========================================
@@ -201,6 +200,9 @@ public final class DifficultyPlugin extends JavaPlugin {
          * 8. TAREAS
          * ========================================
          */
+
+        // Inteligencia artificial del Zombie Gigante
+        day7Bootstrap.registerGiantTasks(mobRegistry);
 
         day10Bootstrap.registerCreatureTasks(
                 dayManager,
