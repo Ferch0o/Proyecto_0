@@ -1,20 +1,14 @@
 package me.difficulty;
 
+import me.difficulty.bootstrap.*;
+import me.difficulty.bootstrap.storm.StormBootstrap;
 import me.difficulty.commands.*;
-import me.difficulty.day.DayManager;
-import me.difficulty.items.CustomItemRegistry;
-import me.difficulty.items.day10.CorruptedInk;
-import me.difficulty.items.day10.ExplosiveCrossbow;
-import me.difficulty.items.day10.MinotaurHorn;
-import me.difficulty.items.day7.CorruptedStar;
-import me.difficulty.listeners.*;
-import me.difficulty.mobs.CustomMobRegistry;
-import me.difficulty.mobs.day10.*;
-import me.difficulty.recipes.CorruptedStarRecipe;
-import me.difficulty.recipes.ExplosiveCrossbowRecipe;
-import me.difficulty.recipes.RecipeUnlockManager;
-import me.difficulty.storm.StormManager;
-import me.difficulty.tasks.*;
+import me.difficulty.core.day.DayManager;
+import me.difficulty.core.recipes.RecipeUnlockListener;
+import me.difficulty.core.items.CustomItemRegistry;
+import me.difficulty.core.mobs.CustomMobRegistry;
+import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbowRecipe;
+import me.difficulty.core.recipes.RecipeUnlockManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
@@ -23,26 +17,10 @@ public final class DifficultyPlugin extends JavaPlugin {
 
     private DayManager dayManager;
     private CustomItemRegistry itemRegistry;
-    private CorruptedStar corruptedStar;
     private RecipeUnlockManager recipeUnlockManager;
     private CustomMobRegistry mobRegistry;
-    private Infrazombie infrazombie;
-    private CorruptedZombie corruptedZombie;
-    private Scavenger scavenger;
-    private ElementalSkeleton elementalSkeleton;
-    private Gladiator gladiator;
-    private FuturisticCreeper futuristicCreeper;
-    private SpeedSpider speedSpider;
-    private AbyssSpider abyssSpider;
-    private Weaver weaver;
-    private Goliath goliath;
-    private StormManager stormManager;
-    private StormMobCapTask stormMobCapTask;
-    private StormExtraSpawnTask stormExtraSpawnTask;
-    private StormPlayerEffectTask stormPlayerEffectTask;
-    private CorruptedInk corruptedInk;
-    private MinotaurHorn minotaurHorn;
-    private ExplosiveCrossbow explosiveCrossbow;
+
+    private StormBootstrap stormBootstrap;
 
     @Override
     public void onEnable() {
@@ -55,6 +33,8 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         saveDefaultConfig();
 
+        QualityOfLifeBootstrap qualityOfLifeBootstrap =
+                new QualityOfLifeBootstrap(this);
 
         /*
          * ========================================
@@ -62,20 +42,22 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        dayManager =
-                new DayManager(this);
+        CoreBootstrap coreBootstrap = new CoreBootstrap(this);
 
-        stormManager =
-                new StormManager(
-                        this,
-                        dayManager
-                );
+        // 1. Sistema de días
+        dayManager = coreBootstrap.createDayManager();
 
-        itemRegistry =
-                new CustomItemRegistry(this);
+        // 2. Sistema de Tormenta
+        stormBootstrap = new StormBootstrap(
+                this,
+                dayManager
+        );
 
-        mobRegistry =
-                new CustomMobRegistry(this);
+        // 3. Registros compartidos
+        CoreBootstrap.Registries registries = coreBootstrap.createRegistries();
+
+        itemRegistry = registries.itemRegistry();
+        mobRegistry = registries.mobRegistry();
 
         /*
          * ========================================
@@ -83,39 +65,14 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        corruptedStar =
-                new CorruptedStar(this);
+        Day7Bootstrap day7Bootstrap = new Day7Bootstrap(this, dayManager);
+        day7Bootstrap.registerItem(itemRegistry);
 
-        itemRegistry.register(
-                corruptedStar
-        );
+        Day10Bootstrap day10Bootstrap = new Day10Bootstrap(this);
 
-        corruptedInk =
-                new CorruptedInk(
-                        this
-                );
-
-        itemRegistry.register(
-                corruptedInk
-        );
-
-        minotaurHorn =
-                new MinotaurHorn(
-                        this
-                );
-
-        itemRegistry.register(
-                minotaurHorn
-        );
-
-        explosiveCrossbow =
-                new ExplosiveCrossbow(
-                        this
-                );
-
-        itemRegistry.register(
-                explosiveCrossbow
-        );
+        // Crear y registrar los tres items del dia 10
+        Day10Bootstrap.Items day10Items =
+                day10Bootstrap.registerItems(itemRegistry);
 
         /*
          * ========================================
@@ -123,79 +80,7 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        infrazombie =
-                new Infrazombie(this);
-
-        mobRegistry.register(
-                infrazombie
-        );
-
-        corruptedZombie =
-                new CorruptedZombie(this);
-
-        mobRegistry.register(
-                corruptedZombie
-        );
-
-        scavenger =
-                new Scavenger(this);
-
-        mobRegistry.register(
-                scavenger
-        );
-
-        elementalSkeleton =
-                new ElementalSkeleton(this);
-
-        mobRegistry.register(
-                elementalSkeleton
-        );
-
-        gladiator =
-                new Gladiator(this);
-
-        mobRegistry.register(
-                gladiator
-        );
-
-        futuristicCreeper =
-                new FuturisticCreeper(this);
-
-        mobRegistry.register(
-                futuristicCreeper
-        );
-
-        speedSpider =
-                new SpeedSpider(this);
-
-        mobRegistry.register(
-                speedSpider
-        );
-
-        abyssSpider =
-                new AbyssSpider(this);
-
-        mobRegistry.register(
-                abyssSpider
-        );
-
-        weaver =
-                new Weaver(
-                        this,
-                        elementalSkeleton,
-                        gladiator
-                );
-
-        mobRegistry.register(
-                weaver
-        );
-
-        goliath =
-                new Goliath(this);
-
-        mobRegistry.register(
-                goliath
-        );
+        Day10Bootstrap.Mobs day10Mobs = day10Bootstrap.registerMobs(mobRegistry);
 
         /*
          * ========================================
@@ -203,19 +88,8 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        CorruptedStarRecipe corruptedStarRecipe =
-                new CorruptedStarRecipe(
-                        this,
-                        corruptedStar
-                );
-
-        ExplosiveCrossbowRecipe explosiveCrossbowRecipe =
-                new ExplosiveCrossbowRecipe(
-                        this,
-                        explosiveCrossbow,
-                        corruptedInk,
-                        minotaurHorn
-                );
+        day7Bootstrap.createRecipe();
+        ExplosiveCrossbowRecipe explosiveCrossbowRecipe = day10Bootstrap.createRecipe(day10Items);
 
         /*
          * IMPORTANTE:
@@ -223,9 +97,10 @@ public final class DifficultyPlugin extends JavaPlugin {
          * Primero registramos la receta
          * en Minecraft.
          */
-        corruptedStarRecipe.register();
 
-        explosiveCrossbowRecipe.register();
+        day7Bootstrap.registerRecipe();
+        day10Bootstrap.registerRecipe(explosiveCrossbowRecipe);
+
         /*
          * ========================================
          * 5. DESBLOQUEO DE RECETAS
@@ -236,17 +111,15 @@ public final class DifficultyPlugin extends JavaPlugin {
                 new RecipeUnlockManager(
                         this,
                         dayManager,
-                        corruptedStarRecipe.getRecipeKey(),
+                        day7Bootstrap.getRecipe().getRecipeKey(),
                         explosiveCrossbowRecipe.getRecipeKey()
                 );
-
 
         /*
          * ========================================
          * 6. LISTENERS
          * ========================================
          */
-
 
         /*
          * ========================================
@@ -255,15 +128,7 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new StormBossBarListener(
-                                this,
-                                stormManager
-                        ),
-                        this
-                );
+        stormBootstrap.registerBossBarListener();
 
         /*
          * ========================================
@@ -275,54 +140,11 @@ public final class DifficultyPlugin extends JavaPlugin {
          * Afecta a todos los jugadores.
          */
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new FriendlyFireProtectionListener(this),
-                        this
-                );
+        qualityOfLifeBootstrap.registerFriendlyFire();
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new StormDeathListener(
-                                dayManager,
-                                stormManager
-                        ),
-                        this
-                );
+        stormBootstrap.registerDeathListener();
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CorruptedStarListener(
-                                corruptedStar,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CorruptedStarRecipeListener(
-                                corruptedStarRecipe.getRecipeKey(),
-                                corruptedStar,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CorruptedStarRecipeBookListener(
-                                corruptedStarRecipe.getRecipeKey(),
-                                corruptedStar,
-                                dayManager
-                        ),
-                        this
-                );
+        day7Bootstrap.registerListeners();
 
         getServer()
                 .getPluginManager()
@@ -333,262 +155,37 @@ public final class DifficultyPlugin extends JavaPlugin {
                         this
                 );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CorruptedZombieCombatListener(
-                                mobRegistry,
-                                dayManager
-                        ),
-                        this
-                );
+        day10Bootstrap.registerZombieAndSkeletonListeners(
+                dayManager,
+                mobRegistry,
+                day10Mobs
+        );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new ZombieSpawnListener(
-                                dayManager,
-                                infrazombie,
-                                corruptedZombie,
-                                scavenger
-                        ),
-                        this
-                );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new ElementalSkeletonCombatListener(
-                                mobRegistry,
-                                dayManager
-                        ),
-                        this
-                );
+        day10Bootstrap.registerCreeperListeners(
+                dayManager,
+                mobRegistry,
+                day10Mobs
+        );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new SkeletonSpawnListener(
-                                dayManager,
-                                elementalSkeleton,
-                                gladiator
-                        ),
-                        this
-                );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new FuturisticCreeperExplosionListener(
-                                dayManager,
-                                mobRegistry
-                        ),
-                        this
-                );
+        day10Bootstrap.registerSpiderListeners(
+                dayManager,
+                mobRegistry,
+                day10Mobs
+        );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CreeperSpawnListener(
-                                dayManager,
-                                futuristicCreeper
-                        ),
-                        this
-                );
+        day10Bootstrap.registerOtherCreatureListeners(
+                dayManager
+        );
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new WeaverRiderCombatListener(
-                                weaver,
-                                dayManager
-                        ),
-                        this
-                );
+        stormBootstrap.registerDay10Listeners();
 
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new GoliathListener(
-                                mobRegistry,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new AbyssSpiderDeathListener(
-                                mobRegistry,
-                                dayManager,
-                                goliath
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new SpiderSpawnListener(
-                                dayManager,
-                                speedSpider,
-                                abyssSpider,
-                                weaver,
-                                goliath
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new IronGolemListener(
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new HorseSpawnListener(
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new PetCombatListener(
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new WolfControlListener(
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new StormCreeperListener(
-                                stormManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CreeperPotionCloudListener(stormManager),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new StormEvokerDropListener(
-                                stormManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new StormEnderPearlListener(
-                                stormManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new StormDiamondDropListener(
-                                this,
-                                stormManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new CorruptedInkDropListener(
-                                corruptedInk,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new MinotaurHornDropListener(
-                                minotaurHorn,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new Day10MaterialProtectionListener(
-                                explosiveCrossbowRecipe.getRecipeKey(),
-                                corruptedInk,
-                                minotaurHorn
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new ExplosiveCrossbowRecipeListener(
-                                this,
-                                explosiveCrossbowRecipe.getRecipeKey(),
-                                corruptedInk,
-                                minotaurHorn,
-                                explosiveCrossbow,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new ExplosiveCrossbowRecipeBookListener(
-                                this,
-                                explosiveCrossbowRecipe.getRecipeKey(),
-                                corruptedInk,
-                                minotaurHorn,
-                                explosiveCrossbow,
-                                dayManager
-                        ),
-                        this
-                );
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        new ExplosiveCrossbowShootListener(
-                                this,
-                                explosiveCrossbow,
-                                dayManager
-                        ),
-                        this
-                );
+        day10Bootstrap.registerItemListeners(
+                dayManager,
+                day10Items,
+                explosiveCrossbowRecipe
+        );
 
         /*
          * ========================================
@@ -597,15 +194,7 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        SharedVillagerCureListener sharedVillagerCureListener =
-                new SharedVillagerCureListener(this);
-
-        getServer()
-                .getPluginManager()
-                .registerEvents(
-                        sharedVillagerCureListener,
-                        this
-                );
+        qualityOfLifeBootstrap.registerVillagerListener();
 
         /*
          * ========================================
@@ -613,105 +202,13 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        new GladiatorWeaponTask(
-                this,
+        day10Bootstrap.registerCreatureTasks(
                 dayManager,
                 mobRegistry,
-                gladiator
-        ).runTaskTimer(
-                this,
-                0L,
-                10L
+                day10Mobs
         );
 
-        new SpeedSpiderClimbTask(
-                dayManager,
-                mobRegistry
-        ).runTaskTimer(
-                this,
-                0L,
-                2L
-        );
-
-        new HorseEffectTask(
-                dayManager
-        ).runTaskTimer(
-                this,
-                0L,
-                10L
-        );
-
-        new PetBehaviorTask(
-                dayManager
-        ).runTaskTimer(
-                this,
-                0L,
-                5L
-        );
-
-        new StormTimerTask(
-                stormManager
-        ).runTaskTimer(
-                this,
-                20L,
-                20L
-        );
-
-        new StormNaturalTask(
-                dayManager,
-                stormManager
-        ).runTaskTimer(
-                this,
-                20L,
-                20L
-        );
-
-
-        new StormMobEffectTask(
-                this,
-                stormManager
-        ).runTaskTimer(
-                this,
-                0L,
-                5L
-        );
-
-        stormMobCapTask =
-                new StormMobCapTask(
-                        stormManager
-                );
-
-
-        stormMobCapTask.runTaskTimer(
-                this,
-                20L,
-                20L
-        );
-
-        stormExtraSpawnTask =
-                new StormExtraSpawnTask(
-                        this,
-                        stormManager
-                );
-
-
-        stormExtraSpawnTask.runTaskTimer(
-                this,
-                20L,
-                20L
-        );
-
-        stormPlayerEffectTask =
-                new StormPlayerEffectTask(
-                        stormManager
-                );
-
-
-        stormPlayerEffectTask.runTaskTimer(
-                this,
-                200L,
-                200L
-        );
+        stormBootstrap.registerTasks();
 
         /*
          * ========================================
@@ -736,123 +233,14 @@ public final class DifficultyPlugin extends JavaPlugin {
                 )
         );
 
-        Objects.requireNonNull(
-                getCommand("givecorruptedstar")
-        ).setExecutor(
-                new GiveCorruptedStarCommand(
-                        corruptedStar
-                )
+        day7Bootstrap.registerCommand();
+
+        day10Bootstrap.registerSpawnCommands(
+                dayManager,
+                day10Mobs
         );
 
-        Objects.requireNonNull(
-                getCommand("spawninfrazombie")
-        ).setExecutor(
-                new SpawnInfrazombieCommand(
-                        infrazombie,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawncorruptedzombie")
-        ).setExecutor(
-                new SpawnCorruptedZombieCommand(
-                        corruptedZombie,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawnscavenger")
-        ).setExecutor(
-                new SpawnScavengerCommand(
-                        scavenger,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawnelementalskeleton")
-        ).setExecutor(
-                new SpawnElementalSkeletonCommand(
-                        elementalSkeleton,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawngladiator")
-        ).setExecutor(
-                new SpawnGladiatorCommand(
-                        gladiator,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawnfuturisticcreeper")
-        ).setExecutor(
-                new SpawnFuturisticCreeperCommand(
-                        futuristicCreeper,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawnspeedspider")
-        ).setExecutor(
-                new SpawnSpeedSpiderCommand(
-                        speedSpider,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawnabyssspider")
-        ).setExecutor(
-                new SpawnAbyssSpiderCommand(
-                        abyssSpider,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawnweaver")
-        ).setExecutor(
-                new SpawnWeaverCommand(
-                        weaver,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawngoliath")
-        ).setExecutor(
-                new SpawnGoliathCommand(
-                        goliath,
-                        dayManager
-                )
-        );
-
-        StormCommand stormCommand =
-                new StormCommand(
-                        stormManager
-                );
-
-
-        Objects.requireNonNull(
-                getCommand("storm")
-        ).setExecutor(
-                stormCommand
-        );
-
-
-        Objects.requireNonNull(
-                getCommand("storm")
-        ).setTabCompleter(
-                stormCommand
-        );
-
+        stormBootstrap.registerCommand();
 
         /*
          * ========================================
@@ -860,14 +248,7 @@ public final class DifficultyPlugin extends JavaPlugin {
          * ========================================
          */
 
-        Objects.requireNonNull(
-                getCommand("sharedcure")
-        ).setExecutor(
-                new SharedCureCommand(
-                        sharedVillagerCureListener
-                )
-        );
-
+        qualityOfLifeBootstrap.registerVillagerCommand();
 
         /*
          * ========================================
@@ -895,12 +276,8 @@ public final class DifficultyPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
 
-        if (stormMobCapTask != null) {
-            stormMobCapTask.shutdown();
-        }
-
-        if (stormManager != null) {
-            stormManager.saveState();
+        if (stormBootstrap != null) {
+            stormBootstrap.shutdown();
         }
 
         getLogger().info(
