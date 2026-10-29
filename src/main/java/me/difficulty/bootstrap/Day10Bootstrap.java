@@ -516,4 +516,121 @@ public final class Day10Bootstrap {
                 5L
         );
     }
+
+
+    // ========================================
+    // COMANDOS - MOBS DEL DIA 10
+    // ========================================
+
+    public void registerSpawnCommands(
+            DayManager dayManager,
+            Mobs mobs
+    ) {
+
+        // ========================================
+        // ZOMBIS
+        // ========================================
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawninfrazombie")
+        ).setExecutor(
+                new SpawnInfrazombieCommand(
+                        mobs.infrazombie(),
+                        dayManager
+                )
+        );
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawncorruptedzombie")
+        ).setExecutor(
+                new SpawnCorruptedZombieCommand(
+                        mobs.corruptedZombie(),
+                        dayManager
+                )
+        );
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawnscavenger")
+        ).setExecutor(
+                new SpawnScavengerCommand(
+                        mobs.scavenger(),
+                        dayManager
+                )
+        );
+
+        // ========================================
+        // ESQUELETOS
+        // ========================================
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawnelementalskeleton")
+        ).setExecutor(
+                new SpawnElementalSkeletonCommand(
+                        mobs.elementalSkeleton(),
+                        dayManager
+                )
+        );
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawngladiator")
+        ).setExecutor(
+                new SpawnGladiatorCommand(
+                        mobs.gladiator(),
+                        dayManager
+                )
+        );
+
+        // ========================================
+        // CREEPER FUTURISTA
+        // ========================================
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawnfuturisticcreeper")
+        ).setExecutor(
+                new SpawnFuturisticCreeperCommand(
+                        mobs.futuristicCreeper(),
+                        dayManager
+                )
+        );
+
+        // ========================================
+        // ARANAS
+        // ========================================
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawnspeedspider")
+        ).setExecutor(
+                new SpawnSpeedSpiderCommand(
+                        mobs.speedSpider(),
+                        dayManager
+                )
+        );
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawnabyssspider")
+        ).setExecutor(
+                new SpawnAbyssSpiderCommand(
+                        mobs.abyssSpider(),
+                        dayManager
+                )
+        );
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawnweaver")
+        ).setExecutor(
+                new SpawnWeaverCommand(
+                        mobs.weaver(),
+                        dayManager
+                )
+        );
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawngoliath")
+        ).setExecutor(
+                new SpawnGoliathCommand(
+                        mobs.goliath(),
+                        dayManager
+                )
+        );
+    }
 }

@@ -424,94 +424,9 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         day7Bootstrap.registerCommand();
 
-        Objects.requireNonNull(
-                getCommand("spawninfrazombie")
-        ).setExecutor(
-                new SpawnInfrazombieCommand(
-                        infrazombie,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawncorruptedzombie")
-        ).setExecutor(
-                new SpawnCorruptedZombieCommand(
-                        corruptedZombie,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawnscavenger")
-        ).setExecutor(
-                new SpawnScavengerCommand(
-                        scavenger,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawnelementalskeleton")
-        ).setExecutor(
-                new SpawnElementalSkeletonCommand(
-                        elementalSkeleton,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawngladiator")
-        ).setExecutor(
-                new SpawnGladiatorCommand(
-                        gladiator,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawnfuturisticcreeper")
-        ).setExecutor(
-                new SpawnFuturisticCreeperCommand(
-                        futuristicCreeper,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawnspeedspider")
-        ).setExecutor(
-                new SpawnSpeedSpiderCommand(
-                        speedSpider,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawnabyssspider")
-        ).setExecutor(
-                new SpawnAbyssSpiderCommand(
-                        abyssSpider,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawnweaver")
-        ).setExecutor(
-                new SpawnWeaverCommand(
-                        weaver,
-                        dayManager
-                )
-        );
-
-        Objects.requireNonNull(
-                getCommand("spawngoliath")
-        ).setExecutor(
-                new SpawnGoliathCommand(
-                        goliath,
-                        dayManager
-                )
+        day10Bootstrap.registerSpawnCommands(
+                dayManager,
+                day10Mobs
         );
 
         StormCommand stormCommand =
