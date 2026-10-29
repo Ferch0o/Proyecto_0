@@ -23,7 +23,7 @@ public final class GiantCombatTask implements Runnable {
 
     // CONFIGURACION DEL COMBATE
 
-    private static final double ATTACK_DAMAGE = 8.0;
+    private static final double ATTACK_DAMAGE = 70.0;
     private static final double ATTACK_RANGE = 4.0;
     private static final double MAX_HEIGHT_DIFFERENCE = 3.0;
 

@@ -14,7 +14,12 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public final class GiantDropListener implements Listener {
 
+    // Probabilidad de soltar fragmentos
     private static final int NETHERITE_CHANCE = 80;
+
+    // Cantidad aleatoria
+    private static final int MIN_SCRAP = 4;
+    private static final int MAX_SCRAP = 8;
 
     private final DayManager dayManager;
     private final GiantZombie giantZombie;
@@ -41,21 +46,29 @@ public final class GiantDropListener implements Listener {
 
         int day = dayManager.getCurrentDay();
 
-        // Recompensa disponible desde el dia 7 al 9
+        // Recompensa disponible en dias 7, 8 y 9
         if (day < 7 || day >= 10) {
             return;
         }
 
-        // Probabilidad del 80 %
-        if (ThreadLocalRandom.current()
-                .nextInt(100) >= NETHERITE_CHANCE) {
+        ThreadLocalRandom random =
+                ThreadLocalRandom.current();
+
+        // Probabilidad del 80%
+        if (random.nextInt(100) >= NETHERITE_CHANCE) {
             return;
         }
 
+        // Cantidad entre 4 y 7, inclusive
+        int amount = random.nextInt(
+                MIN_SCRAP,
+                MAX_SCRAP + 1
+        );
+
         event.getDrops().add(
                 new ItemStack(
-                        Material.NETHERITE_INGOT,
-                        1
+                        Material.NETHERITE_SCRAP,
+                        amount
                 )
         );
     }
