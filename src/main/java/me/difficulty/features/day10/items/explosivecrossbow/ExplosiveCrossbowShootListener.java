@@ -50,20 +50,8 @@ public class ExplosiveCrossbowShootListener
     private static final int FIREWORK_POWER =
             1;
 
-
-    /*
-     * ========================================
-     * POTENCIA REAL DE LA EXPLOSIÓN
-     * ========================================
-     *
-     * Potencia 2.
-     *
-     * No rompe bloques.
-     * No genera fuego.
-     */
     private static final float EXPLOSION_POWER =
-            1.5F;
-
+            3F;
 
     /*
      * ========================================
@@ -76,7 +64,6 @@ public class ExplosiveCrossbowShootListener
      */
     private static final double VELOCITY_CHECK_RADIUS =
             6.0;
-
 
     /*
      * ========================================

@@ -150,7 +150,7 @@ public class Scavenger extends CustomMob {
 
         axeMeta.addEnchant(
                 Enchantment.SHARPNESS,
-                20,
+                40,
                 true
         );
 
