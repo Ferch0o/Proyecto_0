@@ -13,6 +13,15 @@ commands:
     description: Cambia el día actual del servidor.
     usage: /setday <día>
     permission: difficulty.setday
+  storm:
+    description: Controla la Tormenta.
+    usage: /storm <start|stop>
+    permission: difficulty.admin
+  sharedcure:
+    description: Comparte descuentos de aldeanos curados anteriormente.
+    usage: /sharedcure add
+    permission: difficulty.sharedcure.admin
+
   givecorruptedstar:
     description: Entrega una Estrella Corrupta para pruebas.
     usage: /givecorruptedstar
@@ -22,6 +31,10 @@ commands:
     usage: /spawngiant
     permission: difficulty.admin
 
+  giveexplosivecrossbow:
+    description: Entrega una Ballesta Explosiva para pruebas.
+    usage: /giveexplosivecrossbow
+    permission: difficulty.admin
   spawninfrazombie:
     description: Genera un Infrazombie para pruebas.
     usage: /spawninfrazombie
@@ -62,16 +75,6 @@ commands:
     description: Genera una Goliat para pruebas.
     usage: /spawngoliath
     permission: difficulty.admin
-  storm:
-    description: Controla la Tormenta.
-    usage: /storm <start|stop>
-    permission: difficulty.admin
-
-  sharedcure:
-    description: Comparte descuentos de aldeanos curados anteriormente.
-    usage: /sharedcure add
-    permission: difficulty.sharedcure.admin
-
 
 permissions:
   difficulty.setday:

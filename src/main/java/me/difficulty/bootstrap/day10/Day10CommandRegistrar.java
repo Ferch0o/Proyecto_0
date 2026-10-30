@@ -5,6 +5,7 @@ import me.difficulty.DifficultyPlugin;
 import me.difficulty.bootstrap.Day10Bootstrap;
 import me.difficulty.core.day.DayManager;
 
+import me.difficulty.features.day10.items.explosivecrossbow.GiveExplosiveCrossbowCommand;
 import me.difficulty.features.day10.mobs.zombies.*;
 import me.difficulty.features.day10.mobs.skeletons.*;
 import me.difficulty.features.day10.mobs.creepers.*;
@@ -132,6 +133,23 @@ public final class Day10CommandRegistrar {
                 new SpawnGoliathCommand(
                         mobs.goliath(),
                         dayManager
+                )
+        );
+    }
+
+    // ========================================
+    // COMANDO DE ITEM - BALLESTA EXPLOSIVA
+    // ========================================
+
+    public void registerItemCommands(
+            Day10Bootstrap.Items items
+    ) {
+
+        Objects.requireNonNull(
+                plugin.getCommand("giveexplosivecrossbow")
+        ).setExecutor(
+                new GiveExplosiveCrossbowCommand(
+                        items.explosiveCrossbow()
                 )
         );
     }
