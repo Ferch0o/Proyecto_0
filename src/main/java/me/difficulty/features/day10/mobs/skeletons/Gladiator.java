@@ -182,7 +182,7 @@ public class Gladiator extends CustomMob {
 
             meta.addEnchant(
                     Enchantment.POWER,
-                    5,
+                    20,
                     true
             );
 
@@ -216,7 +216,7 @@ public class Gladiator extends CustomMob {
 
             meta.addEnchant(
                     Enchantment.SHARPNESS,
-                    5,
+                    20,
                     true
             );
 

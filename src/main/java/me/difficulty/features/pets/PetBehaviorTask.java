@@ -194,7 +194,7 @@ public class PetBehaviorTask extends BukkitRunnable {
                         new PotionEffect(
                                 PotionEffectType.RESISTANCE,
                                 40,
-                                1,
+                                0,
                                 false,
                                 true
                         )
