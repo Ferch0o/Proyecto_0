@@ -69,7 +69,7 @@ public class AbyssSpider extends CustomMob {
                 new PotionEffect(
                         PotionEffectType.STRENGTH,
                         PotionEffect.INFINITE_DURATION,
-                        5,
+                        7,
                         false,
                         false
                 )

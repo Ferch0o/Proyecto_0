@@ -242,6 +242,10 @@ public final class DifficultyPlugin extends JavaPlugin {
                 day10Mobs
         );
 
+        day10Bootstrap.registerItemCommands(
+                day10Items
+        );
+
         stormBootstrap.registerCommand();
 
         /*

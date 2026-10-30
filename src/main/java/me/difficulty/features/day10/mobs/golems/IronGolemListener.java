@@ -59,29 +59,16 @@ public class IronGolemListener implements Listener {
             return;
         }
 
-
-        /*
-         * ========================================
-         * VELOCIDAD II
-         * ========================================
-         *
-         * amplifier:
-         *
-         * 0 = Velocidad I
-         * 1 = Velocidad II
-         */
-
         golem.addPotionEffect(
                 new PotionEffect(
                         PotionEffectType.SPEED,
                         PotionEffect.INFINITE_DURATION,
-                        1,
+                        2,
                         false,
                         false
                 )
         );
     }
-
 
     /*
      * ========================================
@@ -212,8 +199,7 @@ public class IronGolemListener implements Listener {
                         .nextInt(100);
 
 
-        if (roll < 40) {
-
+        if (roll < 70) {
             event.getDrops().add(
                     new ItemStack(
                             Material.IRON_BLOCK,

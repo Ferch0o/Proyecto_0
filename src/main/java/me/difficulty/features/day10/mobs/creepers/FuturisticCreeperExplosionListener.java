@@ -3,11 +3,13 @@ package me.difficulty.features.day10.mobs.creepers;
 import me.difficulty.core.day.DayManager;
 import me.difficulty.core.mobs.CustomMobRegistry;
 import me.difficulty.core.mobs.MobIds;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -115,94 +117,66 @@ public class FuturisticCreeperExplosionListener
                 radius * 2.0;
 
 
-        for (Player player :
-                creeper.getWorld().getPlayers()) {
 
-
-            /*
-             * Calculamos desde aproximadamente
-             * el centro del jugador.
-             */
-            Location playerCenter =
-                    player.getLocation()
-                            .add(
-                                    0.0,
-                                    player.getHeight() / 2.0,
-                                    0.0
-                            );
-
-
-            double distance =
-                    explosionLocation.distance(
-                            playerCenter
-                    );
-
-
-            /*
-             * Está fuera del alcance.
-             */
-            if (distance
-                    > maximumDistance) {
-
+        for (Entity entity : creeper.getWorld().getNearbyEntities(
+                explosionLocation,
+                maximumDistance,
+                maximumDistance,
+                maximumDistance
+        )) {
+            if (!(entity instanceof LivingEntity target)) {
                 continue;
             }
 
+            if (!target.isValid() || target.isDead()
+                    || target.equals(creeper)) {
+                continue;
+            }
 
-            double damage =
-                    calculateDamage(
-                            distance,
-                            maximumDistance
-                    );
+            // No atacar jugadores en creativo o espectador.
+            if (target instanceof Player player) {
+                if (player.getGameMode() == GameMode.CREATIVE
+                        || player.getGameMode() == GameMode.SPECTATOR) {
+                    continue;
+                }
+            }
 
+            Location targetCenter = target.getLocation().add(
+                    0.0,
+                    target.getHeight() / 2.0,
+                    0.0
+            );
+
+            double distance =
+                    explosionLocation.distance(targetCenter);
+
+            if (distance > maximumDistance) {
+                continue;
+            }
+
+            double damage = calculateDamage(
+                    distance,
+                    maximumDistance
+            );
 
             if (damage <= 0.0) {
                 continue;
             }
 
+            DamageSource damageSource = DamageSource
+                    .builder(DamageType.EXPLOSION)
+                    .withCausingEntity(creeper)
+                    .withDirectEntity(creeper)
+                    .withDamageLocation(explosionLocation)
+                    .build();
 
-            /*
-             * Creamos daño de tipo EXPLOSION.
-             *
-             * Al seguir siendo daño de explosión,
-             * Minecraft puede aplicar las defensas
-             * correspondientes.
-             */
-            DamageSource damageSource =
-                    DamageSource
-                            .builder(
-                                    DamageType.EXPLOSION
-                            )
-                            .withCausingEntity(
-                                    creeper
-                            )
-                            .withDirectEntity(
-                                    creeper
-                            )
-                            .withDamageLocation(
-                                    explosionLocation
-                            )
-                            .build();
-
-
-            UUID playerId =
-                    player.getUniqueId();
-
-            applyingCustomDamage.add(
-                    playerId
-            );
+            UUID targetId = target.getUniqueId();
+            applyingCustomDamage.add(targetId);
 
             try {
-
-                player.damage(
-                        damage,
-                        damageSource
-                );
-
+                target.damage(damage, damageSource);
             } finally {
-
-                applyingCustomDamage.remove(
-                        playerId
-                );
+                applyingCustomDamage.remove(targetId);
             }
         }
     }
@@ -229,25 +203,13 @@ public class FuturisticCreeperExplosionListener
     public void onVanillaExplosionDamage(
             EntityDamageEvent event
     ) {
-
-        if (!(event.getEntity()
-                instanceof Player player)) {
-
+        if (!(event.getEntity() instanceof LivingEntity target)) {
             return;
         }
 
-
-        /*
-         * Si este daño lo estamos aplicando
-         * nosotros mismos, lo dejamos pasar.
-         */
-        if (applyingCustomDamage.contains(
-                player.getUniqueId()
-        )) {
-
+        if (applyingCustomDamage.contains(target.getUniqueId())) {
             return;
         }
-
 
         if (event.getCause()
                 != EntityDamageEvent
@@ -299,7 +261,6 @@ public class FuturisticCreeperExplosionListener
         );
     }
 
-
     /*
      * ========================================
      * CÁLCULO DE DAÑO
@@ -310,40 +271,23 @@ public class FuturisticCreeperExplosionListener
             double distance,
             double maximumDistance
     ) {
-
-        /*
-         * 1.0 cerca del centro.
-         * 0.0 en el límite.
-         */
-        double impact =
-                1.0
-                        - (
-                        distance
-                                / maximumDistance
-                );
-
+        double impact = 1.0 - (distance / maximumDistance);
 
         if (impact <= 0.0) {
             return 0.0;
         }
 
+        // Radio del Creeper normal
+        double normalExplosionRange = 3.0 * 2.0;
 
-        /*
-         * Fórmula de explosión con
-         * exposición completa.
-         *
-         * NO hacemos raycast.
-         * NO comprobamos paredes.
-         */
-        return (
-                (
-                        impact * impact
-                                + impact
-                )
-                        / 2.0
-        )
-                * 7.0
-                * maximumDistance
-                + 1.0;
+        // Fórmula base de daño de explosión vanilla.
+        // Adaptamos la distancia al radio ampliado del
+        // Creeper Futurista.
+        double normalDamage = (
+                (impact * impact + impact) / 2.0
+        ) * 7.0 * normalExplosionRange + 1.0;
+
+        // Doble del daño base
+        return normalDamage * 2.0;
     }
 }

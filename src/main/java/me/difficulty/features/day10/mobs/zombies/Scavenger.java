@@ -121,7 +121,6 @@ public class Scavenger extends CustomMob {
             );
         }
 
-
         /*
          * ========================================
          * EQUIPAMIENTO
@@ -134,7 +133,6 @@ public class Scavenger extends CustomMob {
         if (equipment == null) {
             return;
         }
-
 
         /*
          * ========================================
@@ -152,7 +150,7 @@ public class Scavenger extends CustomMob {
 
         axeMeta.addEnchant(
                 Enchantment.SHARPNESS,
-                15,
+                40,
                 true
         );
 

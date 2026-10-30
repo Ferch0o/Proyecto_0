@@ -200,4 +200,15 @@ public final class Day10Bootstrap {
                 mobs
         );
     }
+
+    // ========================================
+    // COMANDOS DE ITEMS DEL DIA 10
+    // ========================================
+
+    public void registerItemCommands(
+            Items items
+    ) {
+        new Day10CommandRegistrar(plugin)
+                .registerItemCommands(items);
+    }
 }

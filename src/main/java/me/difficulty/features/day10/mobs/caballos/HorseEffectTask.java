@@ -46,13 +46,6 @@ public class HorseEffectTask extends BukkitRunnable {
 
         updateRiders();
 
-
-        /*
-         * ========================================
-         * RESISTENCIA V CON ARMADURA
-         * ========================================
-         */
-
         updateHorseArmor();
     }
 
@@ -68,7 +61,6 @@ public class HorseEffectTask extends BukkitRunnable {
         for (Player player :
                 Bukkit.getOnlinePlayers()) {
 
-
             /*
              * ¿El jugador está montando
              * un caballo normal?
@@ -78,7 +70,6 @@ public class HorseEffectTask extends BukkitRunnable {
 
                 continue;
             }
-
 
             /*
              * ====================================
@@ -137,21 +128,6 @@ public class HorseEffectTask extends BukkitRunnable {
 
                     continue;
                 }
-
-
-                /*
-                 * =================================
-                 * RESISTENCIA V
-                 * =================================
-                 *
-                 * Funciona con cualquier
-                 * armadura de caballo:
-                 *
-                 * - cuero
-                 * - hierro
-                 * - oro
-                 * - diamante
-                 */
 
                 horse.addPotionEffect(
                         new PotionEffect(

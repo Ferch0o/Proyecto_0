@@ -2,10 +2,10 @@ package me.difficulty.features.day10.items.explosivecrossbow;
 
 import me.difficulty.core.day.DayManager;
 
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
@@ -15,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.FireworkExplodeEvent;
 
@@ -28,7 +29,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 
 public class ExplosiveCrossbowShootListener
@@ -50,20 +54,8 @@ public class ExplosiveCrossbowShootListener
     private static final int FIREWORK_POWER =
             1;
 
-
-    /*
-     * ========================================
-     * POTENCIA REAL DE LA EXPLOSIÓN
-     * ========================================
-     *
-     * Potencia 2.
-     *
-     * No rompe bloques.
-     * No genera fuego.
-     */
     private static final float EXPLOSION_POWER =
-            1.5F;
-
+            3F;
 
     /*
      * ========================================
@@ -76,7 +68,6 @@ public class ExplosiveCrossbowShootListener
      */
     private static final double VELOCITY_CHECK_RADIUS =
             6.0;
-
 
     /*
      * ========================================
@@ -96,6 +87,9 @@ public class ExplosiveCrossbowShootListener
      * creados por nuestra Ballesta Explosiva.
      */
     private final NamespacedKey explosiveProjectileKey;
+
+    // Evita cancelar nuestros propios eventos de dano personalizado.
+    private final Set<UUID> applyingCustomDamage = new HashSet<>();
 
 
     /*
@@ -283,7 +277,7 @@ public class ExplosiveCrossbowShootListener
                                      * Una explosión visual roja.
                                      *
                                      * El daño fuerte vendrá
-                                     * después de createExplosion().
+                                     * después del cálculo de daño personalizado.
                                      */
                                     meta.addEffect(
                                             FireworkEffect
@@ -501,28 +495,91 @@ public class ExplosiveCrossbowShootListener
 
         /*
          * ========================================
-         * EXPLOSIÓN POTENCIA 2
+         * DAÑO EXPLOSIVO PERSONALIZADO, POTENCIA 3
          * ========================================
          *
-         * EXPLOSION_POWER = 2.0
-         *
-         * false:
-         * no genera fuego.
-         *
-         * false:
-         * no rompe bloques.
+         * No se crea una explosión de mundo:
+         * los objetos tirados y los bloques
+         * no reciben daño por esta mecánica.
          */
 
-        firework
-                .getWorld()
-                .createExplosion(
-                        firework.getLocation(),
-                        EXPLOSION_POWER,
-                        false,
-                        false,
-                        source
-                );
+        // Explosión de daño personalizado.
+        // No creamos una explosión de mundo:
+        // así no dañamos objetos tirados ni bloques.
 
+        Location explosionLocation = firework.getLocation();
+
+        double radius = EXPLOSION_POWER * 2.0;
+
+        // Paper 1.21.5 requiere entidad directa si hay entidad causante.
+        // El cohete es el golpe directo; el tirador recibe el credito.
+        DamageSource.Builder builder = DamageSource
+                .builder(DamageType.EXPLOSION)
+                .withDirectEntity(firework);
+
+        // Conservar la atribución de daño al tirador.
+        if (source != null) {
+            builder.withCausingEntity(source);
+        }
+
+        DamageSource damageSource = builder.build();
+
+        for (Entity nearby : firework.getWorld().getNearbyEntities(
+                explosionLocation,
+                radius,
+                radius,
+                radius
+        )) {
+            // Solamente dañar entidades vivas.
+            if (!(nearby instanceof LivingEntity target)) {
+                continue;
+            }
+
+            if (!target.isValid() || target.isDead()) {
+                continue;
+            }
+
+            if (target instanceof Player player) {
+                if (player.getGameMode() == GameMode.CREATIVE
+                        || player.getGameMode() == GameMode.SPECTATOR) {
+                    continue;
+                }
+            }
+
+            Location targetCenter = target.getLocation().add(
+                    0.0,
+                    target.getHeight() / 2.0,
+                    0.0
+            );
+
+            double distance =
+                    explosionLocation.distance(targetCenter);
+
+            if (distance > radius) {
+                continue;
+            }
+
+            double impact = 1.0 - (distance / radius);
+
+            if (impact <= 0.0) {
+                continue;
+            }
+
+            // Fórmula de daño explosivo, potencia 3.
+            // No calcula exposición a paredes.
+            double damage = (
+                    (impact * impact + impact) / 2.0
+            ) * 7.0 * radius + 1.0;
+
+            UUID targetId = target.getUniqueId();
+            applyingCustomDamage.add(targetId);
+
+            try {
+                target.damage(damage, damageSource);
+            } finally {
+                applyingCustomDamage.remove(targetId);
+            }
+        }
 
         /*
          * ========================================
@@ -559,6 +616,46 @@ public class ExplosiveCrossbowShootListener
                 );
     }
 
+
+    /*
+     * ========================================
+     * EVITAR DAÑO VANILLA DEL COHETE CUSTOM
+     * ========================================
+     *
+     * El cohete visual tiene su propio daño;
+     * cancelarlo evita duplicarlo con el
+     * daño personalizado de potencia 3.
+     */
+
+    @EventHandler(
+            priority = EventPriority.HIGHEST,
+            ignoreCancelled = true
+    )
+    public void onCustomFireworkVanillaDamage(
+            EntityDamageEvent event
+    ) {
+        Entity direct = event.getDamageSource()
+                .getDirectEntity();
+
+        if (!(direct instanceof Firework firework)) {
+            return;
+        }
+
+        if (!firework.getPersistentDataContainer().has(
+                explosiveProjectileKey,
+                PersistentDataType.BYTE
+        )) {
+            return;
+        }
+
+        // El listener tambien recibe el dano que provocamos nosotros.
+        // No cancelar ese evento, solo el dano vanilla del cohete.
+        if (applyingCustomDamage.contains(event.getEntity().getUniqueId())) {
+            return;
+        }
+
+        event.setCancelled(true);
+    }
 
     /*
      * ========================================
