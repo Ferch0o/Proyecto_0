@@ -29,9 +29,7 @@ public class StormEnderPearlListener
      *
      * 5 = 5%
      */
-    private static final int FAILURE_CHANCE =
-            5;
-
+    private static final int FAILURE_CHANCE = 10;
 
     public StormEnderPearlListener(
             StormManager stormManager
