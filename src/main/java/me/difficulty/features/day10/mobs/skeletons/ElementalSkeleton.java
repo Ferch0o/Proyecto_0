@@ -88,7 +88,7 @@ public class ElementalSkeleton extends CustomMob {
 
             bowMeta.addEnchant(
                     Enchantment.FLAME,
-                    30,
+                    1,
                     true
             );
 
