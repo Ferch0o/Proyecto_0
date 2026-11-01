@@ -76,6 +76,19 @@ commands:
     usage: /spawngoliath
     permission: difficulty.admin
 
+  giveelementalpotato:
+    description: Entrega una Patata Elemental para pruebas.
+    usage: /giveelementalpotato
+    permission: difficulty.admin
+  giveday17materials:
+    description: Entrega los materiales de la Patata Elemental.
+    usage: /giveday17materials
+    permission: difficulty.admin
+  resetcurse:
+    description: Restablece la Maldicion del Inframundo para pruebas.
+    usage: /resetcurse <jugador>
+    permission: difficulty.admin
+
 permissions:
   difficulty.setday:
     description: Permite modificar el día del servidor.

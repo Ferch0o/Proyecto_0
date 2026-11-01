@@ -83,6 +83,24 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         /*
          * ========================================
+         * DÍA 17 - MALDICIÓN DEL INFRAMUNDO
+         * Y PATATA ELEMENTAL
+         * ========================================
+         */
+
+        Day17Bootstrap day17Bootstrap =
+                new Day17Bootstrap(
+                        this,
+                        dayManager
+                );
+
+        day17Bootstrap.register(
+                itemRegistry,
+                mobRegistry
+        );
+
+        /*
+         * ========================================
          * 4. RECETAS
          * ========================================
          */
