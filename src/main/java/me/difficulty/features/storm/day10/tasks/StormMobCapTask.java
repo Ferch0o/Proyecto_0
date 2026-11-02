@@ -1,279 +1,306 @@
+
 package me.difficulty.features.storm.day10.tasks;
 
+import me.difficulty.core.day.DayManager;
 import me.difficulty.features.storm.core.StormManager;
+
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.SpawnCategory;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-public class StormMobCapTask
-        extends BukkitRunnable {
+public final class StormMobCapTask extends BukkitRunnable {
 
+    private final DayManager dayManager;
     private final StormManager stormManager;
 
-
     /*
      * ========================================
-     * MULTIPLICADOR DE LA TORMENTA
+     * MOB CAP ORIGINAL
      * ========================================
      *
-     * 2 = doble mob cap
+     * Guardamos el limite original
+     * de cada mundo para evitar:
      *
-     * En el futuro podremos cambiarlo por:
-     *
-     * 3 = triple
-     * 4 = cuádruple
-     * etc.
-     */
-    private static final int MOB_CAP_MULTIPLIER = 2;
-
-
-    /*
-     * ========================================
-     * LÍMITES ORIGINALES
-     * ========================================
-     *
-     * Guardamos el valor que tenía cada mundo
-     * ANTES de modificarlo.
-     *
-     * UUID del mundo -> límite original
+     * 70 -> 140 -> 280 -> 560...
      */
     private final Map<UUID, Integer> originalMonsterCaps =
             new HashMap<>();
 
+    /*
+     * Ultimo multiplicador aplicado
+     * a cada mundo.
+     */
+    private final Map<UUID, Integer> appliedMultipliers =
+            new HashMap<>();
 
     public StormMobCapTask(
+            DayManager dayManager,
             StormManager stormManager
     ) {
-
-        this.stormManager =
-                stormManager;
+        this.dayManager = dayManager;
+        this.stormManager = stormManager;
     }
 
-
+    /*
+     * ========================================
+     * EJECUCION CADA SEGUNDO
+     * ========================================
+     */
     @Override
     public void run() {
 
+        int multiplier = getCurrentMultiplier();
+
         /*
-         * ========================================
-         * TORMENTA ACTIVA
-         * ========================================
+         * Multiplicador x1:
+         * restaurar el valor original.
          */
+        if (multiplier == 1) {
 
-        if (stormManager.hasDay10Effects()) {
-
-            applyStormMobCap();
-
+            restoreOriginalMobCaps();
             return;
         }
 
-
         /*
-         * ========================================
-         * TORMENTA INACTIVA
-         * ========================================
+         * Multiplicador x2 o x3.
          */
-
-        restoreOriginalMobCaps();
+        applyMultiplier(multiplier);
     }
-
 
     /*
      * ========================================
-     * APLICAR MOB CAP ×2
+     * MULTIPLICADOR SEGUN DIA Y TORMENTA
      * ========================================
      */
+    private int getCurrentMultiplier() {
 
-    private void applyStormMobCap() {
+        /*
+         * Desde el dia 17:
+         *
+         * Sin Tormenta = x2
+         * Con Tormenta = x3
+         */
+        if (dayManager.isAtLeast(17)) {
 
-        for (World world :
-                Bukkit.getWorlds()) {
+            return stormManager.hasDay10Effects()
+                    ? 3
+                    : 2;
+        }
 
+        /*
+         * Dias 10-16:
+         *
+         * Sin Tormenta = x1
+         * Con Tormenta = x2
+         *
+         * Dias 0-9 = x1.
+         */
+        if (stormManager.hasDay10Effects()) {
+            return 2;
+        }
 
-            UUID worldId =
-                    world.getUID();
+        return 1;
+    }
 
+    /*
+     * ========================================
+     * APLICAR MULTIPLICADOR
+     * ========================================
+     */
+    private void applyMultiplier(int multiplier) {
+
+        for (World world : Bukkit.getWorlds()) {
+
+            UUID worldId = world.getUID();
 
             /*
-             * Si ya modificamos este mundo,
-             * NO volvemos a multiplicarlo.
+             * Obtener el limite ORIGINAL.
              *
-             * Evitamos:
-             *
-             * 70 -> 140 -> 280 -> 560...
+             * Si ya lo guardamos, reutilizarlo
+             * en vez del valor multiplicado.
              */
-            if (originalMonsterCaps.containsKey(
-                    worldId
-            )) {
+            Integer original =
+                    originalMonsterCaps.get(worldId);
 
+            if (original == null) {
+
+                original = world.getSpawnLimit(
+                        SpawnCategory.MONSTER
+                );
+
+                originalMonsterCaps.put(
+                        worldId,
+                        original
+                );
+            }
+
+            /*
+             * Un valor -1 significa que
+             * el mundo utiliza el limite
+             * global del servidor.
+             */
+            int baseLimit = original;
+
+            if (baseLimit < 0) {
+
+                baseLimit = Bukkit.getSpawnLimit(
+                        SpawnCategory.MONSTER
+                );
+            }
+
+            /*
+             * Si la generacion de monstruos
+             * esta deshabilitada, respetarla.
+             */
+            if (baseLimit <= 0) {
+
+                if (world.getSpawnLimit(
+                        SpawnCategory.MONSTER
+                ) != original) {
+
+                    world.setSpawnLimit(
+                            SpawnCategory.MONSTER,
+                            original
+                    );
+                }
+
+                appliedMultipliers.remove(worldId);
                 continue;
             }
 
-
             /*
-             * Obtener el límite configurado
-             * en este mundo.
-             */
-            int originalLimit =
-                    world.getSpawnLimit(
-                            SpawnCategory.MONSTER
-                    );
-
-
-            /*
-             * Guardamos exactamente el valor
-             * original.
+             * ====================================
+             * CALCULAR EL NUEVO LIMITE
+             * ====================================
              *
-             * Puede ser -1 si el mundo está
-             * heredando el límite general
-             * del servidor.
+             * Siempre usar el limite original.
+             *
+             * Ejemplo:
+             *
+             * 70 x 2 = 140
+             * 70 x 3 = 210
              */
-            originalMonsterCaps.put(
-                    worldId,
-                    originalLimit
+            long calculated =
+                    (long) baseLimit * multiplier;
+
+            int newLimit = (int) Math.min(
+                    Integer.MAX_VALUE,
+                    calculated
             );
 
-
             /*
-             * ====================================
-             * OBTENER LÍMITE EFECTIVO
-             * ====================================
+             * Actualizar solamente si
+             * el valor es diferente.
              */
+            if (world.getSpawnLimit(
+                    SpawnCategory.MONSTER
+            ) != newLimit) {
 
-            int effectiveLimit =
-                    originalLimit;
-
-
-            /*
-             * Un valor negativo significa:
-             *
-             * "usar límite global del servidor".
-             *
-             * Por eso obtenemos ese valor.
-             */
-            if (effectiveLimit < 0) {
-
-                effectiveLimit =
-                        Bukkit.getSpawnLimit(
-                                SpawnCategory.MONSTER
-                        );
+                world.setSpawnLimit(
+                        SpawnCategory.MONSTER,
+                        newLimit
+                );
             }
 
-
             /*
-             * Si el spawning está deshabilitado,
-             * no queremos activarlo accidentalmente.
+             * Evitar imprimir el mismo mensaje
+             * cada segundo.
              */
-            if (effectiveLimit <= 0) {
-                continue;
-            }
-
-
-            /*
-             * ====================================
-             * MULTIPLICAR ×2
-             * ====================================
-             */
-
-            int stormLimit =
-                    effectiveLimit
-                            * MOB_CAP_MULTIPLIER;
-
-
-            world.setSpawnLimit(
-                    SpawnCategory.MONSTER,
-                    stormLimit
-            );
-
-
-            /*
-             * Mensaje de consola para comprobar.
-             */
-            Bukkit.getLogger()
-                    .info(
-                            "[DifficultyPlugin] Tormenta: "
-                                    + world.getName()
-                                    + " MobCap MONSTER: "
-                                    + effectiveLimit
-                                    + " -> "
-                                    + stormLimit
+            Integer previousMultiplier =
+                    appliedMultipliers.put(
+                            worldId,
+                            multiplier
                     );
+
+            if (previousMultiplier == null
+                    || previousMultiplier != multiplier) {
+
+                Bukkit.getLogger().info(
+                        "[DifficultyPlugin] MobCap "
+                                + world.getName()
+                                + ": "
+                                + baseLimit
+                                + " -> "
+                                + newLimit
+                                + " (x"
+                                + multiplier
+                                + ")"
+                );
+            }
         }
     }
 
-
     /*
      * ========================================
-     * RESTAURAR MOB CAP
+     * RESTAURAR LIMITE ORIGINAL
      * ========================================
      */
-
     public void restoreOriginalMobCaps() {
 
         if (originalMonsterCaps.isEmpty()) {
             return;
         }
 
+        Iterator<Map.Entry<UUID, Integer>> iterator =
+                originalMonsterCaps.entrySet().iterator();
 
-        for (Map.Entry<UUID, Integer> entry :
-                originalMonsterCaps.entrySet()) {
+        while (iterator.hasNext()) {
 
+            Map.Entry<UUID, Integer> entry =
+                    iterator.next();
 
-            World world =
-                    Bukkit.getWorld(
-                            entry.getKey()
-                    );
-
+            World world = Bukkit.getWorld(
+                    entry.getKey()
+            );
 
             /*
-             * El mundo podría haberse
-             * descargado.
+             * Si el mundo esta descargado,
+             * conservar el registro para
+             * restaurarlo cuando vuelva
+             * a estar disponible.
              */
             if (world == null) {
                 continue;
             }
 
+            int originalLimit = entry.getValue();
 
-            int originalLimit =
-                    entry.getValue();
+            if (world.getSpawnLimit(
+                    SpawnCategory.MONSTER
+            ) != originalLimit) {
 
+                world.setSpawnLimit(
+                        SpawnCategory.MONSTER,
+                        originalLimit
+                );
 
-            /*
-             * Restauramos exactamente
-             * lo que tenía antes.
-             *
-             * Incluso si era -1.
-             */
-            world.setSpawnLimit(
-                    SpawnCategory.MONSTER,
-                    originalLimit
+                Bukkit.getLogger().info(
+                        "[DifficultyPlugin] MobCap restaurado: "
+                                + world.getName()
+                                + " -> "
+                                + originalLimit
+                );
+            }
+
+            appliedMultipliers.remove(
+                    entry.getKey()
             );
 
-
-            Bukkit.getLogger()
-                    .info(
-                            "[DifficultyPlugin] MobCap restaurado: "
-                                    + world.getName()
-                                    + " -> "
-                                    + originalLimit
-                    );
+            iterator.remove();
         }
-
-
-        originalMonsterCaps.clear();
     }
-
 
     /*
      * ========================================
      * APAGADO DEL PLUGIN
      * ========================================
      */
-
     public void shutdown() {
 
         restoreOriginalMobCaps();

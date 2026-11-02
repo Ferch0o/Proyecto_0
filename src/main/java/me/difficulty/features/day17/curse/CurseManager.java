@@ -75,43 +75,236 @@ public final class CurseManager {
         refresh(player);
     }
 
+
     public void refresh(Player player) {
-        if (dayManager.isAtLeast(17)) persistence.ensureInitialized(player);
+
+        if (dayManager.isAtLeast(17)) {
+            persistence.ensureInitialized(player);
+        }
+
+        /*
+         * ========================================
+         * VIDA MÁXIMA
+         * ========================================
+         */
 
         double healthChange = 0.0;
+
         if (dayManager.isAtLeast(17)) {
-            if (getState(player) == CurseState.CURED) healthChange = 4.0;
-            else healthChange = dayManager.isAtLeast(25) ? -8.0 : -4.0;
+
+            if (getState(player) == CurseState.CURED) {
+
+                // Jugador curado: +2 corazones.
+                healthChange = 4.0;
+
+            } else {
+
+                // Maldición normal o agravada.
+                healthChange = dayManager.isAtLeast(25)
+                        ? -8.0
+                        : -4.0;
+            }
         }
+
         applyHealthModifier(player, healthChange);
 
+        /*
+         * ========================================
+         * EFECTOS DE LA MALDICIÓN
+         * ========================================
+         */
+
         if (isActive(player)) {
+
             boolean severe = dayManager.isAtLeast(25);
-            applyEffect(player, PotionEffectType.SLOWNESS, severe ? 2 : 1);
-            applyEffect(player, PotionEffectType.WEAKNESS, severe ? 1 : 0);
+
+            applyEffect(
+                    player,
+                    PotionEffectType.SLOWNESS,
+                    severe ? 2 : 1
+            );
+
+            applyEffect(
+                    player,
+                    PotionEffectType.WEAKNESS,
+                    severe ? 1 : 0
+            );
+
             if (severe) {
-                player.removePotionEffect(PotionEffectType.HUNGER);
-                applyEffect(player, PotionEffectType.POISON, 0);
+
+                // Retirar únicamente el Hambre
+                // que pertenece a nuestra maldición.
+                removeCurseEffect(
+                        player,
+                        PotionEffectType.HUNGER,
+                        1
+                );
+
+                applyEffect(
+                        player,
+                        PotionEffectType.POISON,
+                        0
+                );
+
             } else {
-                player.removePotionEffect(PotionEffectType.POISON);
-                applyEffect(player, PotionEffectType.HUNGER, 1);
+
+                // No eliminar veneno ajeno
+                // a nuestro sistema.
+                removeCurseEffect(
+                        player,
+                        PotionEffectType.POISON,
+                        0
+                );
+
+                applyEffect(
+                        player,
+                        PotionEffectType.HUNGER,
+                        1
+                );
             }
+
+        } else {
+
+            /*
+             * Jugador curado o maldición
+             * todavía no activada.
+             */
+            clearCurseEffects(player);
         }
     }
 
     public void clearCurseEffects(Player player) {
-        player.removePotionEffect(PotionEffectType.SLOWNESS);
-        player.removePotionEffect(PotionEffectType.WEAKNESS);
-        player.removePotionEffect(PotionEffectType.HUNGER);
-        player.removePotionEffect(PotionEffectType.POISON);
+
+        // Lentitud II.
+        removeCurseEffect(
+                player,
+                PotionEffectType.SLOWNESS,
+                1
+        );
+
+        // Lentitud III del día 25.
+        removeCurseEffect(
+                player,
+                PotionEffectType.SLOWNESS,
+                2
+        );
+
+        // Debilidad I.
+        removeCurseEffect(
+                player,
+                PotionEffectType.WEAKNESS,
+                0
+        );
+
+        // Debilidad II del día 25.
+        removeCurseEffect(
+                player,
+                PotionEffectType.WEAKNESS,
+                1
+        );
+
+        // Hambre II.
+        removeCurseEffect(
+                player,
+                PotionEffectType.HUNGER,
+                1
+        );
+
+        // Veneno I del día 25.
+        removeCurseEffect(
+                player,
+                PotionEffectType.POISON,
+                0
+        );
     }
 
-    private void applyEffect(Player player, PotionEffectType type, int amplifier) {
-        PotionEffect active = player.getPotionEffect(type);
-        if (active != null && active.getAmplifier() == amplifier && active.getDuration() > 45) {
+    private void applyEffect(
+            Player player,
+            PotionEffectType type,
+            int amplifier
+    ) {
+
+        PotionEffect active =
+                player.getPotionEffect(type);
+
+        if (active != null) {
+
+            /*
+             * Si existe otro efecto que no
+             * coincide con nuestra firma,
+             * no lo sobrescribimos.
+             */
+            if (!isCurseEffect(active, amplifier)) {
+                return;
+            }
+
+            /*
+             * No necesitamos renovarlo
+             * mientras tenga suficiente duración.
+             */
+            if (active.getDuration() > 45) {
+                return;
+            }
+        }
+
+        /*
+         * Efecto de nuestra maldición:
+         *
+         * Duración: 100 ticks.
+         * Ambient: true.
+         * Partículas: false.
+         * Icono: true.
+         *
+         * CurseMaintenanceTask lo renueva
+         * mientras el jugador esté maldito.
+         */
+        player.addPotionEffect(
+                new PotionEffect(
+                        type,
+                        100,
+                        amplifier,
+                        true,
+                        false,
+                        true
+                )
+        );
+    }
+
+    private boolean isCurseEffect(
+            PotionEffect effect,
+            int expectedAmplifier
+    ) {
+
+        if (effect == null || effect.isInfinite()) {
+            return false;
+        }
+
+        /*
+         * Debe coincidir con la configuración
+         * utilizada por nuestro CurseManager.
+         */
+        return effect.getAmplifier() == expectedAmplifier
+                && effect.isAmbient()
+                && !effect.hasParticles()
+                && effect.hasIcon()
+                && effect.getDuration() > 0
+                && effect.getDuration() <= 100;
+    }
+
+    private void removeCurseEffect(
+            Player player,
+            PotionEffectType type,
+            int amplifier
+    ) {
+
+        PotionEffect active =
+                player.getPotionEffect(type);
+
+        if (!isCurseEffect(active, amplifier)) {
             return;
         }
-        player.addPotionEffect(new PotionEffect(type, 100, amplifier, true, false, true));
+
+        player.removePotionEffect(type);
     }
 
     private void applyHealthModifier(Player player, double amount) {

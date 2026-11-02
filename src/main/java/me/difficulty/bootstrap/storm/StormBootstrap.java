@@ -124,11 +124,19 @@ public final class StormBootstrap {
                 plugin
         );
 
-        // DIAMANTES
+        /*
+         * ========================================
+         * DIAMANTES DURANTE LA TORMENTA
+         *
+         * Día 10-16: recompensa activa.
+         * Día 17+: recompensa eliminada.
+         * ========================================
+         */
         pm.registerEvents(
                 new StormDiamondDropListener(
                         plugin,
-                        stormManager
+                        stormManager,
+                        dayManager
                 ),
                 plugin
         );
@@ -172,6 +180,7 @@ public final class StormBootstrap {
         // CONTROL DE LIMITE DE MOBS
         stormMobCapTask =
                 new StormMobCapTask(
+                        dayManager,
                         stormManager
                 );
 
@@ -181,9 +190,17 @@ public final class StormBootstrap {
                 20L
         );
 
-        // GENERACION EXTRA DE ENEMIGOS
+        /*
+         * ========================================
+         * GENERACIÓN ADICIONAL DE ENEMIGOS
+         *
+         * Día 10-16: solo durante Tormenta.
+         * Día 17+: siempre activa.
+         * ========================================
+         */
         new StormExtraSpawnTask(
                 plugin,
+                dayManager,
                 stormManager
         ).runTaskTimer(
                 plugin,

@@ -1,12 +1,14 @@
 package me.difficulty.features.storm.day10.listeners;
 
 import me.difficulty.DifficultyPlugin;
+import me.difficulty.core.day.DayManager;
 import me.difficulty.core.mobs.MobIds;
 import me.difficulty.features.storm.core.StormManager;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 
+import org.bukkit.entity.Enemy;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -23,9 +25,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class StormDiamondDropListener
         implements Listener {
 
-
     private final StormManager stormManager;
-
+    private final DayManager dayManager;
     private final NamespacedKey customMobIdKey;
 
 
@@ -90,20 +91,18 @@ public class StormDiamondDropListener
 
     public StormDiamondDropListener(
             DifficultyPlugin plugin,
-            StormManager stormManager
+            StormManager stormManager,
+            DayManager dayManager
     ) {
 
-        this.stormManager =
-                stormManager;
+        this.stormManager = stormManager;
+        this.dayManager = dayManager;
 
-
-        this.customMobIdKey =
-                new NamespacedKey(
-                        plugin,
-                        "custom_mob_id"
-                );
+        this.customMobIdKey = new NamespacedKey(
+                plugin,
+                "custom_mob_id"
+        );
     }
-
 
     /*
      * ========================================
@@ -114,10 +113,7 @@ public class StormDiamondDropListener
     @EventHandler(
             priority = EventPriority.HIGHEST
     )
-    public void onMobDeath(
-            EntityDeathEvent event
-    ) {
-
+    public void onMobDeath(EntityDeathEvent event) {
 
         /*
          * ========================================
@@ -129,6 +125,27 @@ public class StormDiamondDropListener
             return;
         }
 
+        /*
+         * ========================================
+         * DÍA 17+ - SIN DIAMANTES EN TORMENTA
+         * ========================================
+         *
+         * Los mobs hostiles ya no podrán
+         * soltar diamantes durante la Tormenta.
+         *
+         * Conservamos los demás drops:
+         * Carne Seca, Hueso de Guardián,
+         * Pólvora Mágica, etc.
+         */
+
+        if (dayManager.isAtLeast(17)) {
+            if (event.getEntity() instanceof Enemy) {
+                event.getDrops().removeIf(
+                        item -> item.getType() == Material.DIAMOND
+                );
+            }
+            return;
+        }
 
         /*
          * ========================================

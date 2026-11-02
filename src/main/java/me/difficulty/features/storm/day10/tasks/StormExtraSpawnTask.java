@@ -2,6 +2,7 @@
 package me.difficulty.features.storm.day10.tasks;
 
 import me.difficulty.DifficultyPlugin;
+import me.difficulty.core.day.DayManager;
 import me.difficulty.features.storm.core.StormManager;
 
 import org.bukkit.*;
@@ -30,9 +31,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class StormExtraSpawnTask extends BukkitRunnable {
 
+    private final DayManager dayManager;
     private final StormManager stormManager;
     private final NamespacedKey stormExtraMobKey;
-
     /*
      * ========================================
      * CONFIGURACIÓN DE SPAWNS
@@ -76,12 +77,13 @@ public class StormExtraSpawnTask extends BukkitRunnable {
     // Buscar altura cerca del mob de referencia.
     private static final int VERTICAL_SEARCH = 6;
 
-
     public StormExtraSpawnTask(
             DifficultyPlugin plugin,
+            DayManager dayManager,
             StormManager stormManager
     ) {
 
+        this.dayManager = dayManager;
         this.stormManager = stormManager;
 
         this.stormExtraMobKey = new NamespacedKey(
@@ -90,38 +92,59 @@ public class StormExtraSpawnTask extends BukkitRunnable {
         );
     }
 
-
     /*
      * ========================================
-     * EJECUCIÓN CADA SEGUNDO
+     * GENERACIÓN ADICIONAL DE ENEMIGOS
      * ========================================
+     *
+     * Días 0-9:
+     *   Desactivada.
+     *
+     * Días 10-16:
+     *   Solo durante la Tormenta.
+     *
+     * Día 17 en adelante:
+     *   Siempre activa.
      */
-
     @Override
     public void run() {
 
         /*
-         * Solo cuando la Tormenta está
-         * activa y estamos en Día 10+.
+         * Desde el día 17 no necesitamos
+         * que exista una Tormenta.
+         *
+         * Antes del día 17 se conserva
+         * el comportamiento anterior.
          */
+        boolean alwaysActive =
+                dayManager.isAtLeast(17);
 
-        if (!stormManager.hasDay10Effects()) {
+        boolean stormActive =
+                stormManager.hasDay10Effects();
+
+        if (!alwaysActive && !stormActive) {
             return;
         }
 
         /*
-         * Contador temporal de extras
+         * Contador temporal de mobs extra
          * por cada mundo.
          */
+        Map<UUID, Long> extraCounts =
+                new HashMap<>();
 
-        Map<UUID, Long> extraCounts = new HashMap<>();
-
+        /*
+         * Cada jugador conectado tiene
+         * su propio intento de spawn.
+         */
         for (Player player : Bukkit.getOnlinePlayers()) {
 
-            tryExtraSpawn(player, extraCounts);
+            tryExtraSpawn(
+                    player,
+                    extraCounts
+            );
         }
     }
-
 
     /*
      * ========================================

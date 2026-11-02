@@ -68,29 +68,67 @@ public final class ElementalPotatoProtectionListener
 
     /*
      * ========================================
-     * IMPEDIR PLANTAR Y COMPOSTAR
+     * IMPEDIR PLANTAR, COMPOSTAR Y COCINAR
+     * LA PATATA ELEMENTAL
      * ========================================
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteract(PlayerInteractEvent event) {
 
+        /*
+         * Solo nuestra Patata Elemental.
+         * Las patatas vanilla no se afectan.
+         */
         if (!isPotato(event.getItem())) {
             return;
         }
 
+        /*
+         * Solo cuando el jugador
+         * hace clic derecho en un bloque.
+         */
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK
                 || event.getClickedBlock() == null) {
             return;
         }
 
-        Material block = event.getClickedBlock().getType();
+        Material block =
+                event.getClickedBlock().getType();
 
-        if (block == Material.FARMLAND
-                || block == Material.COMPOSTER) {
+        /*
+         * Bloques prohibidos:
+         *
+         * - Tierra labrada.
+         * - Compostador.
+         * - Hoguera normal.
+         * - Hoguera de almas.
+         */
+        boolean forbiddenBlock =
+                block == Material.FARMLAND
+                        || block == Material.COMPOSTER
+                        || block == Material.CAMPFIRE
+                        || block == Material.SOUL_CAMPFIRE;
 
-            event.setUseInteractedBlock(Event.Result.DENY);
-            event.setUseItemInHand(Event.Result.DENY);
+        if (!forbiddenBlock) {
+            return;
         }
+
+        /*
+         * Impedir la interacción
+         * con el bloque.
+         */
+        event.setUseInteractedBlock(
+                Event.Result.DENY
+        );
+
+        /*
+         * Impedir que la Patata
+         * se coloque o utilice
+         * sobre estos bloques.
+         */
+        event.setUseItemInHand(
+                Event.Result.DENY
+        );
     }
 
     /*
