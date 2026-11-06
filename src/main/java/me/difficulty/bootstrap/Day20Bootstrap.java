@@ -7,9 +7,13 @@ import me.difficulty.core.day.DayManager;
 import me.difficulty.core.items.CustomItemRegistry;
 import me.difficulty.core.mobs.CustomMobRegistry;
 
+import me.difficulty.features.day20.items.ElementalHead;
+import me.difficulty.features.day20.items.ElementalHeadPlaceListener;
 import me.difficulty.features.day20.items.ElementalRod;
 import me.difficulty.features.day20.items.ElementalRodProtectionListener;
 import me.difficulty.features.day20.mobs.blazes.*;
+import me.difficulty.features.day20.mobs.withers.*;
+import org.bukkit.plugin.PluginManager;
 
 import java.util.Objects;
 
@@ -261,6 +265,110 @@ public final class Day20Bootstrap {
                         ),
                         plugin
                 );
+    }
+
+
+    /*
+     * ========================================
+     * DÍA 20 - WITHER SKELETONS
+     * ========================================
+     */
+    public void registerWitherSkeletonContent(
+            DayManager dayManager,
+            CustomMobRegistry mobRegistry,
+            CustomItemRegistry itemRegistry
+    ) {
+
+        /*
+         * ========================================
+         * REGISTRAR MOBS
+         * ========================================
+         */
+        CorruptedWitherSkeleton corrupted =
+                new CorruptedWitherSkeleton(plugin);
+
+        FortressGuardian guardian =
+                new FortressGuardian(plugin);
+
+        mobRegistry.register(corrupted);
+        mobRegistry.register(guardian);
+
+        /*
+         * ========================================
+         * REGISTRAR CABEZA ELEMENTAL
+         * ========================================
+         */
+        ElementalHead head =
+                new ElementalHead(plugin);
+
+        itemRegistry.register(head);
+
+        /*
+         * ========================================
+         * REGISTRAR LISTENERS
+         * ========================================
+         */
+        PluginManager pm = plugin.getServer()
+                .getPluginManager();
+
+        pm.registerEvents(
+                new WitherSkeletonSpawnListener(
+                        dayManager,
+                        mobRegistry,
+                        corrupted,
+                        guardian
+                ),
+                plugin
+        );
+
+        pm.registerEvents(
+                new WitherSkeletonCombatListener(
+                        dayManager,
+                        mobRegistry
+                ),
+                plugin
+        );
+
+        pm.registerEvents(
+                new WitherSkeletonDropListener(
+                        dayManager,
+                        mobRegistry,
+                        head
+                ),
+                plugin
+        );
+
+        pm.registerEvents(
+                new ElementalHeadPlaceListener(head),
+                plugin
+        );
+
+        /*
+         * ========================================
+         * COMANDOS DE PRUEBA
+         * ========================================
+         */
+        Objects.requireNonNull(
+                plugin.getCommand("spawncorruptedwither"),
+                "Falta spawncorruptedwither en plugin.yml"
+        ).setExecutor(
+                new SpawnWitherSkeletonCommand(
+                        dayManager,
+                        corrupted,
+                        "Wither Corrupto"
+                )
+        );
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawnfortressguardian"),
+                "Falta spawnfortressguardian en plugin.yml"
+        ).setExecutor(
+                new SpawnWitherSkeletonCommand(
+                        dayManager,
+                        guardian,
+                        "Guardián de la Fortaleza"
+                )
+        );
     }
 
     /*

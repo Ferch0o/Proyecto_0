@@ -70,4 +70,14 @@ public final class MobIds {
 
     public static final String BLAZE_KING =
             "blaze_king";
+
+    // =========================
+    // DÍA 20 - WITHER SKELETONS
+    // =========================
+
+    public static final String CORRUPTED_WITHER_SKELETON =
+            "corrupted_wither_skeleton";
+
+    public static final String FORTRESS_GUARDIAN =
+            "fortress_guardian";
 }

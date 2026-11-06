@@ -270,6 +270,17 @@ public final class DifficultyPlugin extends JavaPlugin {
                 elementalRod
         );
 
+        /*
+         * ========================================
+         * DÍA 20 - WITHER SKELETONS
+         * ========================================
+         */
+        day20Bootstrap.registerWitherSkeletonContent(
+                dayManager,
+                mobRegistry,
+                itemRegistry
+        );
+
         stormBootstrap.registerDay10Listeners();
 
         day10Bootstrap.registerItemListeners(
