@@ -89,6 +89,21 @@ commands:
     usage: /resetcurse <jugador>
     permission: difficulty.admin
 
+  spawncorruptedblaze:
+    description: Genera un Blaze Corrupto para pruebas.
+    usage: /spawncorruptedblaze
+    permission: difficulty.admin
+
+  spawnphantomblaze:
+    description: Genera un Blaze Fantasmal para pruebas.
+    usage: /spawnphantomblaze
+    permission: difficulty.admin
+
+  spawnblazeking:
+    description: Genera un Rey Blaze para pruebas.
+    usage: /spawnblazeking
+    permission: difficulty.admin
+
 permissions:
   difficulty.setday:
     description: Permite modificar el día del servidor.

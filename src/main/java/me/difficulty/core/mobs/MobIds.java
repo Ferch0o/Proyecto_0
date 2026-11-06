@@ -25,7 +25,6 @@ public final class MobIds {
     public static final String SCAVENGER =
             "scavenger";
 
-
     // =========================
     // DÍA 10 - SKELETONS
     // =========================
@@ -36,14 +35,12 @@ public final class MobIds {
     public static final String GLADIATOR =
             "gladiator";
 
-
     // =========================
     // DÍA 10 - CREEPER
     // =========================
 
     public static final String FUTURISTIC_CREEPER =
             "futuristic_creeper";
-
 
     // =========================
     // DÍA 10 - SPIDERS
@@ -60,4 +57,17 @@ public final class MobIds {
 
     public static final String GOLIATH =
             "goliath";
+
+    // =========================
+    // DÍA 20 - BLAZES
+    // =========================
+
+    public static final String CORRUPTED_BLAZE =
+            "corrupted_blaze";
+
+    public static final String PHANTOM_BLAZE =
+            "phantom_blaze";
+
+    public static final String BLAZE_KING =
+            "blaze_king";
 }

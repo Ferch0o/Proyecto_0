@@ -9,6 +9,7 @@ import me.difficulty.core.items.CustomItemRegistry;
 import me.difficulty.core.mobs.CustomMobRegistry;
 import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbowRecipe;
 import me.difficulty.core.recipes.RecipeUnlockManager;
+import me.difficulty.features.day20.items.ElementalRod;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
@@ -97,6 +98,40 @@ public final class DifficultyPlugin extends JavaPlugin {
         day17Bootstrap.register(
                 itemRegistry,
                 mobRegistry
+        );
+
+
+        /*
+         * ========================================
+         * DÍA 20 - NUEVOS MOBS DEL NETHER
+         * ========================================
+         */
+
+        Day20Bootstrap day20Bootstrap =
+                new Day20Bootstrap(this);
+
+        /*
+         * Registrar los tres Blazes.
+         *
+         * El registro no significa que aparecerán
+         * antes del día 20: eso lo controla
+         * BlazeSpawnListener.
+         */
+        Day20Bootstrap.Blazes day20Blazes =
+                day20Bootstrap.registerBlazes(mobRegistry);
+
+        /*
+         * ========================================
+         * DÍA 20 - VARA ELEMENTAL
+         * ========================================
+         */
+        ElementalRod elementalRod =
+                day20Bootstrap.registerElementalRod(
+                        itemRegistry
+                );
+
+        day20Bootstrap.registerElementalRodProtection(
+                elementalRod
         );
 
         /*
@@ -196,6 +231,45 @@ public final class DifficultyPlugin extends JavaPlugin {
                 dayManager
         );
 
+        /*
+         * ========================================
+         * DÍA 20 - APARICIÓN DE BLAZES
+         * ========================================
+         *
+         * Natural y Spawner.
+         */
+        day20Bootstrap.registerBlazeSpawnListener(
+                dayManager,
+                mobRegistry,
+                day20Blazes
+        );
+
+        day20Bootstrap.registerBlazeCombatListener(
+                dayManager,
+                mobRegistry
+        );
+
+        day20Bootstrap.registerPhantomBlazeAttackListener(
+                dayManager,
+                mobRegistry
+        );
+
+        day20Bootstrap.registerBlazeKingAttackListener(
+                dayManager,
+                mobRegistry
+        );
+
+        day20Bootstrap.registerBlazeKingKnockbackListener(
+                dayManager,
+                mobRegistry
+        );
+
+        day20Bootstrap.registerBlazeDropListener(
+                dayManager,
+                mobRegistry,
+                elementalRod
+        );
+
         stormBootstrap.registerDay10Listeners();
 
         day10Bootstrap.registerItemListeners(
@@ -258,6 +332,11 @@ public final class DifficultyPlugin extends JavaPlugin {
         day10Bootstrap.registerSpawnCommands(
                 dayManager,
                 day10Mobs
+        );
+
+        day20Bootstrap.registerBlazeSpawnCommands(
+                dayManager,
+                day20Blazes
         );
 
         day10Bootstrap.registerItemCommands(
