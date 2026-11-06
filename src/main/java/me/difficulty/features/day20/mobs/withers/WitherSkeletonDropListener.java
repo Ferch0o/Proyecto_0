@@ -38,7 +38,7 @@ public final class WitherSkeletonDropListener
 
     /*
      * ========================================
-     * DROPS DE WITHER SKELETON
+     * DROPS DE WITHER SKELETONS
      * ========================================
      */
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -55,7 +55,8 @@ public final class WitherSkeletonDropListener
 
         /*
          * ========================================
-         * WITHER CORRUPTO - DROPS TRIPLES
+         * WITHER CORRUPTO
+         * DROPS TRIPLES
          * ========================================
          */
         if (registry.is(
@@ -68,7 +69,6 @@ public final class WitherSkeletonDropListener
             for (ItemStack original : event.getDrops()) {
 
                 int total = original.getAmount() * 3;
-
                 int limit = Math.max(
                         1,
                         original.getMaxStackSize()
@@ -85,21 +85,19 @@ public final class WitherSkeletonDropListener
 
                     part.setAmount(count);
                     amplified.add(part);
-
                     total -= count;
                 }
             }
 
             event.getDrops().clear();
             event.getDrops().addAll(amplified);
-
             return;
         }
 
         /*
          * ========================================
          * GUARDIÁN DE LA FORTALEZA
-         * CABEZA ELEMENTAL - 50%
+         * SOLO CABEZA ELEMENTAL
          * ========================================
          */
         if (registry.is(
@@ -107,11 +105,24 @@ public final class WitherSkeletonDropListener
                 MobIds.FORTRESS_GUARDIAN
         )) {
 
-            int roll = ThreadLocalRandom
-                    .current()
-                    .nextInt(100);
+            /*
+             * Eliminar TODOS los drops vanilla:
+             *
+             * - Huesos.
+             * - Carbón.
+             * - Calaveras normales.
+             * - Equipamiento.
+             *
+             * No alteramos la experiencia.
+             */
+            event.getDrops().clear();
 
-            if (roll < 50) {
+            /*
+             * 50% de obtener una
+             * Cabeza Elemental.
+             */
+            if (ThreadLocalRandom.current()
+                    .nextInt(100) < 50) {
 
                 event.getDrops().add(
                         elementalHead.createItem()

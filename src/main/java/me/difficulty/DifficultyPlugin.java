@@ -281,6 +281,17 @@ public final class DifficultyPlugin extends JavaPlugin {
                 itemRegistry
         );
 
+        /*
+         * ========================================
+         * DÍA 20 - GHASTS
+         * ========================================
+         */
+        day20Bootstrap.registerGhastContent(
+                dayManager,
+                mobRegistry,
+                itemRegistry
+        );
+
         stormBootstrap.registerDay10Listeners();
 
         day10Bootstrap.registerItemListeners(

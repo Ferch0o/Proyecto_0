@@ -7,11 +7,10 @@ import me.difficulty.core.day.DayManager;
 import me.difficulty.core.items.CustomItemRegistry;
 import me.difficulty.core.mobs.CustomMobRegistry;
 
-import me.difficulty.features.day20.items.ElementalHead;
-import me.difficulty.features.day20.items.ElementalHeadPlaceListener;
-import me.difficulty.features.day20.items.ElementalRod;
+import me.difficulty.features.day20.items.*;
 import me.difficulty.features.day20.items.ElementalRodProtectionListener;
 import me.difficulty.features.day20.mobs.blazes.*;
+import me.difficulty.features.day20.mobs.ghasts.*;
 import me.difficulty.features.day20.mobs.withers.*;
 import org.bukkit.plugin.PluginManager;
 
@@ -367,6 +366,126 @@ public final class Day20Bootstrap {
                         dayManager,
                         guardian,
                         "Guardián de la Fortaleza"
+                )
+        );
+    }
+
+    /*
+     * ========================================
+     * DÍA 20 - GHASTS PERSONALIZADOS
+     * ========================================
+     */
+    public void registerGhastContent(
+            DayManager dayManager,
+            CustomMobRegistry mobRegistry,
+            CustomItemRegistry itemRegistry
+    ) {
+
+        /*
+         * ========================================
+         * REGISTRAR GHASTS
+         * ========================================
+         */
+        CorruptedGhast corrupted =
+                new CorruptedGhast(plugin);
+
+        DemonicGhast demonic =
+                new DemonicGhast(plugin);
+
+        mobRegistry.register(corrupted);
+        mobRegistry.register(demonic);
+
+        /*
+         * ========================================
+         * REGISTRAR LÁGRIMA ELEMENTAL
+         * ========================================
+         */
+        ElementalTear elementalTear =
+                new ElementalTear(plugin);
+
+        itemRegistry.register(elementalTear);
+
+        /*
+         * ========================================
+         * REGISTRAR LISTENERS
+         * ========================================
+         */
+        PluginManager pm = plugin.getServer()
+                .getPluginManager();
+
+        pm.registerEvents(
+                new GhastSpawnListener(
+                        dayManager,
+                        mobRegistry,
+                        corrupted,
+                        demonic
+                ),
+                plugin
+        );
+
+        pm.registerEvents(
+                new CorruptedGhastCombatListener(
+                        dayManager,
+                        mobRegistry
+                ),
+                plugin
+        );
+
+        pm.registerEvents(
+                new DemonicGhastAttackListener(
+                        plugin,
+                        dayManager,
+                        mobRegistry
+                ),
+                plugin
+        );
+
+        pm.registerEvents(
+                new GhastSelfProjectileProtectionListener(),
+                plugin
+        );
+
+        pm.registerEvents(
+                new GhastDropListener(
+                        dayManager,
+                        mobRegistry,
+                        elementalTear
+                ),
+                plugin
+        );
+
+        pm.registerEvents(
+                new ElementalTearProtectionListener(
+                        plugin,
+                        elementalTear
+                ),
+                plugin
+        );
+
+        /*
+         * ========================================
+         * COMANDOS DE PRUEBA
+         * ========================================
+         */
+        Objects.requireNonNull(
+                plugin.getCommand("spawncorruptedghast"),
+                "Falta spawncorruptedghast en plugin.yml"
+        ).setExecutor(
+                new SpawnGhastCommand(
+                        dayManager,
+                        corrupted,
+                        "Ghast Corrupto"
+                )
+        );
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawndemonicghast"),
+                "Falta spawndemonicghast en plugin.yml"
+        ).setExecutor(
+                new SpawnGhastCommand(
+                        dayManager,
+                        demonic,
+                        "Ghast Demoníaco"
                 )
         );
     }

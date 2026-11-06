@@ -109,6 +109,14 @@ commands:
     description: Genera un Guardián de la Fortaleza para pruebas.
     usage: /spawnfortressguardian
     permission: difficulty.admin
+  spawncorruptedghast:
+    description: Genera un Ghast Corrupto para pruebas.
+    usage: /spawncorruptedghast
+    permission: difficulty.admin
+  spawndemonicghast:
+    description: Genera un Ghast Demoníaco para pruebas.
+    usage: /spawndemonicghast
+    permission: difficulty.admin
 
 permissions:
   difficulty.setday:

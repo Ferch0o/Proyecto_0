@@ -7,7 +7,6 @@ import me.difficulty.core.mobs.MobIds;
 
 import me.difficulty.features.day20.items.ElementalRod;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Blaze;
 
 import org.bukkit.event.EventHandler;
@@ -112,48 +111,28 @@ public final class BlazeDropListener implements Listener {
                 MobIds.BLAZE_KING
         )) {
 
+
             /*
-             * Retirar las varas
-             * de Blaze normales.
+             * ========================================
+             * REY BLAZE - SOLO VARAS ELEMENTALES
+             * ========================================
              *
-             * No eliminamos otros drops
-             * que pudieran existir.
+             * Eliminar absolutamente todos
+             * los drops vanilla.
              */
-            event.getDrops().removeIf(
-                    item -> item.getType()
-                            == Material.BLAZE_ROD
-            );
-
-            int amount =
-                    ThreadLocalRandom.current()
-                            .nextInt(1, 4);
+            event.getDrops().clear();
 
             /*
-             * Crear el verdadero
-             * ítem personalizado.
+             * Cantidad aleatoria: 1 a 3.
              */
-            ItemStack rods =
-                    elementalRod.createItem();
+            int amount = ThreadLocalRandom
+                    .current()
+                    .nextInt(1, 4);
 
+            ItemStack rods = elementalRod.createItem();
             rods.setAmount(amount);
 
-            /*
-             * Agregar al drop.
-             */
-            event.getDrops().add(
-                    rods
-            );
+            event.getDrops().add(rods);
         }
-
-        /*
-         * ========================================
-         * BLAZE FANTASMAL
-         * ========================================
-         *
-         * No modificamos sus drops.
-         *
-         * Conserva el comportamiento
-         * vanilla de Minecraft.
-         */
     }
 }

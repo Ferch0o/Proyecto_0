@@ -80,4 +80,15 @@ public final class MobIds {
 
     public static final String FORTRESS_GUARDIAN =
             "fortress_guardian";
+
+    // =========================
+    // DÍA 20 - GHASTS
+    // =========================
+
+    public static final String CORRUPTED_GHAST =
+            "corrupted_ghast";
+
+    public static final String DEMONIC_GHAST =
+            "demonic_ghast";
+
 }

@@ -151,7 +151,7 @@ public final class BlazeSpawnListener implements Listener {
          * BLAZE FANTASMAL - 5%
          * ========================================
          */
-        if (roll < 70) {
+        if (roll < 65) {
 
             phantomBlaze.apply(blaze);
             return;

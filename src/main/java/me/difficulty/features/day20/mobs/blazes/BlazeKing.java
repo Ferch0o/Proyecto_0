@@ -23,7 +23,7 @@ public final class BlazeKing extends CustomMob {
      * ========================================
      */
 
-    private static final double MAX_HEALTH = 40.0;
+    private static final double MAX_HEALTH = 50.0;
 
     /*
      * ========================================
