@@ -8,7 +8,7 @@ import me.difficulty.core.items.CustomItemRegistry;
 import me.difficulty.core.mobs.CustomMobRegistry;
 
 import me.difficulty.features.day20.items.*;
-import me.difficulty.features.day20.mobs.Day20BiomeSpawnTask;
+import me.difficulty.features.day20.mobs.Day20BiomeNaturalSpawnListener;
 import me.difficulty.features.day20.mobs.blazes.*;
 import me.difficulty.features.day20.mobs.ghasts.*;
 import me.difficulty.features.day20.mobs.pigmen.*;
@@ -373,22 +373,25 @@ public final class Day20Bootstrap {
 
     /*
      * ========================================
-     * DÍA 20 - SPAWNS ESPECIALES POR BIOMA
+     * DÍA 20 - APARICIONES NATURALES
+     * POR BIOMA
      * ========================================
      */
-    public void registerBiomeSpawnTask(
+    public void registerBiomeNaturalSpawnListener(
             DayManager dayManager,
             CustomMobRegistry mobRegistry
     ) {
 
-        new Day20BiomeSpawnTask(
-                dayManager,
-                mobRegistry
-        ).runTaskTimer(
-                plugin,
-                200L,
-                200L
-        );
+        plugin.getServer()
+                .getPluginManager()
+                .registerEvents(
+                        new Day20BiomeNaturalSpawnListener(
+                                plugin,
+                                dayManager,
+                                mobRegistry
+                        ),
+                        plugin
+                );
     }
 
     /*

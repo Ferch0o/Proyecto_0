@@ -34,7 +34,6 @@ public final class ElementalMeatConsumeListener
 
     private static final int REGEN_DURATION = 40;
     private static final int HUNGER_DURATION = 80;
-    private static final int EFFECT_DURATION = 60;
 
     private final ElementalMeat elementalMeat;
     private final NamespacedKey cooldownKey;
@@ -158,11 +157,6 @@ public final class ElementalMeatConsumeListener
                 )
         );
 
-        /*
-         * ========================================
-         * ACTIVAR COOLDOWN - 5 SEGUNDOS
-         * ========================================
-         */
         player.getPersistentDataContainer().set(
                 cooldownKey,
                 PersistentDataType.LONG,

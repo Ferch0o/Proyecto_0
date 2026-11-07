@@ -5,6 +5,7 @@ import me.difficulty.core.day.DayManager;
 import me.difficulty.core.mobs.CustomMobRegistry;
 import me.difficulty.features.day20.mobs.FortressLocationUtil;
 
+import org.bukkit.Location;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.EntityType;
@@ -25,6 +26,11 @@ public final class BlazeSpawnListener implements Listener {
     private final PhantomBlaze phantomBlaze;
     private final BlazeKing blazeKing;
 
+    /*
+     * ========================================
+     * CONSTRUCTOR
+     * ========================================
+     */
     public BlazeSpawnListener(
             DayManager dayManager,
             CustomMobRegistry registry,
@@ -34,6 +40,7 @@ public final class BlazeSpawnListener implements Listener {
     ) {
         this.dayManager = dayManager;
         this.registry = registry;
+
         this.corruptedBlaze = corruptedBlaze;
         this.phantomBlaze = phantomBlaze;
         this.blazeKing = blazeKing;
@@ -41,7 +48,7 @@ public final class BlazeSpawnListener implements Listener {
 
     /*
      * ========================================
-     * GENERACIÓN - DÍA 20
+     * GENERACIÓN DE BLAZES - DÍA 20
      * ========================================
      */
     @EventHandler(
@@ -52,14 +59,37 @@ public final class BlazeSpawnListener implements Listener {
             CreatureSpawnEvent event
     ) {
 
+        /*
+         * ========================================
+         * ACTIVACIÓN DESDE EL DÍA 20
+         * ========================================
+         */
         if (!dayManager.isAtLeast(20)) {
             return;
         }
 
+        /*
+         * ========================================
+         * SOLO BLAZES
+         * ========================================
+         */
         if (event.getEntityType() != EntityType.BLAZE) {
             return;
         }
 
+        /*
+         * ========================================
+         * MOTIVOS PERMITIDOS
+         * ========================================
+         *
+         * NATURAL: aparición natural.
+         * SPAWNER: generadores de mobs.
+         *
+         * No transformar los creados mediante:
+         * - Comandos.
+         * - Huevos.
+         * - Plugins con SpawnReason.CUSTOM.
+         */
         CreatureSpawnEvent.SpawnReason reason =
                 event.getSpawnReason();
 
@@ -70,64 +100,92 @@ public final class BlazeSpawnListener implements Listener {
 
         Blaze blaze = (Blaze) event.getEntity();
 
+        /*
+         * ========================================
+         * EVITAR DOBLE ASIGNACIÓN
+         * ========================================
+         */
         if (registry.getMobId(blaze).isPresent()) {
             return;
         }
 
-        /*
-         * ========================================
-         * DELTAS DE BASALTO - 100% CORRUPTO
-         * ========================================
-         *
-         * El bioma tiene prioridad sobre
-         * la distribución de las fortalezas.
-         */
-        if (blaze.getLocation()
-                .getBlock()
-                .getBiome() == Biome.BASALT_DELTAS) {
-
-            corruptedBlaze.apply(blaze);
-            return;
-        }
-
-        /*
-         * ========================================
-         * FUERA DE FORTALEZAS
-         * ========================================
-         *
-         * No transformar otros Blazes
-         * aparecidos fuera de los lugares
-         * contemplados en el documento.
-         */
-        if (!FortressLocationUtil.isInFortress(
-                blaze.getLocation()
-        )) {
-            return;
-        }
+        Location location = blaze.getLocation();
 
         /*
          * ========================================
          * FORTALEZAS DEL NETHER
-         *
-         * 55% Blaze Corrupto
-         * 10% Blaze Fantasmal
-         * 35% Rey Blaze
          * ========================================
+         *
+         * Las fortalezas tienen prioridad
+         * sobre el bioma donde se encuentran.
+         *
+         * Distribución:
+         *
+         * Blaze Corrupto:   55%
+         * Blaze Fantasmal:  10%
+         * Rey Blaze:        35%
          */
-        int roll = ThreadLocalRandom
-                .current()
-                .nextInt(100);
+        if (FortressLocationUtil.isInFortress(location)) {
 
-        if (roll < 55) {
+            int roll = ThreadLocalRandom
+                    .current()
+                    .nextInt(100);
+
+            /*
+             * BLAZE CORRUPTO: 55%
+             */
+            if (roll < 55) {
+
+                corruptedBlaze.apply(blaze);
+                return;
+            }
+
+            /*
+             * BLAZE FANTASMAL: 10%
+             */
+            if (roll < 65) {
+
+                phantomBlaze.apply(blaze);
+                return;
+            }
+
+            /*
+             * REY BLAZE: 35%
+             */
+            blazeKing.apply(blaze);
+            return;
+        }
+
+        /*
+         * ========================================
+         * DELTAS DE BASALTO
+         * ========================================
+         *
+         * Fuera de fortalezas:
+         *
+         * 100% Blaze Corrupto.
+         *
+         * El nuevo sistema natural se encarga
+         * de transformar los cubos de magma
+         * en Blazes Corruptos.
+         *
+         * Este bloque también permite
+         * transformar un Blaze natural
+         * que aparezca en ese bioma.
+         */
+        if (location.getBlock().getBiome()
+                == Biome.BASALT_DELTAS) {
+
             corruptedBlaze.apply(blaze);
-            return;
         }
 
-        if (roll < 65) {
-            phantomBlaze.apply(blaze);
-            return;
-        }
-
-        blazeKing.apply(blaze);
+        /*
+         * ========================================
+         * OTROS LUGARES
+         * ========================================
+         *
+         * No modificar Blazes fuera de
+         * fortalezas ni Deltas de Basalto.
+         */
     }
 }

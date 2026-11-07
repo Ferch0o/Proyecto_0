@@ -283,10 +283,10 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         /*
          * ========================================
-         * DÍA 20 - SPAWN POR BIOMAS
+         * DÍA 20 - GENERACIÓN NATURAL POR BIOMAS
          * ========================================
          */
-        day20Bootstrap.registerBiomeSpawnTask(
+        day20Bootstrap.registerBiomeNaturalSpawnListener(
                 dayManager,
                 mobRegistry
         );
