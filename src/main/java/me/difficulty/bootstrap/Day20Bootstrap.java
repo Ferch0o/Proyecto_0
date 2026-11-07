@@ -8,7 +8,6 @@ import me.difficulty.core.items.CustomItemRegistry;
 import me.difficulty.core.mobs.CustomMobRegistry;
 
 import me.difficulty.features.day20.items.*;
-import me.difficulty.features.day20.items.ElementalRodProtectionListener;
 import me.difficulty.features.day20.mobs.blazes.*;
 import me.difficulty.features.day20.mobs.ghasts.*;
 import me.difficulty.features.day20.mobs.withers.*;
