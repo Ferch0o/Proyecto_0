@@ -3,7 +3,9 @@ package me.difficulty.features.day20.mobs.withers;
 
 import me.difficulty.core.day.DayManager;
 import me.difficulty.core.mobs.CustomMobRegistry;
+import me.difficulty.features.day20.mobs.FortressLocationUtil;
 
+import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.WitherSkeleton;
 
@@ -37,33 +39,26 @@ public final class WitherSkeletonSpawnListener
 
     /*
      * ========================================
-     * GENERACIÓN DE WITHER SKELETONS
+     * GENERACIÓN - DÍA 20
      * ========================================
      */
     @EventHandler(
             priority = EventPriority.HIGHEST,
             ignoreCancelled = true
     )
-    public void onSpawn(CreatureSpawnEvent event) {
+    public void onSpawn(
+            CreatureSpawnEvent event
+    ) {
 
-        /*
-         * ACTIVACIÓN DESDE EL DÍA 20
-         */
         if (!dayManager.isAtLeast(20)) {
             return;
         }
 
-        /*
-         * SOLO WITHER SKELETON
-         */
         if (event.getEntityType()
                 != EntityType.WITHER_SKELETON) {
             return;
         }
 
-        /*
-         * SPAWNS PERMITIDOS
-         */
         CreatureSpawnEvent.SpawnReason reason =
                 event.getSpawnReason();
 
@@ -75,19 +70,41 @@ public final class WitherSkeletonSpawnListener
         WitherSkeleton skeleton =
                 (WitherSkeleton) event.getEntity();
 
-        /*
-         * EVITAR DOBLE ASIGNACIÓN
-         */
         if (registry.getMobId(skeleton).isPresent()) {
             return;
         }
 
         /*
          * ========================================
-         * DISTRIBUCIÓN
+         * VALLE DE ARENA DE ALMAS
+         * 100% WITHER CORRUPTO
+         * ========================================
+         */
+        if (skeleton.getLocation()
+                .getBlock()
+                .getBiome() == Biome.SOUL_SAND_VALLEY) {
+
+            corrupted.apply(skeleton);
+            return;
+        }
+
+        /*
+         * ========================================
+         * OTROS LUGARES
+         * ========================================
+         */
+        if (!FortressLocationUtil.isInFortress(
+                skeleton.getLocation()
+        )) {
+            return;
+        }
+
+        /*
+         * ========================================
+         * FORTALEZAS DEL NETHER
          *
-         * 0 - 69  = Wither Corrupto (70%)
-         * 70 - 99 = Guardián (30%)
+         * 70% Wither Corrupto
+         * 30% Guardián de la Fortaleza
          * ========================================
          */
         int roll = ThreadLocalRandom

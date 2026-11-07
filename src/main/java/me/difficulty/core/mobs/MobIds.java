@@ -91,4 +91,13 @@ public final class MobIds {
     public static final String DEMONIC_GHAST =
             "demonic_ghast";
 
+    // =========================
+    // DÍA 20 - PIGMAN
+    // =========================
+
+    public static final String CORRUPTED_PIGMAN =
+            "corrupted_pigman";
+
+    public static final String NINJA_PIGMAN =
+            "ninja_pigman";
 }

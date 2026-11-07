@@ -283,10 +283,31 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         /*
          * ========================================
+         * DÍA 20 - SPAWN POR BIOMAS
+         * ========================================
+         */
+        day20Bootstrap.registerBiomeSpawnTask(
+                dayManager,
+                mobRegistry
+        );
+
+        /*
+         * ========================================
          * DÍA 20 - GHASTS
          * ========================================
          */
         day20Bootstrap.registerGhastContent(
+                dayManager,
+                mobRegistry,
+                itemRegistry
+        );
+
+        /*
+         * ========================================
+         * DÍA 20 - PIGMAN CORRUPTO Y NINJA
+         * ========================================
+         */
+        day20Bootstrap.registerPigmanContent(
                 dayManager,
                 mobRegistry,
                 itemRegistry

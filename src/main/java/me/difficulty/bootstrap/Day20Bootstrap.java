@@ -8,8 +8,10 @@ import me.difficulty.core.items.CustomItemRegistry;
 import me.difficulty.core.mobs.CustomMobRegistry;
 
 import me.difficulty.features.day20.items.*;
+import me.difficulty.features.day20.mobs.Day20BiomeSpawnTask;
 import me.difficulty.features.day20.mobs.blazes.*;
 import me.difficulty.features.day20.mobs.ghasts.*;
+import me.difficulty.features.day20.mobs.pigmen.*;
 import me.difficulty.features.day20.mobs.withers.*;
 import org.bukkit.plugin.PluginManager;
 
@@ -371,6 +373,26 @@ public final class Day20Bootstrap {
 
     /*
      * ========================================
+     * DÍA 20 - SPAWNS ESPECIALES POR BIOMA
+     * ========================================
+     */
+    public void registerBiomeSpawnTask(
+            DayManager dayManager,
+            CustomMobRegistry mobRegistry
+    ) {
+
+        new Day20BiomeSpawnTask(
+                dayManager,
+                mobRegistry
+        ).runTaskTimer(
+                plugin,
+                200L,
+                200L
+        );
+    }
+
+    /*
+     * ========================================
      * DÍA 20 - GHASTS PERSONALIZADOS
      * ========================================
      */
@@ -485,6 +507,112 @@ public final class Day20Bootstrap {
                         dayManager,
                         demonic,
                         "Ghast Demoníaco"
+                )
+        );
+    }
+
+    /*
+     * ========================================
+     * DÍA 20 - PIGMAN CORRUPTO Y NINJA
+     * ========================================
+     */
+    public void registerPigmanContent(
+            DayManager dayManager,
+            CustomMobRegistry mobRegistry,
+            CustomItemRegistry itemRegistry
+    ) {
+
+        /*
+         * ========================================
+         * REGISTRAR MOBS
+         * ========================================
+         */
+        CorruptedPigman corrupted =
+                new CorruptedPigman(plugin);
+
+        NinjaPigman ninja =
+                new NinjaPigman(plugin);
+
+        mobRegistry.register(corrupted);
+        mobRegistry.register(ninja);
+
+        /*
+         * ========================================
+         * REGISTRAR CARNE ELEMENTAL
+         * ========================================
+         */
+        ElementalMeat elementalMeat =
+                new ElementalMeat(plugin);
+
+        itemRegistry.register(elementalMeat);
+
+        /*
+         * ========================================
+         * REGISTRAR LISTENERS
+         * ========================================
+         */
+        PluginManager pm = plugin.getServer()
+                .getPluginManager();
+
+        pm.registerEvents(
+                new PigmanSpawnListener(
+                        dayManager,
+                        mobRegistry,
+                        corrupted,
+                        ninja
+                ),
+                plugin
+        );
+
+        pm.registerEvents(
+                new PigmanCombatListener(
+                        dayManager,
+                        mobRegistry
+                ),
+                plugin
+        );
+
+        pm.registerEvents(
+                new PigmanDropListener(
+                        dayManager,
+                        mobRegistry,
+                        elementalMeat
+                ),
+                plugin
+        );
+
+        pm.registerEvents(
+                new ElementalMeatConsumeListener(
+                        plugin,
+                        elementalMeat
+                ),
+                plugin
+        );
+
+        /*
+         * ========================================
+         * COMANDOS DE PRUEBA
+         * ========================================
+         */
+        Objects.requireNonNull(
+                plugin.getCommand("spawncorruptedpigman"),
+                "Falta spawncorruptedpigman en plugin.yml"
+        ).setExecutor(
+                new SpawnPigmanCommand(
+                        dayManager,
+                        corrupted,
+                        "Pigman Corrupto"
+                )
+        );
+
+        Objects.requireNonNull(
+                plugin.getCommand("spawnninja"),
+                "Falta spawnninja en plugin.yml"
+        ).setExecutor(
+                new SpawnPigmanCommand(
+                        dayManager,
+                        ninja,
+                        "Ninja"
                 )
         );
     }

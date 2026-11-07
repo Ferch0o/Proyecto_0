@@ -117,6 +117,14 @@ commands:
     description: Genera un Ghast Demoníaco para pruebas.
     usage: /spawndemonicghast
     permission: difficulty.admin
+  spawncorruptedpigman:
+    description: Genera un Pigman Corrupto para pruebas.
+    usage: /spawncorruptedpigman
+    permission: difficulty.admin
+  spawnninja:
+    description: Genera un Ninja para pruebas.
+    usage: /spawnninja
+    permission: difficulty.admin
 
 permissions:
   difficulty.setday:
