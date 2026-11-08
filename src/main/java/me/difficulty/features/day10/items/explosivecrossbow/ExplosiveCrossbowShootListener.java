@@ -2,14 +2,12 @@ package me.difficulty.features.day10.items.explosivecrossbow;
 
 import me.difficulty.core.day.DayManager;
 
+import me.difficulty.core.mobs.MobIds;
 import org.bukkit.*;
 
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -51,11 +49,9 @@ public class ExplosiveCrossbowShootListener
      *
      * Esto NO controla el daño.
      */
-    private static final int FIREWORK_POWER =
-            1;
+    private static final int FIREWORK_POWER = 1;
 
-    private static final float EXPLOSION_POWER =
-            3F;
+    private static final float EXPLOSION_POWER = 3F;
 
     /*
      * ========================================
@@ -66,8 +62,7 @@ public class ExplosiveCrossbowShootListener
      * las entidades cercanas antes
      * de generar la explosión.
      */
-    private static final double VELOCITY_CHECK_RADIUS =
-            6.0;
+    private static final double VELOCITY_CHECK_RADIUS = 6.0;
 
     /*
      * ========================================
@@ -87,6 +82,9 @@ public class ExplosiveCrossbowShootListener
      * creados por nuestra Ballesta Explosiva.
      */
     private final NamespacedKey explosiveProjectileKey;
+
+    private final NamespacedKey explosivePiglinProjectileKey;
+    private final NamespacedKey mobIdKey;
 
     // Evita cancelar nuestros propios eventos de dano personalizado.
     private final Set<UUID> applyingCustomDamage = new HashSet<>();
@@ -113,12 +111,21 @@ public class ExplosiveCrossbowShootListener
         this.dayManager =
                 dayManager;
 
-
         this.explosiveProjectileKey =
                 new NamespacedKey(
                         plugin,
                         "explosive_crossbow_projectile"
                 );
+
+        this.explosivePiglinProjectileKey = new NamespacedKey(
+                plugin,
+                "explosive_piglin_projectile"
+        );
+
+        this.mobIdKey = new NamespacedKey(
+                plugin,
+                "custom_mob_id"
+        );
     }
 
 
@@ -136,21 +143,17 @@ public class ExplosiveCrossbowShootListener
             EntityShootBowEvent event
     ) {
 
-
         /*
          * ========================================
          * OBTENER ARMA
          * ========================================
          */
-
         ItemStack weapon =
                 event.getBow();
-
 
         if (weapon == null) {
             return;
         }
-
 
         /*
          * ========================================
@@ -169,7 +172,6 @@ public class ExplosiveCrossbowShootListener
             return;
         }
 
-
         /*
          * ========================================
          * RESTRICCIÓN DÍA 10
@@ -178,9 +180,7 @@ public class ExplosiveCrossbowShootListener
 
         if (!dayManager.isAtLeast(10)) {
 
-
             event.setCancelled(true);
-
 
             if (event.getEntity()
                     instanceof Player player) {
@@ -191,10 +191,8 @@ public class ExplosiveCrossbowShootListener
                 );
             }
 
-
             return;
         }
-
 
         /*
          * ========================================
@@ -217,7 +215,6 @@ public class ExplosiveCrossbowShootListener
         Entity originalProjectile =
                 event.getProjectile();
 
-
         /*
          * Guardamos la velocidad
          * del proyectil original.
@@ -227,7 +224,6 @@ public class ExplosiveCrossbowShootListener
                 originalProjectile
                         .getVelocity()
                         .clone();
-
 
         /*
          * ========================================
@@ -241,7 +237,6 @@ public class ExplosiveCrossbowShootListener
                         .spawn(
                                 originalProjectile
                                         .getLocation(),
-
                                 Firework.class,
 
                                 spawnedFirework -> {
@@ -352,6 +347,31 @@ public class ExplosiveCrossbowShootListener
                 velocity
         );
 
+        /*
+         * Identificar los cohetes disparados
+         * específicamente por el Piglin Explosivo.
+         *
+         * Guardamos la marca en el proyectil:
+         * seguirá funcionando aunque el Piglin
+         * muera antes de que explote.
+         */
+        if (event.getEntity() instanceof Piglin piglin) {
+
+            String mobId = piglin.getPersistentDataContainer()
+                    .get(
+                            mobIdKey,
+                            PersistentDataType.STRING
+                    );
+
+            if (MobIds.EXPLOSIVE_PIGLIN.equals(mobId)) {
+
+                firework.getPersistentDataContainer().set(
+                        explosivePiglinProjectileKey,
+                        PersistentDataType.BYTE,
+                        (byte) 1
+                );
+            }
+        }
 
         /*
          * ========================================
@@ -390,11 +410,8 @@ public class ExplosiveCrossbowShootListener
     public void onFireworkExplode(
             FireworkExplodeEvent event
     ) {
-
-
         Firework firework =
                 event.getEntity();
-
 
         /*
          * ========================================
@@ -449,49 +466,37 @@ public class ExplosiveCrossbowShootListener
         Map<LivingEntity, Vector> previousVelocities =
                 new HashMap<>();
 
+        /*
+         * Identificar si el cohete pertenece
+         * a un Piglin Explosivo.
+         */
+        boolean explosivePiglinShot = firework
+                .getPersistentDataContainer()
+                .has(
+                        explosivePiglinProjectileKey,
+                        PersistentDataType.BYTE
+                );
 
-        for (Entity nearby :
-                firework
-                        .getWorld()
-                        .getNearbyEntities(
-                                firework.getLocation(),
-                                VELOCITY_CHECK_RADIUS,
-                                VELOCITY_CHECK_RADIUS,
-                                VELOCITY_CHECK_RADIUS
-                        )) {
-
+        for (Entity nearby : firework.getWorld().getNearbyEntities(
+                firework.getLocation(),
+                VELOCITY_CHECK_RADIUS,
+                VELOCITY_CHECK_RADIUS,
+                VELOCITY_CHECK_RADIUS
+        )) {
 
             /*
-             * Solo entidades vivas.
-             *
-             * Jugadores
-             * Zombies
-             * Esqueletos
-             * Animales
-             * etc.
+             * Guardar velocidades de todas
+             * las entidades vivas cercanas.
              */
-
-            if (!(nearby
-                    instanceof LivingEntity living)) {
-
+            if (!(nearby instanceof LivingEntity living)) {
                 continue;
             }
 
-
-            /*
-             * Guardamos exactamente
-             * la velocidad que tenía
-             * antes de la explosión.
-             */
-
             previousVelocities.put(
                     living,
-                    living
-                            .getVelocity()
-                            .clone()
+                    living.getVelocity().clone()
             );
         }
-
 
         /*
          * ========================================
@@ -533,6 +538,35 @@ public class ExplosiveCrossbowShootListener
             // Solamente dañar entidades vivas.
             if (!(nearby instanceof LivingEntity target)) {
                 continue;
+            }
+
+            /*
+             * ========================================
+             * PROTECCIÓN ENTRE VARIANTES DE PIGLINS
+             * ========================================
+             *
+             * Los cohetes del Piglin Explosivo
+             * pueden dañar cualquier entidad viva,
+             * excepto las tres variantes custom.
+             *
+             * La Ballesta Explosiva utilizada por
+             * jugadores no tiene esta restricción.
+             */
+            if (explosivePiglinShot) {
+
+                String targetMobId = target
+                        .getPersistentDataContainer()
+                        .get(
+                                mobIdKey,
+                                PersistentDataType.STRING
+                        );
+
+                if (MobIds.CORRUPTED_PIGLIN.equals(targetMobId)
+                        || MobIds.EXPLOSIVE_PIGLIN.equals(targetMobId)
+                        || MobIds.KING_PIGLIN.equals(targetMobId)) {
+
+                    continue;
+                }
             }
 
             if (!target.isValid() || target.isDead()) {
@@ -591,7 +625,6 @@ public class ExplosiveCrossbowShootListener
                 previousVelocities
         );
 
-
         /*
          * ========================================
          * QUITAR EMPUJE 1 TICK DESPUÉS
@@ -615,7 +648,6 @@ public class ExplosiveCrossbowShootListener
                         )
                 );
     }
-
 
     /*
      * ========================================
@@ -666,15 +698,11 @@ public class ExplosiveCrossbowShootListener
     private void restoreVelocities(
             Map<LivingEntity, Vector> previousVelocities
     ) {
-
-
         for (Map.Entry<LivingEntity, Vector> entry :
                 previousVelocities.entrySet()) {
 
-
             LivingEntity entity =
                     entry.getKey();
-
 
             /*
              * Si murió por la explosión
@@ -687,7 +715,6 @@ public class ExplosiveCrossbowShootListener
 
                 continue;
             }
-
 
             /*
              * Restauramos exactamente

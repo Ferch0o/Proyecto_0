@@ -100,4 +100,17 @@ public final class MobIds {
 
     public static final String NINJA_PIGMAN =
             "ninja_pigman";
+
+    // =========================
+    // DÍA 20 - PIGLINS
+    // =========================
+
+    public static final String CORRUPTED_PIGLIN =
+            "corrupted_piglin";
+
+    public static final String EXPLOSIVE_PIGLIN =
+            "explosive_piglin";
+
+    public static final String KING_PIGLIN =
+            "king_piglin";
 }

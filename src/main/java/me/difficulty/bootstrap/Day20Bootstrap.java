@@ -7,10 +7,12 @@ import me.difficulty.core.day.DayManager;
 import me.difficulty.core.items.CustomItemRegistry;
 import me.difficulty.core.mobs.CustomMobRegistry;
 
+import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbow;
 import me.difficulty.features.day20.items.*;
 import me.difficulty.features.day20.mobs.Day20BiomeNaturalSpawnListener;
 import me.difficulty.features.day20.mobs.blazes.*;
 import me.difficulty.features.day20.mobs.ghasts.*;
+import me.difficulty.features.day20.mobs.piglins.*;
 import me.difficulty.features.day20.mobs.pigmen.*;
 import me.difficulty.features.day20.mobs.withers.*;
 import org.bukkit.plugin.PluginManager;
@@ -616,6 +618,177 @@ public final class Day20Bootstrap {
                         dayManager,
                         ninja,
                         "Ninja"
+                )
+        );
+    }
+
+    /*
+     * ========================================
+     * DÍA 20 - PIGLINS PERSONALIZADOS
+     * ========================================
+     */
+    public void registerPiglinContent(
+            DayManager dayManager,
+            CustomMobRegistry mobRegistry,
+            CustomItemRegistry itemRegistry
+    ) {
+
+        /*
+         * REUTILIZAR BALLESTA EXPLOSIVA.
+         */
+        ExplosiveCrossbow crossbow =
+                new ExplosiveCrossbow(plugin);
+
+        /*
+         * ========================================
+         * REGISTRAR LAS TRES VARIANTES
+         * ========================================
+         */
+        CorruptedPiglin corrupted =
+                new CorruptedPiglin(plugin);
+
+        ExplosivePiglin explosive =
+                new ExplosivePiglin(
+                        plugin,
+                        crossbow
+                );
+
+        KingPiglin king =
+                new KingPiglin(plugin);
+
+        mobRegistry.register(corrupted);
+        mobRegistry.register(explosive);
+        mobRegistry.register(king);
+
+        /*
+         * ========================================
+         * REGISTRAR ORO ELEMENTAL
+         * ========================================
+         */
+        ElementalGold elementalGold =
+                new ElementalGold(plugin);
+
+        itemRegistry.register(elementalGold);
+
+        PluginManager pm = plugin.getServer()
+                .getPluginManager();
+
+        /*
+         * ========================================
+         * APARICIONES
+         * ========================================
+         */
+        pm.registerEvents(
+                new PiglinSpawnListener(
+                        dayManager,
+                        mobRegistry,
+                        corrupted,
+                        explosive,
+                        king
+                ),
+                plugin
+        );
+
+        /*
+         * ========================================
+         * COMBATE
+         * ========================================
+         */
+        pm.registerEvents(
+                new PiglinCombatListener(
+                        dayManager,
+                        mobRegistry
+                ),
+                plugin
+        );
+
+        /*
+         * ========================================
+         * DROPS
+         * ========================================
+         */
+        pm.registerEvents(
+                new PiglinDropListener(
+                        dayManager,
+                        mobRegistry,
+                        elementalGold
+                ),
+                plugin
+        );
+
+        /*
+         * ========================================
+         * ORO Y TRUEQUES
+         * ========================================
+         */
+        pm.registerEvents(
+                new PiglinGoldListener(
+                        plugin,
+                        dayManager,
+                        mobRegistry
+                ),
+                plugin
+        );
+
+        /*
+         * ========================================
+         * AGRESIVIDAD GENERAL
+         * ========================================
+         *
+         * Cada 10 ticks.
+         */
+        new PiglinAggressionTask(
+                plugin,
+                dayManager,
+                mobRegistry
+        ).runTaskTimer(
+                plugin,
+                20L,
+                10L
+        );
+
+        /*
+         * ========================================
+         * COMANDOS DE PRUEBA
+         * ========================================
+         */
+
+        /*
+         * PIGLIN CORRUPTO
+         */
+        Objects.requireNonNull(
+                plugin.getCommand("spawncorruptedpiglin"),
+                "Falta spawncorruptedpiglin en plugin.yml"
+        ).setExecutor(
+                new SpawnPiglinCommand(
+                        dayManager,
+                        corrupted
+                )
+        );
+
+        /*
+         * PIGLIN EXPLOSIVO
+         */
+        Objects.requireNonNull(
+                plugin.getCommand("spawnexplosivepiglin"),
+                "Falta spawnexplosivepiglin en plugin.yml"
+        ).setExecutor(
+                new SpawnExplosivePiglinCommand(
+                        dayManager,
+                        explosive
+                )
+        );
+
+        /*
+         * REY PIGLIN
+         */
+        Objects.requireNonNull(
+                plugin.getCommand("spawnkingpiglin"),
+                "Falta spawnkingpiglin en plugin.yml"
+        ).setExecutor(
+                new SpawnKingPiglinCommand(
+                        dayManager,
+                        king
                 )
         );
     }

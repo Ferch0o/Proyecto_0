@@ -125,6 +125,18 @@ commands:
     description: Genera un Ninja para pruebas.
     usage: /spawnninja
     permission: difficulty.admin
+  spawncorruptedpiglin:
+    description: Genera un Piglin Corrupto para pruebas.
+    usage: /spawncorruptedpiglin
+    permission: difficulty.admin
+  spawnexplosivepiglin:
+    description: Genera un Piglin Explosivo para pruebas.
+    usage: /spawnexplosivepiglin
+    permission: difficulty.admin
+  spawnkingpiglin:
+    description: Genera un Rey Piglin para pruebas.
+    usage: /spawnkingpiglin
+    permission: difficulty.admin
 
 permissions:
   difficulty.setday:
