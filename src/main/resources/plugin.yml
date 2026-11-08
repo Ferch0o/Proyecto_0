@@ -137,6 +137,18 @@ commands:
     description: Genera un Rey Piglin para pruebas.
     usage: /spawnkingpiglin
     permission: difficulty.admin
+  spawncorruptedenderman:
+    description: Genera un Enderman Corrupto para pruebas.
+    usage: /spawncorruptedenderman
+    permission: difficulty.admin
+  spawnancestralenderman:
+    description: Genera un Enderman Ancestral para pruebas.
+    usage: /spawnancestralenderman
+    permission: difficulty.admin
+  giveelementalpearl:
+    description: Entrega 16 Perlas Elementales para pruebas.
+    usage: /giveelementalpearl
+    permission: difficulty.admin
 
 permissions:
   difficulty.setday:

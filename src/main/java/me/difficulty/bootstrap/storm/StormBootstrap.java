@@ -119,7 +119,8 @@ public final class StormBootstrap {
         // ENDER PEARLS
         pm.registerEvents(
                 new StormEnderPearlListener(
-                        stormManager
+                        stormManager,
+                        plugin
                 ),
                 plugin
         );

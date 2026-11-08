@@ -16,11 +16,10 @@ import java.util.List;
 public final class ElementalGold extends CustomItem {
 
     public ElementalGold(JavaPlugin plugin) {
-
         super(
                 plugin,
                 ItemIds.ELEMENTAL_GOLD,
-                Material.GOLD_INGOT,
+                Material.IRON_INGOT,
                 ItemIds.ELEMENTAL_GOLD_MODEL
         );
     }

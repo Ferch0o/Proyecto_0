@@ -113,4 +113,14 @@ public final class MobIds {
 
     public static final String KING_PIGLIN =
             "king_piglin";
+
+    // =========================
+    // DÍA 20 - ENDERMEN
+    // =========================
+
+    public static final String CORRUPTED_ENDERMAN =
+            "corrupted_enderman";
+
+    public static final String ANCESTRAL_ENDERMAN =
+            "ancestral_enderman";
 }

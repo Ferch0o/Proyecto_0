@@ -1,7 +1,9 @@
 package me.difficulty.features.storm.day10.listeners;
 
+import me.difficulty.features.day20.items.ElementalPearlTeleportUtil;
 import me.difficulty.features.storm.core.StormManager;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -11,6 +13,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -20,7 +23,7 @@ public class StormEnderPearlListener
 
 
     private final StormManager stormManager;
-
+    private final NamespacedKey elementalPearlProjectileKey;
 
     /*
      * ========================================
@@ -32,14 +35,17 @@ public class StormEnderPearlListener
     private static final int FAILURE_CHANCE = 10;
 
     public StormEnderPearlListener(
-            StormManager stormManager
+            StormManager stormManager,
+            JavaPlugin plugin
     ) {
+        this.stormManager = stormManager;
 
-        this.stormManager =
-                stormManager;
+        this.elementalPearlProjectileKey =
+                new NamespacedKey(
+                        plugin,
+                        "elemental_pearl_projectile"
+                );
     }
-
-
     /*
      * ========================================
      * ENDER PEARL
@@ -89,18 +95,27 @@ public class StormEnderPearlListener
             return;
         }
 
-
         /*
          * ========================================
-         * TIRADA DEL 5%
+         * PERLA ELEMENTAL
          * ========================================
+         *
+         * No puede fallar por nuestra Tormenta.
+         *
+         * La identificación depende de la
+         * perla lanzada, no del inventario.
          */
+        if (ElementalPearlTeleportUtil.isElementalTeleport(
+                event,
+                elementalPearlProjectileKey
+        )) {
+            return;
+        }
 
         int roll =
                 ThreadLocalRandom
                         .current()
                         .nextInt(100);
-
 
         /*
          * 0,1,2,3,4

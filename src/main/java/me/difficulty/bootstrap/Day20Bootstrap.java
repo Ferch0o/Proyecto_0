@@ -11,6 +11,7 @@ import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbow;
 import me.difficulty.features.day20.items.*;
 import me.difficulty.features.day20.mobs.Day20BiomeNaturalSpawnListener;
 import me.difficulty.features.day20.mobs.blazes.*;
+import me.difficulty.features.day20.mobs.endermen.*;
 import me.difficulty.features.day20.mobs.ghasts.*;
 import me.difficulty.features.day20.mobs.piglins.*;
 import me.difficulty.features.day20.mobs.pigmen.*;
@@ -675,6 +676,16 @@ public final class Day20Bootstrap {
 
         /*
          * ========================================
+         * PROTECCIÓN DEL ORO ELEMENTAL
+         * ========================================
+         */
+        pm.registerEvents(
+                new ElementalGoldProtectionListener(plugin),
+                plugin
+        );
+
+        /*
+         * ========================================
          * APARICIONES
          * ========================================
          */
@@ -789,6 +800,173 @@ public final class Day20Bootstrap {
                 new SpawnKingPiglinCommand(
                         dayManager,
                         king
+                )
+        );
+    }
+
+    /*
+     * ========================================
+     * DÍA 20 - ENDERMEN PERSONALIZADOS
+     * ========================================
+     */
+    public void registerEndermanContent(
+            DayManager dayManager,
+            CustomMobRegistry mobRegistry,
+            CustomItemRegistry itemRegistry
+    ) {
+
+        /*
+         * ========================================
+         * REGISTRAR VARIANTES
+         * ========================================
+         */
+        CorruptedEnderman corrupted =
+                new CorruptedEnderman(plugin);
+
+        AncestralEnderman ancestral =
+                new AncestralEnderman(plugin);
+
+        mobRegistry.register(corrupted);
+        mobRegistry.register(ancestral);
+
+        /*
+         * ========================================
+         * REGISTRAR PERLA ELEMENTAL
+         * ========================================
+         */
+        ElementalPearl elementalPearl =
+                new ElementalPearl(plugin);
+
+        itemRegistry.register(elementalPearl);
+
+        PluginManager pm = plugin.getServer()
+                .getPluginManager();
+
+        /*
+         * ========================================
+         * APARICIONES: 70% / 30%
+         * ========================================
+         */
+        pm.registerEvents(
+                new EndermanSpawnListener(
+                        dayManager,
+                        mobRegistry,
+                        corrupted,
+                        ancestral
+                ),
+                plugin
+        );
+
+        /*
+         * ========================================
+         * COMBATE
+         * ========================================
+         */
+        pm.registerEvents(
+                new EndermanCombatListener(
+                        dayManager,
+                        mobRegistry
+                ),
+                plugin
+        );
+
+        /*
+         * ========================================
+         * DROPS
+         * ========================================
+         */
+        pm.registerEvents(
+                new EndermanDropListener(
+                        dayManager,
+                        mobRegistry,
+                        elementalPearl
+                ),
+                plugin
+        );
+
+        /*
+         * ========================================
+         * VELOCIDAD DEL ENDERMAN CORRUPTO
+         * ========================================
+         */
+        new CorruptedEndermanSpeedTask(
+                dayManager,
+                mobRegistry
+        ).runTaskTimer(
+                plugin,
+                20L,
+                10L
+        );
+
+        /*
+         * ========================================
+         * PROTECCIÓN DE PERLAS ELEMENTALES
+         * ========================================
+         */
+        pm.registerEvents(
+                new ElementalPearlProtectionListener(
+                        elementalPearl
+                ),
+                plugin
+        );
+
+        /*
+         * ========================================
+         * TELETRANSPORTE DE PERLAS ELEMENTALES
+         * ========================================
+         */
+        pm.registerEvents(
+                new ElementalPearlTeleportListener(
+                        plugin,
+                        elementalPearl
+                ),
+                plugin
+        );
+
+        /*
+         * ========================================
+         * COMANDO - ENDERMAN CORRUPTO
+         * ========================================
+         */
+        Objects.requireNonNull(
+                plugin.getCommand("spawncorruptedenderman"),
+                "Falta spawncorruptedenderman en plugin.yml"
+        ).setExecutor(
+                new SpawnEndermanCommand(
+                        dayManager,
+                        corrupted,
+                        "Enderman Corrupto"
+                )
+        );
+
+        /*
+         * ========================================
+         * COMANDO - ENDERMAN ANCESTRAL
+         * ========================================
+         */
+        Objects.requireNonNull(
+                plugin.getCommand("spawnancestralenderman"),
+                "Falta spawnancestralenderman en plugin.yml"
+        ).setExecutor(
+                new SpawnEndermanCommand(
+                        dayManager,
+                        ancestral,
+                        "Enderman Ancestral"
+                )
+        );
+
+        /*
+         * ========================================
+         * COMANDO - PERLAS ELEMENTALES
+         * ========================================
+         */
+        Objects.requireNonNull(
+                plugin.getCommand("giveelementalpearl"),
+                "Falta giveelementalpearl en plugin.yml"
+        ).setExecutor(
+                new GiveElementalPearlCommand(
+                        dayManager,
+                        elementalPearl
                 )
         );
     }
