@@ -1,20 +1,14 @@
 
 package me.difficulty.features.day20.items;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-
 import org.bukkit.NamespacedKey;
-
 import org.bukkit.entity.Player;
 
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,11 +24,16 @@ public final class ElementalMeatConsumeListener
      * CONFIGURACIÓN
      * ========================================
      */
-    private static final long COOLDOWN_MS = 15_000L;
+    private static final int COOLDOWN_TICKS =
+            ElementalMeat.COOLDOWN_SECONDS * 20;
+
+    private static final long COOLDOWN_MS =
+            ElementalMeat.COOLDOWN_SECONDS * 1000L;
 
     private static final int REGEN_DURATION = 40;
     private static final int HUNGER_DURATION = 80;
 
+    private final JavaPlugin plugin;
     private final ElementalMeat elementalMeat;
     private final NamespacedKey cooldownKey;
 
@@ -42,59 +41,13 @@ public final class ElementalMeatConsumeListener
             JavaPlugin plugin,
             ElementalMeat elementalMeat
     ) {
+
+        this.plugin = plugin;
         this.elementalMeat = elementalMeat;
 
-        this.cooldownKey = new NamespacedKey(
+        cooldownKey = new NamespacedKey(
                 plugin,
                 "elemental_meat_cooldown_until"
-        );
-    }
-
-    /*
-     * ========================================
-     * BLOQUEAR USO DURANTE COOLDOWN
-     * ========================================
-     */
-    @EventHandler(
-            priority = EventPriority.HIGHEST,
-            ignoreCancelled = true
-    )
-    public void onInteract(PlayerInteractEvent event) {
-
-        Action action = event.getAction();
-
-        if (action != Action.RIGHT_CLICK_AIR
-                && action != Action.RIGHT_CLICK_BLOCK) {
-            return;
-        }
-
-        if (!elementalMeat.isItem(event.getItem())) {
-            return;
-        }
-
-        Player player = event.getPlayer();
-
-        long remaining = getRemainingCooldown(player);
-
-        if (remaining <= 0L) {
-            return;
-        }
-
-        /*
-         * Impedir iniciar el consumo.
-         * No bloqueamos la interacción
-         * normal con cofres o puertas.
-         */
-        event.setUseItemInHand(Event.Result.DENY);
-
-        long seconds = (remaining + 999L) / 1000L;
-
-        player.sendActionBar(
-                Component.text(
-                        "Carne Elemental: espera "
-                                + seconds + " s.",
-                        NamedTextColor.RED
-                )
         );
     }
 
@@ -107,7 +60,9 @@ public final class ElementalMeatConsumeListener
             priority = EventPriority.HIGHEST,
             ignoreCancelled = true
     )
-    public void onConsume(PlayerItemConsumeEvent event) {
+    public void onConsume(
+            PlayerItemConsumeEvent event
+    ) {
 
         if (!elementalMeat.isItem(event.getItem())) {
             return;
@@ -116,11 +71,11 @@ public final class ElementalMeatConsumeListener
         Player player = event.getPlayer();
 
         /*
-         * Segunda comprobación para evitar
-         * cualquier consumo durante cooldown.
+         * Verificar cooldown persistente.
          */
-        if (getRemainingCooldown(player) > 0L) {
+        long remaining = getRemainingCooldown(player);
 
+        if (remaining > 0L) {
             event.setCancelled(true);
             return;
         }
@@ -157,6 +112,11 @@ public final class ElementalMeatConsumeListener
                 )
         );
 
+        /*
+         * ========================================
+         * GUARDAR COOLDOWN
+         * ========================================
+         */
         player.getPersistentDataContainer().set(
                 cooldownKey,
                 PersistentDataType.LONG,
@@ -164,9 +124,60 @@ public final class ElementalMeatConsumeListener
         );
 
         /*
-         * Dejar que Minecraft consuma
-         * una unidad normalmente.
+         * ========================================
+         * ACTIVAR CAPA GRIS - 15 SEGUNDOS
+         * ========================================
          */
+        player.setCooldown(
+                elementalMeat.getCooldownGroup(),
+                COOLDOWN_TICKS
+        );
+
+        /*
+         * Minecraft consume una unidad
+         * de Carne Elemental normalmente.
+         */
+    }
+
+    /*
+     * ========================================
+     * RESTAURAR COOLDOWN AL RECONECTAR
+     * ========================================
+     */
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+
+        Player player = event.getPlayer();
+
+        plugin.getServer().getScheduler().runTask(
+                plugin,
+                () -> {
+
+                    if (!player.isOnline()) {
+                        return;
+                    }
+
+                    long remaining =
+                            getRemainingCooldown(player);
+
+                    if (remaining <= 0L) {
+
+                        player.getPersistentDataContainer()
+                                .remove(cooldownKey);
+
+                        return;
+                    }
+
+                    int ticks = (int) Math.ceil(
+                            remaining / 50.0
+                    );
+
+                    player.setCooldown(
+                            elementalMeat.getCooldownGroup(),
+                            ticks
+                    );
+                }
+        );
     }
 
     /*
@@ -174,7 +185,9 @@ public final class ElementalMeatConsumeListener
      * TIEMPO RESTANTE
      * ========================================
      */
-    private long getRemainingCooldown(Player player) {
+    private long getRemainingCooldown(
+            Player player
+    ) {
 
         long until = player.getPersistentDataContainer()
                 .getOrDefault(

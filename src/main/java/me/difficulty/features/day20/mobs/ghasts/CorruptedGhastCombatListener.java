@@ -5,6 +5,7 @@ import me.difficulty.core.day.DayManager;
 import me.difficulty.core.mobs.CustomMobRegistry;
 import me.difficulty.core.mobs.MobIds;
 
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.LargeFireball;
@@ -14,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 
 import org.bukkit.potion.PotionEffectType;
@@ -27,12 +29,14 @@ public final class CorruptedGhastCombatListener
      * CONFIGURACIÓN - GHAST CORRUPTO
      * ========================================
      *
-     * Potencia de explosión x9.
+     * Explosión de combate x9.
      *
-     * Minecraft calcula el daño
-     * y el alcance naturalmente.
+     * Destrucción limitada a un radio
+     * máximo de 5 bloques.
      */
     private static final float RADIUS_MULTIPLIER = 9.0f;
+
+    private static final double BLOCK_DESTRUCTION_RADIUS = 5.0;
 
     private final DayManager dayManager;
     private final CustomMobRegistry registry;
@@ -49,6 +53,8 @@ public final class CorruptedGhastCombatListener
      * ========================================
      * EXPLOSIÓN DEL GHAST CORRUPTO
      * ========================================
+     *
+     * Conservamos la potencia anterior.
      */
     @EventHandler(
             priority = EventPriority.HIGHEST,
@@ -71,17 +77,72 @@ public final class CorruptedGhastCombatListener
             return;
         }
 
-        /*
-         * ========================================
-         * POTENCIA DE EXPLOSIÓN x9
-         * ========================================
-         *
-         * No aplicamos multiplicadores
-         * adicionales de daño.
-         */
         event.setRadius(
                 event.getRadius() * RADIUS_MULTIPLIER
         );
+    }
+
+    /*
+     * ========================================
+     * LIMITAR DESTRUCCIÓN DEL TERRENO
+     * ========================================
+     *
+     * La explosión mantiene su potencia
+     * de combate.
+     *
+     * Únicamente limitamos los bloques
+     * que Minecraft puede destruir.
+     */
+    @EventHandler(
+            priority = EventPriority.HIGHEST,
+            ignoreCancelled = true
+    )
+    public void onEntityExplode(
+            EntityExplodeEvent event
+    ) {
+
+        if (!dayManager.isAtLeast(20)) {
+            return;
+        }
+
+        if (!(event.getEntity()
+                instanceof LargeFireball fireball)) {
+            return;
+        }
+
+        if (!isCorruptedGhastFireball(fireball)) {
+            return;
+        }
+
+        Location center = event.getLocation();
+
+        double maxDistanceSquared =
+                BLOCK_DESTRUCTION_RADIUS
+                        * BLOCK_DESTRUCTION_RADIUS;
+
+        /*
+         * Eliminar de la lista los bloques
+         * situados fuera del radio permitido.
+         *
+         * No rompemos ni colocamos bloques
+         * manualmente.
+         */
+        event.blockList().removeIf(block -> {
+
+            double dx = block.getX() + 0.5
+                    - center.getX();
+
+            double dy = block.getY() + 0.5
+                    - center.getY();
+
+            double dz = block.getZ() + 0.5
+                    - center.getZ();
+
+            double distanceSquared =
+                    dx * dx + dy * dy + dz * dz;
+
+            return distanceSquared > maxDistanceSquared;
+        });
     }
 
     /*
@@ -97,17 +158,12 @@ public final class CorruptedGhastCombatListener
             EntityDamageByEntityEvent event
     ) {
 
-        /*
-         * SOLO DESDE EL DÍA 20
-         */
         if (!dayManager.isAtLeast(20)) {
             return;
         }
 
-        /*
-         * SOLO JUGADORES
-         */
-        if (!(event.getEntity() instanceof Player player)) {
+        if (!(event.getEntity()
+                instanceof Player player)) {
             return;
         }
 
@@ -120,10 +176,12 @@ public final class CorruptedGhastCombatListener
         LargeFireball fireball;
 
         if (direct instanceof LargeFireball source) {
+
             fireball = source;
 
         } else if (event.getDamager()
                 instanceof LargeFireball source) {
+
             fireball = source;
 
         } else {
@@ -131,48 +189,36 @@ public final class CorruptedGhastCombatListener
         }
 
         /*
-         * SOLO BOLA DE FUEGO
-         * DEL GHAST CORRUPTO
+         * SOLO GHAST CORRUPTO
          */
         if (!isCorruptedGhastFireball(fireball)) {
             return;
         }
 
         /*
-         * IGNORAR DAÑO NULO
+         * Respetar la Absorción.
          *
-         * No usamos getFinalDamage(),
-         * para respetar el funcionamiento
-         * de la Absorción.
+         * No usamos getFinalDamage().
          */
         if (event.getDamage() <= 0.0) {
             return;
         }
 
         /*
-         * ========================================
-         * PROTECCIÓN CON ESCUDO
-         * ========================================
+         * ESCUDO FRONTAL
          *
-         * Si el jugador bloquea frontalmente,
-         * la explosión NO elimina Fuerza.
-         *
-         * El daño de la explosión se
-         * procesa normalmente por Minecraft.
+         * Si está bloqueando correctamente,
+         * el jugador conserva Fuerza.
          */
-        if (isShieldFacingExplosion(player, fireball)) {
+        if (isShieldFacingExplosion(
+                player,
+                fireball
+        )) {
             return;
         }
 
         /*
-         * ========================================
          * ELIMINAR FUERZA
-         * ========================================
-         *
-         * Se ejecuta si el jugador no
-         * está protegido frontalmente.
-         *
-         * Funciona incluso con Absorción.
          */
         player.removePotionEffect(
                 PotionEffectType.STRENGTH
@@ -181,7 +227,7 @@ public final class CorruptedGhastCombatListener
 
     /*
      * ========================================
-     * COMPROBAR ESCUDO FRENTE A EXPLOSIÓN
+     * COMPROBAR ESCUDO
      * ========================================
      */
     private boolean isShieldFacingExplosion(
@@ -189,38 +235,27 @@ public final class CorruptedGhastCombatListener
             LargeFireball fireball
     ) {
 
-        /*
-         * El jugador debe estar
-         * utilizando el escudo.
-         */
         if (!player.isBlocking()) {
             return false;
         }
 
         /*
-         * Dirección desde el jugador
-         * hacia el centro de la explosión.
+         * Dirección hacia el centro
+         * de la explosión.
          */
         Vector sourceDirection = fireball
                 .getLocation()
                 .toVector()
                 .subtract(
-                        player.getEyeLocation().toVector()
+                        player.getEyeLocation()
+                                .toVector()
                 );
 
-        /*
-         * Dirección horizontal.
-         */
         sourceDirection.setY(0.0);
 
         /*
-         * ========================================
-         * RESPALDO
-         * ========================================
-         *
-         * Si la explosión ocurre exactamente
-         * sobre el jugador, utilizar la
-         * trayectoria inversa del proyectil.
+         * Respaldo para una explosión
+         * exactamente sobre el jugador.
          */
         if (sourceDirection.lengthSquared() < 0.0001) {
 
@@ -239,18 +274,10 @@ public final class CorruptedGhastCombatListener
             sourceDirection.setY(0.0);
         }
 
-        /*
-         * Si no existe dirección válida,
-         * no consideramos el ataque bloqueado.
-         */
         if (sourceDirection.lengthSquared() < 0.0001) {
             return false;
         }
 
-        /*
-         * Dirección hacia donde mira
-         * el jugador.
-         */
         Vector facing = player
                 .getEyeLocation()
                 .getDirection();
@@ -264,17 +291,6 @@ public final class CorruptedGhastCombatListener
         facing.normalize();
         sourceDirection.normalize();
 
-        /*
-         * ========================================
-         * PRODUCTO PUNTO
-         * ========================================
-         *
-         * Positivo: explosión desde delante.
-         * Negativo: explosión desde detrás.
-         *
-         * Misma lógica direccional usada
-         * en la protección del Blaze.
-         */
         return facing.dot(sourceDirection) > 0.0;
     }
 
