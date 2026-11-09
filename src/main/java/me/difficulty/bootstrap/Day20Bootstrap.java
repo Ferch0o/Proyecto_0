@@ -1195,26 +1195,10 @@ public final class Day20Bootstrap {
                         plugin
                 );
 
-        /*
-         * ========================================
-         * MULTI PEARLS - CLIC IZQUIERDO
-         * ========================================
-         *
-         * Permite acumular resultados
-         * mediante clics normales.
-         *
-         * Shift + clic conserva
-         * el funcionamiento vanilla.
-         */
         plugin.getServer()
                 .getPluginManager()
                 .registerEvents(
-                        new MultiPearlsStackListener(
-                                plugin,
-                                dayManager,
-                                elementalPearl,
-                                multiPearls
-                        ),
+                        recipe,
                         plugin
                 );
 

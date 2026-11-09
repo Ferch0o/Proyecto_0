@@ -1,6 +1,7 @@
 
 package me.difficulty.features.day20.items;
 
+import com.destroystokyo.paper.event.player.PlayerRecipeBookClickEvent;
 import me.difficulty.core.day.DayManager;
 
 import org.bukkit.Keyed;
@@ -403,6 +404,51 @@ public final class MultiPearlsRecipe
 
             event.setCancelled(true);
         }
+    }
+
+    /*
+     * ========================================
+     * MULTI PEARLS - LIBRO DE RECETAS
+     * ========================================
+     *
+     * Cuando se selecciona la receta,
+     * Minecraft coloca la mayor cantidad
+     * posible de ingredientes.
+     *
+     * Esto permite fabricar varias
+     * Multi Pearls mediante clics
+     * izquierdos normales.
+     */
+    @EventHandler(
+            priority = EventPriority.HIGHEST,
+            ignoreCancelled = true
+    )
+    public void onRecipeBookClick(
+            PlayerRecipeBookClickEvent event
+    ) {
+
+        /*
+         * Solo nuestra receta.
+         */
+        if (!recipeKey.equals(event.getRecipe())) {
+            return;
+        }
+
+        /*
+         * No permitir antes del dia 20.
+         */
+        if (!dayManager.isAtLeast(REQUIRED_DAY)) {
+
+            event.setCancelled(true);
+            return;
+        }
+
+        /*
+         * Hacer que Minecraft intente
+         * colocar el maximo posible
+         * de ingredientes en la mesa.
+         */
+        event.setMakeAll(true);
     }
 
     /*
