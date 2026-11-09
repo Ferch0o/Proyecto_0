@@ -1195,13 +1195,6 @@ public final class Day20Bootstrap {
                         plugin
                 );
 
-        plugin.getServer()
-                .getPluginManager()
-                .registerEvents(
-                        recipe,
-                        plugin
-                );
-
         return recipe.getRecipeKey();
     }
 
