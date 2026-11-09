@@ -1185,13 +1185,34 @@ public final class Day20Bootstrap {
 
         /*
          * ========================================
-         * REGISTRAR PROTECCIONES
+         * MULTI PEARLS - VALIDACION Y CRAFTEO
          * ========================================
          */
         plugin.getServer()
                 .getPluginManager()
                 .registerEvents(
                         recipe,
+                        plugin
+                );
+
+        /*
+         * ========================================
+         * MULTI PEARLS - LIBRO DE RECETAS
+         * ========================================
+         *
+         * Misma metodologia que la
+         * Estrella Corrupta del dia 7.
+         */
+        plugin.getServer()
+                .getPluginManager()
+                .registerEvents(
+                        new MultiPearlsRecipeBookListener(
+                                plugin,
+                                dayManager,
+                                elementalPearl,
+                                multiPearls,
+                                recipe.getRecipeKey()
+                        ),
                         plugin
                 );
 
