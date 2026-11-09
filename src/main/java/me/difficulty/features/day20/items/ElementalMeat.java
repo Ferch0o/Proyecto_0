@@ -21,9 +21,15 @@ import java.util.List;
 public final class ElementalMeat extends CustomItem {
 
     /*
-     * COOLDOWN: 15 SEGUNDOS
+     * ========================================
+     * DIA 20 - CARNE ELEMENTAL
+     * ========================================
+     *
+     * Regeneracion V: 4 segundos.
+     * Hambre X: 5 segundos.
+     * Cooldown: 12 segundos.
      */
-    public static final int COOLDOWN_SECONDS = 15;
+    public static final int COOLDOWN_SECONDS = 12;
 
     private final NamespacedKey cooldownGroup;
 
@@ -70,11 +76,8 @@ public final class ElementalMeat extends CustomItem {
 
             /*
              * ========================================
-             * COOLDOWN VISUAL
+             * COOLDOWN VISUAL - 12 SEGUNDOS
              * ========================================
-             *
-             * Mismo sistema que utiliza
-             * la Estrella Corrupta.
              */
             UseCooldownComponent cooldown =
                     meta.getUseCooldown();
@@ -123,7 +126,7 @@ public final class ElementalMeat extends CustomItem {
 
     /*
      * ========================================
-     * DESCRIPCIÓN
+     * DESCRIPCION ACTUALIZADA
      * ========================================
      */
     @Override
@@ -132,7 +135,7 @@ public final class ElementalMeat extends CustomItem {
         return List.of(
 
                 Component.text(
-                        "Regeneración V durante 2 segundos.",
+                        "Regeneración V durante 4 segundos.",
                         NamedTextColor.GREEN
                 ).decoration(
                         TextDecoration.ITALIC,
@@ -140,7 +143,7 @@ public final class ElementalMeat extends CustomItem {
                 ),
 
                 Component.text(
-                        "Hambre X durante 4 segundos.",
+                        "Hambre X durante 5 segundos.",
                         NamedTextColor.RED
                 ).decoration(
                         TextDecoration.ITALIC,
@@ -148,7 +151,7 @@ public final class ElementalMeat extends CustomItem {
                 ),
 
                 Component.text(
-                        "Reutilización: 15 segundos.",
+                        "Reutilización: 12 segundos.",
                         NamedTextColor.GRAY
                 ).decoration(
                         TextDecoration.ITALIC,

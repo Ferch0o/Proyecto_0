@@ -5,6 +5,7 @@ import me.difficulty.DifficultyPlugin;
 
 import me.difficulty.core.day.DayManager;
 import me.difficulty.core.items.CustomItemRegistry;
+import me.difficulty.core.items.ItemIds;
 import me.difficulty.core.mobs.CustomMobRegistry;
 
 import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbow;
@@ -15,7 +16,10 @@ import me.difficulty.features.day20.mobs.endermen.*;
 import me.difficulty.features.day20.mobs.ghasts.*;
 import me.difficulty.features.day20.mobs.piglins.*;
 import me.difficulty.features.day20.mobs.pigmen.*;
+import me.difficulty.features.day20.mobs.striders.StriderRideListener;
 import me.difficulty.features.day20.mobs.withers.*;
+import me.difficulty.features.day20.worldgen.*;
+import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.PluginManager;
 
 import java.util.Objects;
@@ -905,6 +909,7 @@ public final class Day20Bootstrap {
          */
         pm.registerEvents(
                 new ElementalPearlProtectionListener(
+                        plugin,
                         elementalPearl
                 ),
                 plugin
@@ -969,6 +974,251 @@ public final class Day20Bootstrap {
                         elementalPearl
                 )
         );
+    }
+
+    /*
+     * ========================================
+     * DÍA 20 - STRIDERS
+     * ========================================
+     *
+     * Efectos mientras el jugador monta:
+     * - Jugador: Resistencia III y Fuego.
+     * - Strider: Resistencia III.
+     * - Strider inmune a explosiones.
+     *
+     * Al desmontar:
+     * - Resistencia al Fuego por 3 minutos.
+     */
+
+    public void registerStriderContent(
+            DayManager dayManager
+    ) {
+
+        StriderRideListener striderRideListener =
+                new StriderRideListener(
+                        plugin,
+                        dayManager
+                );
+
+        /*
+         * Registrar eventos de montura,
+         * desmontura y explosiones.
+         */
+        plugin.getServer()
+                .getPluginManager()
+                .registerEvents(
+                        striderRideListener,
+                        plugin
+                );
+
+        /*
+         * Revisar los efectos
+         * cada 10 ticks.
+         */
+        striderRideListener.runTaskTimer(
+                plugin,
+                0L,
+                10L
+        );
+    }
+
+    /*
+     * ========================================
+     * DIA 20 - ANCIENT DEBRIS
+     * ========================================
+     *
+     * - Sin generacion natural en chunks nuevos.
+     * - 80% de no obtener drops al romperlo.
+     * - Los chunks antiguos se conservan.
+     */
+
+    public void registerAncientDebrisContent(
+            DayManager dayManager
+    ) {
+
+        PluginManager pm = plugin.getServer()
+                .getPluginManager();
+
+        /*
+         * GENERACION EN CHUNKS NUEVOS
+         */
+        AncientDebrisWorldListener worldListener =
+                new AncientDebrisWorldListener(
+                        dayManager
+                );
+
+        pm.registerEvents(
+                worldListener,
+                plugin
+        );
+
+        /*
+         * Registrar tambien en mundos
+         * que ya estan cargados.
+         */
+        worldListener.registerLoadedWorlds();
+
+        /*
+         * CONTROL DEL DROP
+         */
+        pm.registerEvents(
+                new AncientDebrisDropListener(
+                        dayManager
+                ),
+                plugin
+        );
+    }
+
+    /*
+     * ========================================
+     * DIA 20 - MINERALES DE ORO
+     * ========================================
+     *
+     * - Eliminar generacion natural.
+     * - Bloquear drops al picar.
+     * - Bloquear drops por explosiones.
+     */
+
+    public void registerGoldOreContent(
+            DayManager dayManager
+    ) {
+
+        PluginManager pm = plugin.getServer()
+                .getPluginManager();
+
+        /*
+         * ========================================
+         * GENERACION DE CHUNKS NUEVOS
+         * ========================================
+         */
+        GoldOreWorldListener worldListener =
+                new GoldOreWorldListener(
+                        dayManager
+                );
+
+        pm.registerEvents(
+                worldListener,
+                plugin
+        );
+
+        worldListener.registerLoadedWorlds();
+
+        /*
+         * ========================================
+         * BLOQUEAR DROPS AL PICAR
+         * ========================================
+         */
+        pm.registerEvents(
+                new GoldOreDropListener(
+                        dayManager
+                ),
+                plugin
+        );
+
+        /*
+         * ========================================
+         * BLOQUEAR DROPS POR EXPLOSIONES
+         * ========================================
+         */
+        pm.registerEvents(
+                new GoldOreExplosionListener(
+                        plugin,
+                        dayManager
+                ),
+                plugin
+        );
+    }
+
+    /*
+     * ========================================
+     * DIA 20 - MULTI PEARLS
+     * ========================================
+     *
+     * - Registrar nuevo item.
+     * - Registrar receta.
+     * - Proteger de recetas vanilla.
+     * - Activar desde el dia 20.
+     */
+    public NamespacedKey registerMultiPearlsContent(
+            DayManager dayManager,
+            CustomItemRegistry itemRegistry
+    ) {
+
+        /*
+         * Recuperar la Perla Elemental
+         * ya registrada por los Endermen.
+         */
+        ElementalPearl elementalPearl =
+                (ElementalPearl) itemRegistry.get(
+                        ItemIds.ELEMENTAL_PEARL
+                ).orElseThrow(
+                        () -> new IllegalStateException(
+                                "La Perla Elemental debe "
+                                        + "registrarse antes de Multi Pearls."
+                        )
+                );
+
+        /*
+         * ========================================
+         * REGISTRAR MULTI PEARLS
+         * ========================================
+         */
+        MultiPearls multiPearls =
+                new MultiPearls(plugin);
+
+        itemRegistry.register(multiPearls);
+
+        /*
+         * ========================================
+         * REGISTRAR RECETA
+         * ========================================
+         */
+        MultiPearlsRecipe recipe =
+                new MultiPearlsRecipe(
+                        plugin,
+                        dayManager,
+                        elementalPearl,
+                        multiPearls
+                );
+
+        recipe.register();
+
+        /*
+         * ========================================
+         * REGISTRAR PROTECCIONES
+         * ========================================
+         */
+        plugin.getServer()
+                .getPluginManager()
+                .registerEvents(
+                        recipe,
+                        plugin
+                );
+
+        /*
+         * ========================================
+         * MULTI PEARLS - CLIC IZQUIERDO
+         * ========================================
+         *
+         * Permite acumular resultados
+         * mediante clics normales.
+         *
+         * Shift + clic conserva
+         * el funcionamiento vanilla.
+         */
+        plugin.getServer()
+                .getPluginManager()
+                .registerEvents(
+                        new MultiPearlsStackListener(
+                                plugin,
+                                dayManager,
+                                elementalPearl,
+                                multiPearls
+                        ),
+                        plugin
+                );
+
+        return recipe.getRecipeKey();
     }
 
     /*

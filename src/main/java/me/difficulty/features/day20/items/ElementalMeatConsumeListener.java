@@ -21,17 +21,25 @@ public final class ElementalMeatConsumeListener
 
     /*
      * ========================================
-     * CONFIGURACIÓN
+     * CONFIGURACION - DIA 20
      * ========================================
+     *
+     * Regeneracion V: 4 segundos.
+     * Hambre X: 5 segundos.
+     * Cooldown: 12 segundos.
      */
+
     private static final int COOLDOWN_TICKS =
             ElementalMeat.COOLDOWN_SECONDS * 20;
 
     private static final long COOLDOWN_MS =
             ElementalMeat.COOLDOWN_SECONDS * 1000L;
 
-    private static final int REGEN_DURATION = 40;
-    private static final int HUNGER_DURATION = 80;
+    // 4 segundos = 80 ticks.
+    private static final int REGEN_DURATION = 80;
+
+    // 5 segundos = 100 ticks.
+    private static final int HUNGER_DURATION = 100;
 
     private final JavaPlugin plugin;
     private final ElementalMeat elementalMeat;
@@ -64,6 +72,10 @@ public final class ElementalMeatConsumeListener
             PlayerItemConsumeEvent event
     ) {
 
+        /*
+         * Solo nuestra Carne Elemental.
+         * No afectar la carne cocinada vanilla.
+         */
         if (!elementalMeat.isItem(event.getItem())) {
             return;
         }
@@ -71,7 +83,9 @@ public final class ElementalMeatConsumeListener
         Player player = event.getPlayer();
 
         /*
-         * Verificar cooldown persistente.
+         * ========================================
+         * VERIFICAR COOLDOWN PERSISTENTE
+         * ========================================
          */
         long remaining = getRemainingCooldown(player);
 
@@ -82,8 +96,10 @@ public final class ElementalMeatConsumeListener
 
         /*
          * ========================================
-         * REGENERACIÓN V - 2 SEGUNDOS
+         * REGENERACION V - 4 SEGUNDOS
          * ========================================
+         *
+         * Amplificador 4 = nivel V.
          */
         player.addPotionEffect(
                 new PotionEffect(
@@ -98,8 +114,10 @@ public final class ElementalMeatConsumeListener
 
         /*
          * ========================================
-         * HAMBRE X - 4 SEGUNDOS
+         * HAMBRE X - 5 SEGUNDOS
          * ========================================
+         *
+         * Amplificador 9 = nivel X.
          */
         player.addPotionEffect(
                 new PotionEffect(
@@ -114,7 +132,7 @@ public final class ElementalMeatConsumeListener
 
         /*
          * ========================================
-         * GUARDAR COOLDOWN
+         * GUARDAR COOLDOWN - 12 SEGUNDOS
          * ========================================
          */
         player.getPersistentDataContainer().set(
@@ -125,7 +143,7 @@ public final class ElementalMeatConsumeListener
 
         /*
          * ========================================
-         * ACTIVAR CAPA GRIS - 15 SEGUNDOS
+         * ACTIVAR COOLDOWN VISUAL
          * ========================================
          */
         player.setCooldown(
@@ -134,8 +152,8 @@ public final class ElementalMeatConsumeListener
         );
 
         /*
-         * Minecraft consume una unidad
-         * de Carne Elemental normalmente.
+         * Minecraft consume normalmente
+         * una unidad de Carne Elemental.
          */
     }
 
@@ -182,7 +200,7 @@ public final class ElementalMeatConsumeListener
 
     /*
      * ========================================
-     * TIEMPO RESTANTE
+     * OBTENER TIEMPO RESTANTE
      * ========================================
      */
     private long getRemainingCooldown(

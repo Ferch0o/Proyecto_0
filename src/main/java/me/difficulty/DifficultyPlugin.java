@@ -10,6 +10,7 @@ import me.difficulty.core.mobs.CustomMobRegistry;
 import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbowRecipe;
 import me.difficulty.core.recipes.RecipeUnlockManager;
 import me.difficulty.features.day20.items.ElementalRod;
+import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
@@ -333,6 +334,55 @@ public final class DifficultyPlugin extends JavaPlugin {
                 dayManager,
                 mobRegistry,
                 itemRegistry
+        );
+
+        /*
+         * ========================================
+         * DIA 20 - MULTI PEARLS
+         * ========================================
+         *
+         * Se registra despues de los Endermen
+         * porque necesita la Perla Elemental.
+         */
+        NamespacedKey multiPearlsRecipeKey =
+                day20Bootstrap.registerMultiPearlsContent(
+                        dayManager,
+                        itemRegistry
+                );
+
+        /*
+         * Registrar la receta para controlar
+         * su desbloqueo desde el dia 20.
+         */
+        recipeUnlockManager.registerMultiPearlsRecipe(
+                multiPearlsRecipeKey
+        );
+
+        /*
+         * ========================================
+         * DÍA 20 - STRIDERS
+         * ========================================
+         */
+        day20Bootstrap.registerStriderContent(
+                dayManager
+        );
+
+        /*
+         * ========================================
+         * DÍA 20 - GENERACION DE ANCIENT DEBRIS
+         * ========================================
+         */
+        day20Bootstrap.registerAncientDebrisContent(
+                dayManager
+        );
+
+        /*
+         * ========================================
+         * DIA 20 - MINERALES DE ORO
+         * ========================================
+         */
+        day20Bootstrap.registerGoldOreContent(
+                dayManager
         );
 
         stormBootstrap.registerDay10Listeners();

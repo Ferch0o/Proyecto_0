@@ -6,7 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class DayManager {
 
     private final JavaPlugin plugin;
-    private int currentDay;
+    private volatile int currentDay;
 
     public DayManager(JavaPlugin plugin) {
         this.plugin = plugin;
