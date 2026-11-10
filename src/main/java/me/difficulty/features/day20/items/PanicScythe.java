@@ -55,6 +55,7 @@ public final class PanicScythe extends CustomItem {
             cooldown.setCooldownGroup(cooldownGroup);
 
             meta.setUseCooldown(cooldown);
+
             item.setItemMeta(meta);
         }
 
@@ -83,8 +84,16 @@ public final class PanicScythe extends CustomItem {
         return List.of(
 
                 Component.text(
-                        "Clic derecho: teletransporte de 5 bloques.",
+                        "Clic derecho: teletransporte de 7 bloques.",
                         NamedTextColor.LIGHT_PURPLE
+                ).decoration(
+                        TextDecoration.ITALIC,
+                        false
+                ),
+
+                Component.text(
+                        "Puede atravesar paredes y bloques.",
+                        NamedTextColor.DARK_PURPLE
                 ).decoration(
                         TextDecoration.ITALIC,
                         false

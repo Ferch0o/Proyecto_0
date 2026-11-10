@@ -6,13 +6,12 @@ import me.difficulty.core.day.DayManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.block.Block;
+
 import org.bukkit.entity.Player;
 
 import org.bukkit.event.Event;
@@ -26,6 +25,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
@@ -35,10 +35,25 @@ import java.util.UUID;
 public final class PanicScytheAbilityListener
         implements Listener {
 
+    /*
+     * ========================================
+     * GUADAÑA DEL PANICO - DIA 20
+     * ========================================
+     *
+     * Distancia: 7 bloques.
+     * Direccion: mirada del jugador.
+     * Atraviesa paredes y bloques.
+     *
+     * Costo: 2 bloques de oro.
+     * Cooldown: 1 segundo.
+     */
+
     private static final int REQUIRED_DAY = 20;
+
     private static final int GOLD_COST = 2;
 
-    private static final double TELEPORT_DISTANCE = 5.0;
+    private static final double TELEPORT_DISTANCE = 7.0;
+
     private static final long COOLDOWN_MS = 1000L;
 
     private final DayManager dayManager;
@@ -58,7 +73,7 @@ public final class PanicScytheAbilityListener
 
     /*
      * ========================================
-     * ACTIVAR GUADAÑA
+     * ACTIVAR HABILIDAD
      * ========================================
      */
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -66,6 +81,9 @@ public final class PanicScytheAbilityListener
             PlayerInteractEvent event
     ) {
 
+        /*
+         * Solo mano principal.
+         */
         if (event.getHand() != EquipmentSlot.HAND) {
             return;
         }
@@ -79,6 +97,9 @@ public final class PanicScytheAbilityListener
 
         Player player = event.getPlayer();
 
+        /*
+         * Solo Guadaña del Pánico auténtica.
+         */
         if (!panicScythe.isItem(
                 player.getInventory().getItemInMainHand()
         )) {
@@ -90,12 +111,16 @@ public final class PanicScytheAbilityListener
         }
 
         /*
-         * Evitar que la azada de netherite
-         * active acciones vanilla.
+         * Bloquear uso vanilla de la azada.
          */
         event.setUseInteractedBlock(Event.Result.DENY);
         event.setUseItemInHand(Event.Result.DENY);
 
+        /*
+         * ========================================
+         * COMPROBAR COOLDOWN
+         * ========================================
+         */
         long now = System.currentTimeMillis();
 
         long nextUse = cooldowns.getOrDefault(
@@ -109,7 +134,7 @@ public final class PanicScytheAbilityListener
 
         /*
          * ========================================
-         * VERIFICAR BLOQUES DE ORO
+         * COMPROBAR BLOQUES DE ORO
          * ========================================
          */
         if (countGoldBlocks(player) < GOLD_COST) {
@@ -124,26 +149,51 @@ public final class PanicScytheAbilityListener
             return;
         }
 
+        /*
+         * ========================================
+         * DESTINO DE TELETRANSPORTE
+         * ========================================
+         *
+         * La direccion incluye:
+         *
+         * - Horizontal.
+         * - Hacia arriba.
+         * - Hacia abajo.
+         *
+         * No ignoramos la inclinacion
+         * de la mirada del jugador.
+         */
         Location origin = player.getLocation();
-        Vector direction = getHorizontalDirection(origin);
+
+        Vector direction =
+                origin.getDirection().normalize();
 
         Location destination = origin.clone().add(
-                direction.clone().multiply(
-                        TELEPORT_DISTANCE
-                )
+                direction.multiply(TELEPORT_DISTANCE)
         );
 
         /*
          * ========================================
-         * DESTINO SEGURO
+         * LIMITES DEL MUNDO
          * ========================================
+         *
+         * Permitimos atravesar paredes y
+         * aparecer dentro de bloques.
+         *
+         * Solo evitamos coordenadas fuera
+         * de los limites del mundo.
          */
-        if (!isPathClear(origin, direction)
-                || !isSafeDestination(destination)) {
+        World world = origin.getWorld();
+
+        if (destination.getY() < world.getMinHeight()
+                || destination.getY() + 1.8
+                >= world.getMaxHeight()
+                || !world.getWorldBorder()
+                .isInside(destination)) {
 
             player.sendActionBar(
                     Component.text(
-                            "No hay un destino seguro.",
+                            "Destino fuera de los límites del mundo.",
                             NamedTextColor.RED
                     )
             );
@@ -152,25 +202,42 @@ public final class PanicScytheAbilityListener
         }
 
         /*
-         * Teletransportar primero.
-         * Si otro plugin cancela el evento,
-         * no consumir materiales ni cooldown.
+         * ========================================
+         * TELETRANSPORTE
+         * ========================================
+         *
+         * No comprobar:
+         *
+         * - Paredes.
+         * - Bloques sólidos.
+         * - Suelo debajo del jugador.
+         * - Espacio libre para el cuerpo.
+         *
+         * El jugador puede quedar
+         * atrapado dentro de bloques.
          */
         boolean teleported = player.teleport(
                 destination,
                 PlayerTeleportEvent.TeleportCause.PLUGIN
         );
 
+        /*
+         * Si otro sistema cancela el
+         * teletransporte, no gastar oro.
+         */
         if (!teleported) {
             return;
         }
 
         /*
          * ========================================
-         * DESCONTAR COSTO
+         * DESCONTAR BLOQUES DE ORO
          * ========================================
          */
-        removeGoldBlocks(player, GOLD_COST);
+        removeGoldBlocks(
+                player,
+                GOLD_COST
+        );
 
         /*
          * ========================================
@@ -179,7 +246,7 @@ public final class PanicScytheAbilityListener
          */
         cooldowns.put(
                 player.getUniqueId(),
-                now + COOLDOWN_MS
+                System.currentTimeMillis() + COOLDOWN_MS
         );
 
         player.setCooldown(
@@ -189,7 +256,7 @@ public final class PanicScytheAbilityListener
 
         /*
          * ========================================
-         * EFECTO VISUAL Y SONIDO
+         * PARTICULAS Y SONIDO
          * ========================================
          */
         origin.getWorld().spawnParticle(
@@ -218,163 +285,7 @@ public final class PanicScytheAbilityListener
 
     /*
      * ========================================
-     * DIRECCION HORIZONTAL
-     * ========================================
-     *
-     * Usamos el yaw para que mirar
-     * hacia arriba o abajo no altere
-     * la altura del teletransporte.
-     */
-    private Vector getHorizontalDirection(
-            Location origin
-    ) {
-
-        double yaw =
-                Math.toRadians(origin.getYaw());
-
-        return new Vector(
-                -Math.sin(yaw),
-                0.0,
-                Math.cos(yaw)
-        ).normalize();
-    }
-
-    /*
-     * ========================================
-     * EVITAR ATRAVESAR PAREDES
-     * ========================================
-     */
-    private boolean isPathClear(
-            Location origin,
-            Vector direction
-    ) {
-
-        World world = origin.getWorld();
-
-        /*
-         * Revisar el recorrido a tres
-         * posiciones laterales del jugador
-         * y a dos alturas.
-         */
-        Vector sideways = new Vector(
-                -direction.getZ(),
-                0.0,
-                direction.getX()
-        );
-
-        double[] offsets = {
-                -0.25, 0.0, 0.25
-        };
-
-        for (double offset : offsets) {
-
-            Location line = origin.clone().add(
-                    sideways.clone().multiply(offset)
-            );
-
-            Location feet =
-                    line.clone().add(0, 0.2, 0);
-
-            Location head =
-                    line.clone().add(0, 1.6, 0);
-
-            if (world.rayTraceBlocks(
-                    feet,
-                    direction,
-                    TELEPORT_DISTANCE,
-                    FluidCollisionMode.NEVER,
-                    true
-            ) != null) {
-                return false;
-            }
-
-            if (world.rayTraceBlocks(
-                    head,
-                    direction,
-                    TELEPORT_DISTANCE,
-                    FluidCollisionMode.NEVER,
-                    true
-            ) != null) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /*
-     * ========================================
-     * VALIDAR DESTINO
-     * ========================================
-     */
-    private boolean isSafeDestination(
-            Location destination
-    ) {
-
-        World world = destination.getWorld();
-
-        if (!world.getWorldBorder()
-                .isInside(destination)) {
-            return false;
-        }
-
-        Block feet = destination.getBlock();
-
-        Block head = destination.clone()
-                .add(0, 1, 0)
-                .getBlock();
-
-        Block floor = destination.clone()
-                .add(0, -1, 0)
-                .getBlock();
-
-        /*
-         * Espacio libre para el cuerpo.
-         */
-        if (!feet.isPassable()
-                || !head.isPassable()) {
-            return false;
-        }
-
-        if (feet.isLiquid()
-                || head.isLiquid()) {
-            return false;
-        }
-
-        /*
-         * Evitar fuego y nieve en polvo.
-         */
-        if (isHazard(feet.getType())
-                || isHazard(head.getType())) {
-            return false;
-        }
-
-        /*
-         * Necesitamos suelo sólido.
-         */
-        if (!floor.getType().isSolid()) {
-            return false;
-        }
-
-        return !isHazard(floor.getType());
-    }
-
-    private boolean isHazard(Material type) {
-
-        return type == Material.LAVA
-                || type == Material.FIRE
-                || type == Material.SOUL_FIRE
-                || type == Material.POWDER_SNOW
-                || type == Material.CACTUS
-                || type == Material.MAGMA_BLOCK
-                || type == Material.CAMPFIRE
-                || type == Material.SOUL_CAMPFIRE
-                || type == Material.SWEET_BERRY_BUSH;
-    }
-
-    /*
-     * ========================================
-     * BLOQUES DE ORO VANILLA
+     * CONTAR BLOQUES DE ORO VANILLA
      * ========================================
      */
     private boolean isGoldBlock(
@@ -393,9 +304,8 @@ public final class PanicScytheAbilityListener
 
         int total = 0;
 
-        for (ItemStack item : player
-                .getInventory()
-                .getStorageContents()) {
+        for (ItemStack item :
+                player.getInventory().getStorageContents()) {
 
             if (isGoldBlock(item)) {
                 total += item.getAmount();
@@ -405,14 +315,18 @@ public final class PanicScytheAbilityListener
         return total;
     }
 
+    /*
+     * ========================================
+     * CONSUMIR BLOQUES DE ORO
+     * ========================================
+     */
     private void removeGoldBlocks(
             Player player,
             int amount
     ) {
 
-        ItemStack[] storage = player
-                .getInventory()
-                .getStorageContents();
+        ItemStack[] storage =
+                player.getInventory().getStorageContents();
 
         int remaining = amount;
 
@@ -435,8 +349,11 @@ public final class PanicScytheAbilityListener
                     item.getAmount() - removed;
 
             if (left <= 0) {
+
                 storage[i] = null;
+
             } else {
+
                 item.setAmount(left);
             }
 
@@ -447,8 +364,15 @@ public final class PanicScytheAbilityListener
                 .setStorageContents(storage);
     }
 
+    /*
+     * ========================================
+     * LIMPIAR COOLDOWN AL DESCONECTAR
+     * ========================================
+     */
     @EventHandler
-    public void onQuit(PlayerQuitEvent event) {
+    public void onQuit(
+            PlayerQuitEvent event
+    ) {
 
         cooldowns.remove(
                 event.getPlayer().getUniqueId()
