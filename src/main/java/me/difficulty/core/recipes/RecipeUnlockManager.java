@@ -30,6 +30,8 @@ public class RecipeUnlockManager {
     private NamespacedKey multiPearlsRecipeKey;
     private NamespacedKey panicScytheRecipeKey;
     private NamespacedKey elementalIngotRecipeKey;
+    private NamespacedKey elementalTemplateRecipeKey;
+    private NamespacedKey elementalTemplateCopyKey;
 
     public RecipeUnlockManager(
             JavaPlugin plugin,
@@ -82,6 +84,20 @@ public class RecipeUnlockManager {
     ) {
 
         this.elementalIngotRecipeKey = recipeKey;
+    }
+
+    /*
+     * ========================================
+     * REGISTRAR PLANTILLA ELEMENTAL
+     * ========================================
+     */
+    public void registerElementalTemplateRecipes(
+            NamespacedKey originalKey,
+            NamespacedKey copyKey
+    ) {
+
+        elementalTemplateRecipeKey = originalKey;
+        elementalTemplateCopyKey = copyKey;
     }
 
     /*
@@ -188,6 +204,36 @@ public class RecipeUnlockManager {
 
                 player.undiscoverRecipe(
                         elementalIngotRecipeKey
+                );
+            }
+        }
+
+        /*
+         * ========================================
+         * PLANTILLA ELEMENTAL - DIA 20
+         * ========================================
+         */
+        if (elementalTemplateRecipeKey != null
+                && elementalTemplateCopyKey != null) {
+
+            if (dayManager.isAtLeast(20)) {
+
+                player.discoverRecipe(
+                        elementalTemplateRecipeKey
+                );
+
+                player.discoverRecipe(
+                        elementalTemplateCopyKey
+                );
+
+            } else {
+
+                player.undiscoverRecipe(
+                        elementalTemplateRecipeKey
+                );
+
+                player.undiscoverRecipe(
+                        elementalTemplateCopyKey
                 );
             }
         }

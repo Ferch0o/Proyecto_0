@@ -1400,6 +1400,111 @@ public final class Day20Bootstrap {
 
     /*
      * ========================================
+     * DIA 20 - PLANTILLA ELEMENTAL
+     * ========================================
+     */
+    public record ElementalTemplateKeys(
+            NamespacedKey original,
+            NamespacedKey copy
+    ) {
+    }
+
+    public ElementalTemplateKeys registerElementalTemplateContent(
+            DayManager dayManager,
+            CustomItemRegistry itemRegistry
+    ) {
+
+        ElementalRod rod =
+                (ElementalRod) itemRegistry.get(
+                        ItemIds.ELEMENTAL_ROD
+                ).orElseThrow();
+
+        ElementalHead head =
+                (ElementalHead) itemRegistry.get(
+                        ItemIds.ELEMENTAL_HEAD
+                ).orElseThrow();
+
+        ElementalTear tear =
+                (ElementalTear) itemRegistry.get(
+                        ItemIds.ELEMENTAL_TEAR
+                ).orElseThrow();
+
+        ElementalMeat meat =
+                (ElementalMeat) itemRegistry.get(
+                        ItemIds.ELEMENTAL_MEAT
+                ).orElseThrow();
+
+        MultiPearls multiPearls =
+                (MultiPearls) itemRegistry.get(
+                        ItemIds.MULTI_PEARLS
+                ).orElseThrow();
+
+        /*
+         * Registrar objeto personalizado.
+         */
+        ElementalTemplate template =
+                new ElementalTemplate(plugin);
+
+        itemRegistry.register(template);
+
+        /*
+         * Registrar las dos recetas.
+         */
+        ElementalTemplateRecipe recipes =
+                new ElementalTemplateRecipe(
+                        plugin,
+                        dayManager,
+                        rod,
+                        head,
+                        tear,
+                        meat,
+                        multiPearls,
+                        template
+                );
+
+        recipes.register();
+
+        PluginManager pm =
+                plugin.getServer().getPluginManager();
+
+        /*
+         * Control de cantidades y fabricación.
+         */
+        pm.registerEvents(
+                recipes,
+                plugin
+        );
+
+        /*
+         * Libro de recetas.
+         */
+        pm.registerEvents(
+                new ElementalTemplateRecipeBookListener(
+                        dayManager,
+                        recipes
+                ),
+                plugin
+        );
+
+        /*
+         * Protección contra usos vanilla.
+         */
+        pm.registerEvents(
+                new ElementalTemplateProtectionListener(
+                        template,
+                        recipes.getCopyKey()
+                ),
+                plugin
+        );
+
+        return new ElementalTemplateKeys(
+                recipes.getOriginalKey(),
+                recipes.getCopyKey()
+        );
+    }
+
+    /*
+     * ========================================
      * COMANDOS DE PRUEBA - BLAZES DÍA 20
      * ========================================
      */

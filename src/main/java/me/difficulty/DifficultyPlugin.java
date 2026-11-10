@@ -390,6 +390,22 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         /*
          * ========================================
+         * DIA 20 - PLANTILLA ELEMENTAL
+         * ========================================
+         */
+        Day20Bootstrap.ElementalTemplateKeys templateKeys =
+                day20Bootstrap.registerElementalTemplateContent(
+                        dayManager,
+                        itemRegistry
+                );
+
+        recipeUnlockManager.registerElementalTemplateRecipes(
+                templateKeys.original(),
+                templateKeys.copy()
+        );
+
+        /*
+         * ========================================
          * DÍA 20 - STRIDERS
          * ========================================
          */
