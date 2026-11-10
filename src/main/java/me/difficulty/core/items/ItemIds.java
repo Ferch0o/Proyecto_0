@@ -85,8 +85,8 @@ public final class ItemIds {
     public static final String PANIC_SCYTHE = "panic_scythe";
     public static final int PANIC_SCYTHE_MODEL = 1208;
 
-    public static final String FRAGMENTED_TEMPLATE = "fragmented_template";
-    public static final int FRAGMENTED_TEMPLATE_MODEL = 1209;
+    public static final String ELEMENTAL_INGOT = "elemental_ingot";
+    public static final int ELEMENTAL_INGOT_MODEL = 1209;
 
     public static final String ELEMENTAL_TEMPLATE = "elemental_template";
     public static final int ELEMENTAL_TEMPLATE_MODEL = 1210;

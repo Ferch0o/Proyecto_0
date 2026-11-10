@@ -375,6 +375,21 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         /*
          * ========================================
+         * DIA 20 - LINGOTE ELEMENTAL
+         * ========================================
+         */
+        NamespacedKey elementalIngotRecipeKey =
+                day20Bootstrap.registerElementalIngotContent(
+                        dayManager,
+                        itemRegistry
+                );
+
+        recipeUnlockManager.registerElementalIngotRecipe(
+                elementalIngotRecipeKey
+        );
+
+        /*
+         * ========================================
          * DÍA 20 - STRIDERS
          * ========================================
          */

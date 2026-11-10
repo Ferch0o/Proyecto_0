@@ -7,6 +7,7 @@ import me.difficulty.core.mobs.CustomMobRegistry;
 import me.difficulty.features.day17.curse.*;
 import me.difficulty.features.day17.items.*;
 import me.difficulty.features.day17.items.elementalpotato.*;
+import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.PluginManager;
 
 import java.util.Objects;
@@ -43,7 +44,18 @@ public final class Day17Bootstrap {
         registry.register(potato);
         ElementalPotatoRecipe recipe = new ElementalPotatoRecipe(plugin, potato, materials);
         recipe.register();
-        pm.registerEvents(new Day17MaterialProtectionListener(materials, recipe.key()), plugin);
+
+        pm.registerEvents(
+                new Day17MaterialProtectionListener(
+                        materials,
+                        recipe.key(),
+                        new NamespacedKey(
+                                plugin,
+                                "elemental_ingot_recipe"
+                        )
+                ),
+                plugin
+        );
 
         pm.registerEvents(
                 new ElementalPotatoRecipeListener(

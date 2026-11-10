@@ -29,6 +29,7 @@ public class RecipeUnlockManager {
 
     private NamespacedKey multiPearlsRecipeKey;
     private NamespacedKey panicScytheRecipeKey;
+    private NamespacedKey elementalIngotRecipeKey;
 
     public RecipeUnlockManager(
             JavaPlugin plugin,
@@ -69,6 +70,18 @@ public class RecipeUnlockManager {
     ) {
 
         this.panicScytheRecipeKey = recipeKey;
+    }
+
+    /*
+     * ========================================
+     * REGISTRAR RECETA LINGOTE ELEMENTAL
+     * ========================================
+     */
+    public void registerElementalIngotRecipe(
+            NamespacedKey recipeKey
+    ) {
+
+        this.elementalIngotRecipeKey = recipeKey;
     }
 
     /*
@@ -154,6 +167,27 @@ public class RecipeUnlockManager {
 
                 player.undiscoverRecipe(
                         panicScytheRecipeKey
+                );
+            }
+        }
+
+        /*
+         * ========================================
+         * LINGOTE ELEMENTAL - DIA 20
+         * ========================================
+         */
+        if (elementalIngotRecipeKey != null) {
+
+            if (dayManager.isAtLeast(20)) {
+
+                player.discoverRecipe(
+                        elementalIngotRecipeKey
+                );
+
+            } else {
+
+                player.undiscoverRecipe(
+                        elementalIngotRecipeKey
                 );
             }
         }

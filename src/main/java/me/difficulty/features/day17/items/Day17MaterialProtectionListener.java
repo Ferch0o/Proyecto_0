@@ -27,13 +27,17 @@ public final class Day17MaterialProtectionListener
 
     private final Day17Materials materials;
     private final NamespacedKey recipeKey;
+    private final NamespacedKey elementalIngotRecipeKey;
 
     public Day17MaterialProtectionListener(
             Day17Materials materials,
-            NamespacedKey recipeKey
+            NamespacedKey recipeKey,
+            NamespacedKey elementalIngotRecipeKey
     ) {
+
         this.materials = materials;
         this.recipeKey = recipeKey;
+        this.elementalIngotRecipeKey = elementalIngotRecipeKey;
     }
 
     /*
@@ -80,17 +84,22 @@ public final class Day17MaterialProtectionListener
 
     /*
      * ========================================
-     * RECETA PERMITIDA
+     * RECETAS PERMITIDAS
      * ========================================
      *
-     * La Patata Elemental es la unica
-     * receta que puede utilizar los
-     * materiales restringidos.
+     * Patata Elemental.
+     * Lingote Elemental.
      */
     private boolean isAllowedRecipe(Recipe recipe) {
 
-        return recipe instanceof Keyed keyed
-                && recipeKey.equals(keyed.getKey());
+        if (!(recipe instanceof Keyed keyed)) {
+            return false;
+        }
+
+        NamespacedKey key = keyed.getKey();
+
+        return recipeKey.equals(key)
+                || elementalIngotRecipeKey.equals(key);
     }
 
     /*

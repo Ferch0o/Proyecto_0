@@ -9,6 +9,7 @@ import me.difficulty.core.items.ItemIds;
 import me.difficulty.core.mobs.CustomMobRegistry;
 
 import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbow;
+import me.difficulty.features.day17.items.Day17Material;
 import me.difficulty.features.day20.items.*;
 import me.difficulty.features.day20.mobs.Day20BiomeNaturalSpawnListener;
 import me.difficulty.features.day20.mobs.blazes.*;
@@ -1304,6 +1305,92 @@ public final class Day20Bootstrap {
                 new PanicScytheAbilityListener(
                         dayManager,
                         panicScythe
+                ),
+                plugin
+        );
+
+        return recipe.getRecipeKey();
+    }
+
+    /*
+     * ========================================
+     * DIA 20 - LINGOTE ELEMENTAL
+     * ========================================
+     */
+    public NamespacedKey registerElementalIngotContent(
+            DayManager dayManager,
+            CustomItemRegistry itemRegistry
+    ) {
+
+        /*
+         * Recuperar Bloque de Titanio
+         * registrado desde el día 17.
+         */
+        Day17Material titanium =
+                (Day17Material) itemRegistry.get(
+                        ItemIds.TITANIUM_BLOCK
+                ).orElseThrow(
+                        () -> new IllegalStateException(
+                                "El Bloque de Titanio debe "
+                                        + "registrarse primero."
+                        )
+                );
+
+        /*
+         * ========================================
+         * REGISTRAR OBJETO
+         * ========================================
+         */
+        ElementalIngot elementalIngot =
+                new ElementalIngot(plugin);
+
+        itemRegistry.register(elementalIngot);
+
+        /*
+         * ========================================
+         * REGISTRAR RECETA
+         * ========================================
+         */
+        ElementalIngotRecipe recipe =
+                new ElementalIngotRecipe(
+                        plugin,
+                        dayManager,
+                        titanium,
+                        elementalIngot
+                );
+
+        recipe.register();
+
+        PluginManager pm =
+                plugin.getServer().getPluginManager();
+
+        /*
+         * Controlar cantidades y fabricación.
+         */
+        pm.registerEvents(
+                recipe,
+                plugin
+        );
+
+        /*
+         * Libro de recetas.
+         */
+        pm.registerEvents(
+                new ElementalIngotRecipeBookListener(
+                        dayManager,
+                        titanium,
+                        elementalIngot,
+                        recipe.getRecipeKey()
+                ),
+                plugin
+        );
+
+        /*
+         * Proteger contra usos vanilla.
+         */
+        pm.registerEvents(
+                new ElementalIngotProtectionListener(
+                        elementalIngot
                 ),
                 plugin
         );
