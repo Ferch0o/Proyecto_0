@@ -3,6 +3,7 @@ package me.difficulty.features.day20.items;
 
 import me.difficulty.core.items.ItemIds;
 
+import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Crafter;
 import org.bukkit.entity.IronGolem;
@@ -35,6 +36,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.EquipmentSlot;
 
@@ -45,6 +47,7 @@ public final class ElementalGoldProtectionListener
         implements Listener {
 
     private final NamespacedKey itemIdKey;
+    private final NamespacedKey panicScytheRecipeKey;
 
     public ElementalGoldProtectionListener(
             JavaPlugin plugin
@@ -52,6 +55,11 @@ public final class ElementalGoldProtectionListener
         itemIdKey = new NamespacedKey(
                 plugin,
                 "custom_item_id"
+        );
+
+        panicScytheRecipeKey = new NamespacedKey(
+                plugin,
+                "panic_scythe_recipe"
         );
     }
 
@@ -148,42 +156,59 @@ public final class ElementalGoldProtectionListener
 
     /*
      * ========================================
-     * BLOQUEAR RESULTADO DE CRAFTEO
+     * PROTEGER CRAFTEOS
      * ========================================
-     *
-     * No permitir convertir Oro Elemental
-     * en recetas vanilla de hierro.
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPrepareCraft(
             PrepareItemCraftEvent event
     ) {
 
-        if (containsElementalGold(
+        if (!containsElementalGold(
                 event.getInventory().getMatrix()
         )) {
-
-            event.getInventory().setResult(null);
+            return;
         }
+
+        /*
+         * La Guadaña del Pánico sí puede
+         * utilizar Oro Elemental.
+         */
+        if (isAllowedRecipe(event.getRecipe())) {
+            return;
+        }
+
+        /*
+         * Todas las demás recetas
+         * siguen bloqueadas.
+         */
+        event.getInventory().setResult(null);
     }
 
     /*
      * ========================================
-     * CANCELAR CRAFTEO MANUAL
+     * PROTEGER FABRICACION MANUAL
      * ========================================
      */
     @EventHandler(
             priority = EventPriority.HIGHEST,
             ignoreCancelled = true
     )
-    public void onCraft(CraftItemEvent event) {
+    public void onCraft(
+            CraftItemEvent event
+    ) {
 
-        if (containsElementalGold(
+        if (!containsElementalGold(
                 event.getInventory().getMatrix()
         )) {
-
-            event.setCancelled(true);
+            return;
         }
+
+        if (isAllowedRecipe(event.getRecipe())) {
+            return;
+        }
+
+        event.setCancelled(true);
     }
 
     /*
@@ -578,5 +603,21 @@ public final class ElementalGoldProtectionListener
         if (isElementalGold(held)) {
             event.setCancelled(true);
         }
+    }
+
+
+    /*
+     * ========================================
+     * RECETA AUTORIZADA PARA ORO ELEMENTAL
+     * ========================================
+     */
+    private boolean isAllowedRecipe(
+            Recipe recipe
+    ) {
+
+        return recipe instanceof Keyed keyed
+                && panicScytheRecipeKey.equals(
+                keyed.getKey()
+        );
     }
 }

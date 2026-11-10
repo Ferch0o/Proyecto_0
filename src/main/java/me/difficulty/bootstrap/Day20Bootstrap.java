@@ -1221,6 +1221,98 @@ public final class Day20Bootstrap {
 
     /*
      * ========================================
+     * DIA 20 - GUADAÑA DEL PANICO
+     * ========================================
+     */
+    public NamespacedKey registerPanicScytheContent(
+            DayManager dayManager,
+            CustomItemRegistry itemRegistry
+    ) {
+
+        ElementalGold elementalGold =
+                (ElementalGold) itemRegistry.get(
+                        ItemIds.ELEMENTAL_GOLD
+                ).orElseThrow(
+                        () -> new IllegalStateException(
+                                "El Oro Elemental debe "
+                                        + "registrarse primero."
+                        )
+                );
+
+        MultiPearls multiPearls =
+                (MultiPearls) itemRegistry.get(
+                        ItemIds.MULTI_PEARLS
+                ).orElseThrow(
+                        () -> new IllegalStateException(
+                                "Multi Pearls debe "
+                                        + "registrarse primero."
+                        )
+                );
+
+        /*
+         * Registrar el objeto.
+         */
+        PanicScythe panicScythe =
+                new PanicScythe(plugin);
+
+        itemRegistry.register(panicScythe);
+
+        /*
+         * Registrar receta.
+         */
+        PanicScytheRecipe recipe =
+                new PanicScytheRecipe(
+                        plugin,
+                        dayManager,
+                        elementalGold,
+                        multiPearls,
+                        panicScythe
+                );
+
+        recipe.register();
+
+        PluginManager pm =
+                plugin.getServer().getPluginManager();
+
+        /*
+         * Validacion y consumo.
+         */
+        pm.registerEvents(
+                recipe,
+                plugin
+        );
+
+        /*
+         * Libro de recetas.
+         */
+        pm.registerEvents(
+                new PanicScytheRecipeBookListener(
+                        plugin,
+                        dayManager,
+                        elementalGold,
+                        multiPearls,
+                        panicScythe,
+                        recipe.getRecipeKey()
+                ),
+                plugin
+        );
+
+        /*
+         * Habilidad de teletransporte.
+         */
+        pm.registerEvents(
+                new PanicScytheAbilityListener(
+                        dayManager,
+                        panicScythe
+                ),
+                plugin
+        );
+
+        return recipe.getRecipeKey();
+    }
+
+    /*
+     * ========================================
      * COMANDOS DE PRUEBA - BLAZES DÍA 20
      * ========================================
      */

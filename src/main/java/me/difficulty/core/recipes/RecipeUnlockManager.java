@@ -28,6 +28,7 @@ public class RecipeUnlockManager {
      */
 
     private NamespacedKey multiPearlsRecipeKey;
+    private NamespacedKey panicScytheRecipeKey;
 
     public RecipeUnlockManager(
             JavaPlugin plugin,
@@ -56,6 +57,18 @@ public class RecipeUnlockManager {
     ) {
 
         this.multiPearlsRecipeKey = recipeKey;
+    }
+
+    /*
+     * ========================================
+     * REGISTRAR RECETA GUADAÑA DEL PANICO
+     * ========================================
+     */
+    public void registerPanicScytheRecipe(
+            NamespacedKey recipeKey
+    ) {
+
+        this.panicScytheRecipeKey = recipeKey;
     }
 
     /*
@@ -120,6 +133,27 @@ public class RecipeUnlockManager {
 
                 player.undiscoverRecipe(
                         multiPearlsRecipeKey
+                );
+            }
+        }
+
+        /*
+         * ========================================
+         * GUADAÑA DEL PANICO - DIA 20
+         * ========================================
+         */
+        if (panicScytheRecipeKey != null) {
+
+            if (dayManager.isAtLeast(20)) {
+
+                player.discoverRecipe(
+                        panicScytheRecipeKey
+                );
+
+            } else {
+
+                player.undiscoverRecipe(
+                        panicScytheRecipeKey
                 );
             }
         }

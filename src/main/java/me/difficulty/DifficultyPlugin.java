@@ -360,6 +360,21 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         /*
          * ========================================
+         * DIA 20 - GUADAÑA DEL PANICO
+         * ========================================
+         */
+        NamespacedKey panicScytheRecipeKey =
+                day20Bootstrap.registerPanicScytheContent(
+                        dayManager,
+                        itemRegistry
+                );
+
+        recipeUnlockManager.registerPanicScytheRecipe(
+                panicScytheRecipeKey
+        );
+
+        /*
+         * ========================================
          * DÍA 20 - STRIDERS
          * ========================================
          */
