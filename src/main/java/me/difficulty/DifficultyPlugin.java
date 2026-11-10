@@ -406,6 +406,21 @@ public final class DifficultyPlugin extends JavaPlugin {
 
         /*
          * ========================================
+         * DIA 20 - ARMADURA ELEMENTAL
+         * ========================================
+         */
+        NamespacedKey[] elementalArmorRecipeKeys =
+                day20Bootstrap.registerElementalArmorContent(
+                        dayManager,
+                        itemRegistry
+                );
+
+        recipeUnlockManager.registerElementalArmorRecipes(
+                elementalArmorRecipeKeys
+        );
+
+        /*
+         * ========================================
          * DÍA 20 - STRIDERS
          * ========================================
          */

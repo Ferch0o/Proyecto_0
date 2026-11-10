@@ -10,28 +10,43 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.CrafterCraftEvent;
 
-import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.inventory.PrepareAnvilEvent;
-import org.bukkit.event.inventory.PrepareGrindstoneEvent;
-import org.bukkit.event.inventory.PrepareItemCraftEvent;
-import org.bukkit.event.inventory.PrepareSmithingEvent;
+import org.bukkit.event.inventory.*;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Set;
 
 public final class ElementalTemplateProtectionListener
         implements Listener {
 
     private final ElementalTemplate template;
     private final NamespacedKey copyRecipeKey;
+    private final Set<NamespacedKey> armorRecipeKeys;
 
     public ElementalTemplateProtectionListener(
+            JavaPlugin plugin,
             ElementalTemplate template,
             NamespacedKey copyRecipeKey
     ) {
-
         this.template = template;
         this.copyRecipeKey = copyRecipeKey;
+
+        armorRecipeKeys = Set.of(
+                new NamespacedKey(
+                        plugin, "elemental_helmet_smithing"
+                ),
+                new NamespacedKey(
+                        plugin, "elemental_chestplate_smithing"
+                ),
+                new NamespacedKey(
+                        plugin, "elemental_leggings_smithing"
+                ),
+                new NamespacedKey(
+                        plugin, "elemental_boots_smithing"
+                )
+        );
     }
 
     private boolean containsTemplate(
@@ -63,6 +78,17 @@ public final class ElementalTemplateProtectionListener
 
         return recipe instanceof Keyed keyed
                 && copyRecipeKey.equals(
+                keyed.getKey()
+        );
+    }
+
+
+    private boolean isAllowedSmithingRecipe(
+            Recipe recipe
+    ) {
+
+        return recipe instanceof Keyed keyed
+                && armorRecipeKeys.contains(
                 keyed.getKey()
         );
     }
@@ -130,20 +156,45 @@ public final class ElementalTemplateProtectionListener
         }
     }
 
-    /*
-     * Reservar las futuras recetas
-     * de herrería para la Armadura Elemental.
-     */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPrepareSmithing(
             PrepareSmithingEvent event
     ) {
 
-        if (containsTemplate(
+        if (!containsTemplate(
                 event.getInventory().getContents()
         )) {
+            return;
+        }
 
-            event.setResult(null);
+        if (isAllowedSmithingRecipe(
+                event.getInventory().getRecipe()
+        )) {
+            return;
+        }
+
+        event.setResult(null);
+    }
+
+    @EventHandler(
+            priority = EventPriority.HIGHEST,
+            ignoreCancelled = true
+    )
+    public void onSmithItem(
+            SmithItemEvent event
+    ) {
+
+        if (!containsTemplate(
+                event.getInventory().getContents()
+        )) {
+            return;
+        }
+
+        if (!isAllowedSmithingRecipe(
+                event.getInventory().getRecipe()
+        )) {
+
+            event.setCancelled(true);
         }
     }
 

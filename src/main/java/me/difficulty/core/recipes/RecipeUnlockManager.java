@@ -32,6 +32,7 @@ public class RecipeUnlockManager {
     private NamespacedKey elementalIngotRecipeKey;
     private NamespacedKey elementalTemplateRecipeKey;
     private NamespacedKey elementalTemplateCopyKey;
+    private NamespacedKey[] elementalArmorRecipeKeys = new NamespacedKey[0];
 
     public RecipeUnlockManager(
             JavaPlugin plugin,
@@ -98,6 +99,19 @@ public class RecipeUnlockManager {
 
         elementalTemplateRecipeKey = originalKey;
         elementalTemplateCopyKey = copyKey;
+    }
+
+    /*
+     * ========================================
+     * REGISTRAR RECETAS ARMADURA ELEMENTAL
+     * ========================================
+     */
+    public void registerElementalArmorRecipes(
+            NamespacedKey... recipeKeys
+    ) {
+
+        this.elementalArmorRecipeKeys =
+                recipeKeys.clone();
     }
 
     /*
@@ -235,6 +249,24 @@ public class RecipeUnlockManager {
                 player.undiscoverRecipe(
                         elementalTemplateCopyKey
                 );
+            }
+        }
+
+        /*
+         * ========================================
+         * ARMADURA ELEMENTAL - DIA 20
+         * ========================================
+         */
+        for (NamespacedKey recipeKey :
+                elementalArmorRecipeKeys) {
+
+            if (dayManager.isAtLeast(20)) {
+
+                player.discoverRecipe(recipeKey);
+
+            } else {
+
+                player.undiscoverRecipe(recipeKey);
             }
         }
     }

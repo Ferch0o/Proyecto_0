@@ -1,6 +1,8 @@
 
 package me.difficulty.features.day20.items;
 
+import org.bukkit.Keyed;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Crafter;
 
 import org.bukkit.event.EventHandler;
@@ -8,24 +10,52 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.CrafterCraftEvent;
 
-import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.inventory.PrepareAnvilEvent;
-import org.bukkit.event.inventory.PrepareGrindstoneEvent;
-import org.bukkit.event.inventory.PrepareItemCraftEvent;
-import org.bukkit.event.inventory.PrepareSmithingEvent;
+import org.bukkit.event.inventory.*;
 
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Set;
 
 public final class ElementalIngotProtectionListener
         implements Listener {
 
     private final ElementalIngot elementalIngot;
+    private final Set<NamespacedKey> armorRecipeKeys;
+
 
     public ElementalIngotProtectionListener(
+            JavaPlugin plugin,
             ElementalIngot elementalIngot
     ) {
 
         this.elementalIngot = elementalIngot;
+
+        armorRecipeKeys = Set.of(
+                new NamespacedKey(
+                        plugin, "elemental_helmet_smithing"
+                ),
+                new NamespacedKey(
+                        plugin, "elemental_chestplate_smithing"
+                ),
+                new NamespacedKey(
+                        plugin, "elemental_leggings_smithing"
+                ),
+                new NamespacedKey(
+                        plugin, "elemental_boots_smithing"
+                )
+        );
+    }
+
+    private boolean isAllowedSmithingRecipe(
+            Recipe recipe
+    ) {
+
+        return recipe instanceof Keyed keyed
+                && armorRecipeKeys.contains(
+                keyed.getKey()
+        );
     }
 
     private boolean containsIngot(
@@ -106,22 +136,45 @@ public final class ElementalIngotProtectionListener
         }
     }
 
-    /*
-     * ========================================
-     * HERRERIA - RESERVADO PARA
-     * LA ARMADURA ELEMENTAL
-     * ========================================
-     */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPrepareSmithing(
             PrepareSmithingEvent event
     ) {
 
-        if (containsIngot(
+        if (!containsIngot(
                 event.getInventory().getContents()
         )) {
+            return;
+        }
 
-            event.setResult(null);
+        if (isAllowedSmithingRecipe(
+                event.getInventory().getRecipe()
+        )) {
+            return;
+        }
+
+        event.setResult(null);
+    }
+
+    @EventHandler(
+            priority = EventPriority.HIGHEST,
+            ignoreCancelled = true
+    )
+    public void onSmithItem(
+            SmithItemEvent event
+    ) {
+
+        if (!containsIngot(
+                event.getInventory().getContents()
+        )) {
+            return;
+        }
+
+        if (!isAllowedSmithingRecipe(
+                event.getInventory().getRecipe()
+        )) {
+
+            event.setCancelled(true);
         }
     }
 

@@ -90,4 +90,17 @@ public final class ItemIds {
 
     public static final String ELEMENTAL_TEMPLATE = "elemental_template";
     public static final int ELEMENTAL_TEMPLATE_MODEL = 1210;
+
+    public static final String ELEMENTAL_HELMET = "elemental_helmet";
+    public static final int ELEMENTAL_HELMET_MODEL = 1211;
+
+    public static final String ELEMENTAL_CHESTPLATE = "elemental_chestplate";
+    public static final int ELEMENTAL_CHESTPLATE_MODEL = 1212;
+
+    public static final String ELEMENTAL_LEGGINGS = "elemental_leggings";
+    public static final int ELEMENTAL_LEGGINGS_MODEL = 1213;
+
+    public static final String ELEMENTAL_BOOTS = "elemental_boots";
+    public static final int ELEMENTAL_BOOTS_MODEL = 1214;
+
 }

@@ -1390,6 +1390,7 @@ public final class Day20Bootstrap {
          */
         pm.registerEvents(
                 new ElementalIngotProtectionListener(
+                        plugin,
                         elementalIngot
                 ),
                 plugin
@@ -1491,6 +1492,7 @@ public final class Day20Bootstrap {
          */
         pm.registerEvents(
                 new ElementalTemplateProtectionListener(
+                        plugin,
                         template,
                         recipes.getCopyKey()
                 ),
@@ -1501,6 +1503,132 @@ public final class Day20Bootstrap {
                 recipes.getOriginalKey(),
                 recipes.getCopyKey()
         );
+    }
+
+    /*
+     * ========================================
+     * DIA 20 - ARMADURA ELEMENTAL
+     * ========================================
+     */
+    public NamespacedKey[] registerElementalArmorContent(
+            DayManager dayManager,
+            CustomItemRegistry itemRegistry
+    ) {
+
+        /*
+         * Recuperar ingredientes existentes.
+         */
+        ElementalTemplate template =
+                (ElementalTemplate) itemRegistry.get(
+                        ItemIds.ELEMENTAL_TEMPLATE
+                ).orElseThrow(
+                        () -> new IllegalStateException(
+                                "Falta registrar la Plantilla Elemental."
+                        )
+                );
+
+        ElementalIngot ingot =
+                (ElementalIngot) itemRegistry.get(
+                        ItemIds.ELEMENTAL_INGOT
+                ).orElseThrow(
+                        () -> new IllegalStateException(
+                                "Falta registrar el Lingote Elemental."
+                        )
+                );
+
+        /*
+         * ========================================
+         * CREAR CUATRO PIEZAS
+         * ========================================
+         */
+        ElementalArmorPiece helmet =
+                new ElementalArmorPiece(
+                        plugin,
+                        ElementalArmorPiece.Kind.HELMET
+                );
+
+        ElementalArmorPiece chestplate =
+                new ElementalArmorPiece(
+                        plugin,
+                        ElementalArmorPiece.Kind.CHESTPLATE
+                );
+
+        ElementalArmorPiece leggings =
+                new ElementalArmorPiece(
+                        plugin,
+                        ElementalArmorPiece.Kind.LEGGINGS
+                );
+
+        ElementalArmorPiece boots =
+                new ElementalArmorPiece(
+                        plugin,
+                        ElementalArmorPiece.Kind.BOOTS
+                );
+
+        /*
+         * Registrar objetos personalizados.
+         */
+        itemRegistry.register(helmet);
+        itemRegistry.register(chestplate);
+        itemRegistry.register(leggings);
+        itemRegistry.register(boots);
+
+        /*
+         * ========================================
+         * RECETAS DE HERRERÍA
+         * ========================================
+         */
+        ElementalArmorSmithingListener smithing =
+                new ElementalArmorSmithingListener(
+                        plugin,
+                        dayManager,
+                        template,
+                        ingot,
+                        java.util.List.of(
+                                helmet,
+                                chestplate,
+                                leggings,
+                                boots
+                        )
+                );
+
+        smithing.register();
+
+        PluginManager pm =
+                plugin.getServer().getPluginManager();
+
+        pm.registerEvents(
+                smithing,
+                plugin
+        );
+
+        /*
+         * ========================================
+         * BONUS DEL CONJUNTO COMPLETO
+         * ========================================
+         */
+        ElementalArmorSetListener armorSet =
+                new ElementalArmorSetListener(
+                        plugin,
+                        dayManager,
+                        helmet,
+                        chestplate,
+                        leggings,
+                        boots
+                );
+
+        pm.registerEvents(
+                armorSet,
+                plugin
+        );
+
+        /*
+         * Detecta cambios de armadura,
+         * dimensión y día.
+         */
+        armorSet.start();
+
+        return smithing.getRecipeKeys();
     }
 
     /*
