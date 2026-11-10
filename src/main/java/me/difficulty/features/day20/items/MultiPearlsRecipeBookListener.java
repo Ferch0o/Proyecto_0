@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-
 import org.bukkit.event.inventory.InventoryType;
 
 import org.bukkit.inventory.CraftingInventory;
@@ -28,21 +27,18 @@ public final class MultiPearlsRecipeBookListener
 
     /*
      * ========================================
-     * DIA 20 - LIBRO DE RECETAS
+     * DIA 20 - MULTI PEARLS
+     * LIBRO DE RECETAS
      * ========================================
      *
-     * P = Perla Elemental
-     * C = Cuerda vanilla
-     *
-     * P P P
-     * P C P
-     * P P P
-     *
      * Clic normal:
-     * Agrega ingredientes para 1 receta.
+     * Prepara una fabricacion.
      *
      * Shift + clic:
-     * Agrega el maximo permitido.
+     * Prepara el maximo posible.
+     *
+     * No acumulamos clics sobre
+     * una receta ya colocada.
      */
 
     private static final int REQUIRED_DAY = 20;
@@ -70,24 +66,14 @@ public final class MultiPearlsRecipeBookListener
         this.multiPearls = multiPearls;
         this.recipeKey = recipeKey;
 
-        /*
-         * Plantillas autenticas de ingredientes.
-         */
-        this.pearlTemplate =
-                elementalPearl.createItem();
-
-        this.leadTemplate =
-                new ItemStack(Material.LEAD);
+        pearlTemplate = elementalPearl.createItem();
+        leadTemplate = new ItemStack(Material.LEAD);
 
         /*
-         * El limite depende de los stacks.
-         *
-         * Ender Pearl: normalmente 16.
-         * Cuerda: normalmente 64.
-         *
-         * Limite final: 16 fabricaciones.
+         * Respetar el limite real de
+         * cada stack de ingredientes.
          */
-        this.maxCrafts = Math.min(
+        maxCrafts = Math.min(
                 pearlTemplate.getMaxStackSize(),
                 leadTemplate.getMaxStackSize()
         );
@@ -95,27 +81,27 @@ public final class MultiPearlsRecipeBookListener
 
     /*
      * ========================================
-     * CLIC EN EL LIBRO DE RECETAS
+     * SELECCIONAR RECETA
      * ========================================
      */
-    @EventHandler(
-            priority = EventPriority.HIGHEST,
-            ignoreCancelled = true
-    )
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onRecipeBookClick(
             PlayerRecipeBookClickEvent event
     ) {
 
         /*
-         * Solo Multi Pearls.
+         * Ignorar cualquier otra receta.
          */
         if (!recipeKey.equals(event.getRecipe())) {
             return;
         }
 
         /*
-         * Cancelar el llenado automatico.
-         * Nosotros controlaremos las cantidades.
+         * Cancelar el llenado automatico
+         * de Minecraft.
+         *
+         * Asi controlamos los ingredientes
+         * personalizados y sus cantidades.
          */
         event.setCancelled(true);
 
@@ -126,7 +112,7 @@ public final class MultiPearlsRecipeBookListener
         Player player = event.getPlayer();
 
         /*
-         * Exigir mesa de crafteo 3x3.
+         * Solo mesa de crafteo 3x3.
          */
         if (player.getOpenInventory().getType()
                 != InventoryType.WORKBENCH) {
@@ -139,44 +125,36 @@ public final class MultiPearlsRecipeBookListener
             return;
         }
 
-        /*
-         * ========================================
-         * COMPROBAR LA MESA ACTUAL
-         * ========================================
-         */
-        int loadedCrafts = getLoadedCrafts(
-                crafting.getMatrix()
-        );
+        ItemStack[] currentMatrix =
+                crafting.getMatrix();
 
-        if (loadedCrafts < 0) {
-
-            player.sendMessage(
-                    "§cLa mesa contiene ingredientes "
-                            + "incorrectos o cantidades desiguales."
-            );
-
-            return;
-        }
-
-        /*
-         * Espacio para mas fabricaciones.
-         */
-        int availableSpace =
-                maxCrafts - loadedCrafts;
-
-        if (availableSpace <= 0) {
-
-            player.sendMessage(
-                    "§cLa mesa ya contiene el máximo "
-                            + "de Multi Pearls posibles."
-            );
-
+        if (currentMatrix.length != 9) {
             return;
         }
 
         /*
          * ========================================
-         * COMPROBAR INVENTARIO
+         * EXIGIR MESA VACIA
+         * ========================================
+         *
+         * No agregar ingredientes sobre
+         * recetas previamente colocadas.
+         *
+         * Tampoco sobrescribir objetos
+         * que el jugador puso manualmente.
+         */
+        for (ItemStack item : currentMatrix) {
+
+            if (item != null
+                    && !item.getType().isAir()) {
+
+                return;
+            }
+        }
+
+        /*
+         * ========================================
+         * CONTAR MATERIALES DISPONIBLES
          * ========================================
          */
         PlayerInventory inventory =
@@ -185,23 +163,19 @@ public final class MultiPearlsRecipeBookListener
         ItemStack[] storage =
                 inventory.getStorageContents();
 
-        int availablePearls =
-                countItems(
-                        storage,
-                        this::isElementalPearl
-                );
+        int availablePearls = count(
+                storage,
+                this::isValidPearl
+        );
 
-        int availableLeads =
-                countItems(
-                        storage,
-                        this::isVanillaLead
-                );
+        int availableLeads = count(
+                storage,
+                this::isValidLead
+        );
 
         /*
-         * Cada fabricacion requiere:
-         *
-         * 8 Perlas Elementales
-         * 1 Cuerda
+         * Cada Multi Pearls necesita:
+         * 8 Perlas Elementales + 1 cuerda.
          */
         int possibleCrafts = Math.min(
                 availablePearls / 8,
@@ -210,35 +184,20 @@ public final class MultiPearlsRecipeBookListener
 
         possibleCrafts = Math.min(
                 possibleCrafts,
-                availableSpace
+                maxCrafts
         );
 
         /*
          * ========================================
-         * DETERMINAR CANTIDAD
+         * CANTIDAD SEGUN EL CLIC
          * ========================================
          */
-        int craftsToAdd;
+        int crafts = event.isMakeAll()
+                ? possibleCrafts
+                : 1;
 
-        if (event.isMakeAll()) {
-
-            /*
-             * Shift + clic:
-             * cantidad maxima.
-             */
-            craftsToAdd = possibleCrafts;
-
-        } else {
-
-            /*
-             * Clic normal:
-             * una fabricacion mas.
-             */
-            craftsToAdd = 1;
-        }
-
-        if (craftsToAdd <= 0
-                || possibleCrafts < craftsToAdd) {
+        if (crafts <= 0
+                || possibleCrafts < crafts) {
 
             player.sendMessage(
                     "§cNo tienes suficientes "
@@ -253,78 +212,76 @@ public final class MultiPearlsRecipeBookListener
          * COPIAR INVENTARIO
          * ========================================
          *
-         * Todavia no modificamos el
-         * inventario original del jugador.
+         * Evitar cambios parciales si
+         * hay un problema al descontar.
          */
-        ItemStack[] copy = storage.clone();
+        ItemStack[] copy =
+                new ItemStack[storage.length];
 
-        for (int i = 0; i < copy.length; i++) {
+        for (int i = 0; i < storage.length; i++) {
 
-            if (copy[i] != null) {
-                copy[i] = copy[i].clone();
-            }
+            copy[i] = storage[i] == null
+                    ? null
+                    : storage[i].clone();
         }
 
         /*
          * ========================================
-         * RETIRAR MATERIALES DE LA COPIA
+         * RETIRAR INGREDIENTES DE LA COPIA
          * ========================================
          */
-        boolean removedPearls = removeItems(
+        if (!take(
                 copy,
-                this::isElementalPearl,
-                craftsToAdd * 8
-        );
+                this::isValidPearl,
+                crafts * 8
+        )) {
+            return;
+        }
 
-        boolean removedLeads = removeItems(
+        if (!take(
                 copy,
-                this::isVanillaLead,
-                craftsToAdd
-        );
-
-        /*
-         * Si no se pudieron retirar
-         * todos los ingredientes,
-         * no modificar nada.
-         */
-        if (!removedPearls || !removedLeads) {
+                this::isValidLead,
+                crafts
+        )) {
             return;
         }
 
         /*
          * ========================================
-         * ACTUALIZAR MESA
+         * CONSTRUIR MESA
          * ========================================
+         *
+         * Colocamos la cantidad elegida
+         * por cada casilla.
          */
-        int totalCrafts =
-                loadedCrafts + craftsToAdd;
-
-        ItemStack[] newMatrix =
-                createMatrix(totalCrafts);
+        ItemStack[] matrix =
+                createMatrix(crafts);
 
         /*
-         * Los materiales pasan del inventario
-         * del jugador a la mesa.
+         * Los ingredientes pasan del
+         * inventario a la mesa.
          *
-         * Todavia no se fabrica el resultado.
+         * Todavia no se fabrica
+         * ninguna Multi Pearls.
          */
         inventory.setStorageContents(copy);
 
-        crafting.setMatrix(newMatrix);
+        crafting.setMatrix(matrix);
 
         crafting.setResult(
                 multiPearls.createItem()
         );
-
-        player.updateInventory();
     }
 
     /*
      * ========================================
-     * IDENTIFICAR PERLA ELEMENTAL
+     * PERLA ELEMENTAL AUTENTICA
      * ========================================
+     *
+     * ExactChoice debe poder reconocer
+     * los objetos que transferimos.
      */
-    private boolean isElementalPearl(
+    private boolean isValidPearl(
             ItemStack item
     ) {
 
@@ -335,10 +292,10 @@ public final class MultiPearlsRecipeBookListener
 
     /*
      * ========================================
-     * IDENTIFICAR CUERDA VANILLA
+     * CUERDA VANILLA
      * ========================================
      */
-    private boolean isVanillaLead(
+    private boolean isValidLead(
             ItemStack item
     ) {
 
@@ -348,12 +305,12 @@ public final class MultiPearlsRecipeBookListener
 
     /*
      * ========================================
-     * CONTAR INGREDIENTES EN INVENTARIO
+     * CONTAR OBJETOS
      * ========================================
      */
-    private int countItems(
+    private int count(
             ItemStack[] contents,
-            Predicate<ItemStack> condition
+            Predicate<ItemStack> predicate
     ) {
 
         int total = 0;
@@ -361,7 +318,7 @@ public final class MultiPearlsRecipeBookListener
         for (ItemStack item : contents) {
 
             if (item != null
-                    && condition.test(item)) {
+                    && predicate.test(item)) {
 
                 total += item.getAmount();
             }
@@ -372,12 +329,12 @@ public final class MultiPearlsRecipeBookListener
 
     /*
      * ========================================
-     * QUITAR INGREDIENTES DE UNA COPIA
+     * DESCONTAR INGREDIENTES
      * ========================================
      */
-    private boolean removeItems(
+    private boolean take(
             ItemStack[] contents,
-            Predicate<ItemStack> condition,
+            Predicate<ItemStack> predicate,
             int amount
     ) {
 
@@ -390,7 +347,7 @@ public final class MultiPearlsRecipeBookListener
             ItemStack item = contents[i];
 
             if (item == null
-                    || !condition.test(item)) {
+                    || !predicate.test(item)) {
                 continue;
             }
 
@@ -419,82 +376,7 @@ public final class MultiPearlsRecipeBookListener
 
     /*
      * ========================================
-     * OBTENER CRAFTEOS YA COLOCADOS
-     * ========================================
-     *
-     * 0: mesa vacia.
-     * 1-16: fabricaciones preparadas.
-     * -1: matriz invalida.
-     */
-    private int getLoadedCrafts(
-            ItemStack[] matrix
-    ) {
-
-        if (matrix.length != 9) {
-            return -1;
-        }
-
-        /*
-         * Comprobar si esta vacia.
-         */
-        boolean empty = true;
-
-        for (ItemStack item : matrix) {
-
-            if (item != null
-                    && !item.getType().isAir()) {
-
-                empty = false;
-                break;
-            }
-        }
-
-        if (empty) {
-            return 0;
-        }
-
-        /*
-         * Comprobar ingrediente central.
-         */
-        ItemStack center = matrix[4];
-
-        if (!isVanillaLead(center)) {
-            return -1;
-        }
-
-        int amount = center.getAmount();
-
-        if (amount < 1
-                || amount > maxCrafts) {
-            return -1;
-        }
-
-        /*
-         * Las ocho casillas deben
-         * tener exactamente la misma
-         * cantidad de Perlas Elementales.
-         */
-        for (int slot = 0; slot < 9; slot++) {
-
-            if (slot == 4) {
-                continue;
-            }
-
-            ItemStack item = matrix[slot];
-
-            if (!isElementalPearl(item)
-                    || item.getAmount() != amount) {
-
-                return -1;
-            }
-        }
-
-        return amount;
-    }
-
-    /*
-     * ========================================
-     * CONSTRUIR MATRIZ DEL CRAFTEO
+     * CREAR MATRIZ
      * ========================================
      */
     private ItemStack[] createMatrix(
@@ -506,24 +388,26 @@ public final class MultiPearlsRecipeBookListener
 
         for (int slot = 0; slot < 9; slot++) {
 
+            ItemStack item;
+
             if (slot == 4) {
 
-                ItemStack lead =
-                        leadTemplate.clone();
-
-                lead.setAmount(crafts);
-
-                matrix[slot] = lead;
+                /*
+                 * Cuerda central.
+                 */
+                item = leadTemplate.clone();
 
             } else {
 
-                ItemStack pearl =
-                        pearlTemplate.clone();
-
-                pearl.setAmount(crafts);
-
-                matrix[slot] = pearl;
+                /*
+                 * Perlas Elementales.
+                 */
+                item = pearlTemplate.clone();
             }
+
+            item.setAmount(crafts);
+
+            matrix[slot] = item;
         }
 
         return matrix;
