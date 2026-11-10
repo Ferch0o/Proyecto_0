@@ -335,17 +335,17 @@ public final class ElementalArmorSetListener
                 appliedEffects.get(uuid);
 
         /*
-         * Quitar nuestro efecto anterior
-         * cuando cambia la dimensión
-         * o se pierde el conjunto.
+         * ========================================
+         * RETIRAR EFECTO ANTERIOR
+         * ========================================
          */
         if (previous != null
                 && !previous.equals(desired)) {
 
-            PotionEffect current =
+            PotionEffect oldEffect =
                     player.getPotionEffect(previous);
 
-            if (isOurEffect(current)) {
+            if (isOurEffect(oldEffect)) {
                 player.removePotionEffect(previous);
             }
 
@@ -359,34 +359,59 @@ public final class ElementalArmorSetListener
         PotionEffect current =
                 player.getPotionEffect(desired);
 
-        /*
-         * No sobrescribir efectos de otras
-         * fuentes: pociones, beacons o
-         * futuras habilidades.
-         */
-        if (current != null
-                && !desired.equals(
-                appliedEffects.get(uuid)
-        )) {
-            return;
-        }
-
-        if (current != null
-                && !isOurEffect(current)) {
-
-            appliedEffects.remove(uuid);
-            return;
-        }
+        boolean ourEffect =
+                desired.equals(appliedEffects.get(uuid))
+                        && isOurEffect(current);
 
         /*
-         * Si todavía dura suficiente,
-         * no renovar innecesariamente.
+         * ========================================
+         * RESPETAR EFECTOS EXTERNOS
+         * ========================================
          */
-        if (current != null
-                && current.getDuration() > 30) {
-            return;
+        if (current != null) {
+
+            /*
+             * Si el jugador tiene un efecto
+             * superior a nivel II,
+             * no reemplazarlo.
+             */
+            if (current.getAmplifier()
+                    > EFFECT_AMPLIFIER) {
+
+                appliedEffects.remove(uuid);
+                return;
+            }
+
+            /*
+             * Si otro sistema ya proporciona
+             * nivel II, no sobrescribirlo.
+             */
+            if (current.getAmplifier()
+                    == EFFECT_AMPLIFIER
+                    && !ourEffect) {
+
+                appliedEffects.remove(uuid);
+                return;
+            }
+
+            /*
+             * Si el efecto propio todavía
+             * dura suficiente, conservarlo.
+             */
+            if (ourEffect
+                    && current.getDuration() > 30) {
+                return;
+            }
         }
 
+        /*
+         * ========================================
+         * APLICAR BONUS DE ARMADURA
+         * ========================================
+         *
+         * Reemplaza un efecto inferior,
+         * pero respeta uno superior.
+         */
         player.addPotionEffect(
                 new PotionEffect(
                         desired,
