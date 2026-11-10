@@ -17,9 +17,11 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -189,60 +191,204 @@ public final class ElementalArmorPiece extends CustomItem {
 
     /*
      * ========================================
-     * MEJORAR PIEZA DE NETHERITE
+     * MEJORAR ARMADURA DE NETHERITE
      * ========================================
      *
-     * Conservamos encantamientos y
-     * adornos de la pieza original.
+     * Conserva:
+     * - Nombre personalizado.
+     * - Encantamientos.
+     * - Armor trims.
+     * - Lore original.
+     * - Datos persistentes (PDC).
+     * - Repair cost.
+     * - ItemFlags y otros metadatos.
+     * - Atributos adicionales no defensivos.
      *
-     * No copiamos CustomModelData ni
-     * el ID del objeto antiguo.
+     * Reemplaza:
+     * - ID del objeto.
+     * - Modelo personalizado.
+     * - Armadura.
+     * - Dureza.
+     * - Resistencia al empuje.
+     *
+     * La pieza resultante es irrompible.
      */
     public ItemStack createFromBase(
             ItemStack base
     ) {
 
-        ItemStack result = createItem();
+        /*
+         * ========================================
+         * CREAR ARMADURA ELEMENTAL ORIGINAL
+         * ========================================
+         */
+        ItemStack elemental = createItem();
 
         if (base == null
                 || base.getType() != kind.material) {
-            return result;
+            return elemental;
         }
 
-        ItemMeta baseMeta = base.getItemMeta();
-        ItemMeta resultMeta = result.getItemMeta();
+        ItemMeta originalMeta = base.getItemMeta();
+        ItemMeta elementalMeta = elemental.getItemMeta();
 
-        if (baseMeta == null || resultMeta == null) {
-            return result;
+        if (originalMeta == null
+                || elementalMeta == null) {
+            return elemental;
         }
 
         /*
-         * Conservar encantamientos.
+         * ========================================
+         * CONSERVAR DATOS ORIGINALES
+         * ========================================
+         *
+         * Clonar los metadatos de la netherite
+         * permite mantener sus encantamientos,
+         * trims, flags, repair cost y otros datos.
          */
-        for (Map.Entry<Enchantment, Integer> entry
-                : baseMeta.getEnchants().entrySet()) {
+        ItemMeta newMeta = originalMeta.clone();
 
-            resultMeta.addEnchant(
-                    entry.getKey(),
-                    entry.getValue(),
-                    true
+        /*
+         * ========================================
+         * NOMBRE PERSONALIZADO
+         * ========================================
+         *
+         * Si el jugador renombró su armadura,
+         * mantener exactamente ese nombre.
+         *
+         * Si no tiene nombre personalizado,
+         * utilizar Casco Elemental,
+         * Pechera Elemental, etc.
+         */
+        if (!originalMeta.hasCustomName()
+                && !originalMeta.hasItemName()) {
+
+            newMeta.customName(
+                    elementalMeta.customName()
             );
         }
 
         /*
-         * Conservar armor trims.
+         * ========================================
+         * CONSERVAR LORE ORIGINAL
+         * ========================================
+         *
+         * Mostrar primero las descripciones
+         * que ya tenía la netherite.
+         *
+         * Después agregar las características
+         * de la Armadura Elemental.
          */
-        if (baseMeta instanceof ArmorMeta oldArmor
-                && resultMeta instanceof ArmorMeta newArmor
-                && oldArmor.hasTrim()) {
+        List<Component> newLore = new ArrayList<>();
 
-            newArmor.setTrim(
-                    oldArmor.getTrim()
-            );
+        List<Component> originalLore =
+                originalMeta.lore();
+
+        if (originalLore != null
+                && !originalLore.isEmpty()) {
+
+            newLore.addAll(originalLore);
+            newLore.add(Component.empty());
         }
 
-        result.setItemMeta(resultMeta);
-        return result;
+        List<Component> elementalLore =
+                elementalMeta.lore();
+
+        if (elementalLore != null) {
+            newLore.addAll(elementalLore);
+        }
+
+        newMeta.lore(newLore);
+
+        /*
+         * ========================================
+         * IDENTIDAD ELEMENTAL
+         * ========================================
+         *
+         * Mantener los datos personalizados
+         * anteriores y copiar encima el ID
+         * auténtico de la Armadura Elemental.
+         */
+        elementalMeta.getPersistentDataContainer()
+                .copyTo(
+                        newMeta.getPersistentDataContainer(),
+                        true
+                );
+
+        /*
+         * ========================================
+         * MODELO DE LA ARMADURA ELEMENTAL
+         * ========================================
+         *
+         * No conservar el modelo viejo.
+         * Usar el modelo definido por ItemIds.
+         */
+        newMeta.setCustomModelDataComponent(
+                elementalMeta.getCustomModelDataComponent()
+        );
+
+        newMeta.setItemModel(
+                elementalMeta.getItemModel()
+        );
+
+        /*
+         * ========================================
+         * IRROMPIBLE Y SIN DESGASTE
+         * ========================================
+         */
+        newMeta.setUnbreakable(true);
+
+        if (newMeta instanceof Damageable damageable) {
+            damageable.setDamage(0);
+        }
+
+        /*
+         * ========================================
+         * REEMPLAZAR ATRIBUTOS DEFENSIVOS
+         * ========================================
+         *
+         * Eliminamos los valores defensivos
+         * anteriores para evitar duplicarlos.
+         *
+         * Los atributos adicionales que pudiera
+         * tener la armadura original permanecen.
+         */
+        newMeta.removeAttributeModifier(
+                Attribute.ARMOR
+        );
+
+        newMeta.removeAttributeModifier(
+                Attribute.ARMOR_TOUGHNESS
+        );
+
+        newMeta.removeAttributeModifier(
+                Attribute.KNOCKBACK_RESISTANCE
+        );
+
+        /*
+         * Incorporar los atributos definitivos
+         * de la Armadura Elemental.
+         */
+        if (elementalMeta.hasAttributeModifiers()) {
+
+            elementalMeta.getAttributeModifiers()
+                    .forEach(
+                            (attribute, modifier) ->
+                                    newMeta.addAttributeModifier(
+                                            attribute,
+                                            modifier
+                                    )
+                    );
+        }
+
+        /*
+         * ========================================
+         * FINALIZAR TRANSFORMACION
+         * ========================================
+         */
+        elemental.setItemMeta(newMeta);
+
+        return elemental;
     }
 
     /*
