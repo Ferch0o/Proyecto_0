@@ -10,6 +10,7 @@ import me.difficulty.core.mobs.CustomMobRegistry;
 import me.difficulty.features.day10.items.explosivecrossbow.ExplosiveCrossbowRecipe;
 import me.difficulty.core.recipes.RecipeUnlockManager;
 import me.difficulty.features.day20.items.ElementalRod;
+import me.difficulty.features.day20.loot.NetherChestLootManager;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -23,6 +24,8 @@ public final class DifficultyPlugin extends JavaPlugin {
     private CustomMobRegistry mobRegistry;
 
     private StormBootstrap stormBootstrap;
+
+    private NetherChestLootManager netherChestLootManager;
 
     @Override
     public void onEnable() {
@@ -445,6 +448,27 @@ public final class DifficultyPlugin extends JavaPlugin {
         day20Bootstrap.registerGoldOreContent(
                 dayManager
         );
+
+        /*
+         * ========================================
+         * DIA 20 - LOOT DE FORTALEZAS Y BASTIONES
+         * ========================================
+         *
+         * Identificacion activa desde el Dia 0.
+         * Loot personalizado y refills desde el Dia 20.
+         *
+         * Debe registrarse despues de los items
+         * personalizados, porque utiliza sus IDs.
+         */
+
+        netherChestLootManager =
+                new NetherChestLootManager(
+                        this,
+                        dayManager,
+                        itemRegistry
+                );
+
+        netherChestLootManager.start();
 
         stormBootstrap.registerDay10Listeners();
 

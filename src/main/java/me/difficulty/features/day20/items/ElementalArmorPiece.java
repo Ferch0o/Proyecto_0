@@ -191,37 +191,22 @@ public final class ElementalArmorPiece extends CustomItem {
 
     /*
      * ========================================
-     * MEJORAR ARMADURA DE NETHERITE
+     * MEJORAR NETHERITE A ARMADURA ELEMENTAL
      * ========================================
      *
-     * Conserva:
-     * - Nombre personalizado.
-     * - Encantamientos.
-     * - Armor trims.
-     * - Lore original.
-     * - Datos persistentes (PDC).
-     * - Repair cost.
-     * - ItemFlags y otros metadatos.
-     * - Atributos adicionales no defensivos.
+     * Conservamos los datos personalizados,
+     * excepto:
      *
-     * Reemplaza:
-     * - ID del objeto.
-     * - Modelo personalizado.
-     * - Armadura.
-     * - Dureza.
-     * - Resistencia al empuje.
-     *
-     * La pieza resultante es irrompible.
+     * - Reparación.
+     * - Irrompibilidad.
+     * - Daño acumulado.
+     * - Atributos defensivos anteriores.
+     * - Modelo e identidad anteriores.
      */
     public ItemStack createFromBase(
             ItemStack base
     ) {
 
-        /*
-         * ========================================
-         * CREAR ARMADURA ELEMENTAL ORIGINAL
-         * ========================================
-         */
         ItemStack elemental = createItem();
 
         if (base == null
@@ -239,26 +224,29 @@ public final class ElementalArmorPiece extends CustomItem {
 
         /*
          * ========================================
-         * CONSERVAR DATOS ORIGINALES
+         * CONSERVAR METADATOS DEL JUGADOR
          * ========================================
          *
-         * Clonar los metadatos de la netherite
-         * permite mantener sus encantamientos,
-         * trims, flags, repair cost y otros datos.
+         * Incluye:
+         * - Encantamientos.
+         * - Armor trims.
+         * - Nombres personalizados.
+         * - Repair cost.
+         * - Datos de otros plugins.
+         * - Item flags.
          */
         ItemMeta newMeta = originalMeta.clone();
 
         /*
          * ========================================
-         * NOMBRE PERSONALIZADO
+         * NOMBRE
          * ========================================
          *
-         * Si el jugador renombró su armadura,
-         * mantener exactamente ese nombre.
+         * Respetar el nombre dado mediante
+         * un yunque.
          *
-         * Si no tiene nombre personalizado,
-         * utilizar Casco Elemental,
-         * Pechera Elemental, etc.
+         * Si no existe, utilizar el nombre
+         * correspondiente a la pieza elemental.
          */
         if (!originalMeta.hasCustomName()
                 && !originalMeta.hasItemName()) {
@@ -270,44 +258,74 @@ public final class ElementalArmorPiece extends CustomItem {
 
         /*
          * ========================================
-         * CONSERVAR LORE ORIGINAL
+         * LORE PERSONALIZADO
          * ========================================
-         *
-         * Mostrar primero las descripciones
-         * que ya tenía la netherite.
-         *
-         * Después agregar las características
-         * de la Armadura Elemental.
          */
-        List<Component> newLore = new ArrayList<>();
+        List<Component> lore = new ArrayList<>();
 
-        List<Component> originalLore =
-                originalMeta.lore();
+        List<Component> oldLore = originalMeta.lore();
 
-        if (originalLore != null
-                && !originalLore.isEmpty()) {
+        if (oldLore != null && !oldLore.isEmpty()) {
 
-            newLore.addAll(originalLore);
-            newLore.add(Component.empty());
+            lore.addAll(oldLore);
+            lore.add(Component.empty());
         }
 
         List<Component> elementalLore =
                 elementalMeta.lore();
 
         if (elementalLore != null) {
-            newLore.addAll(elementalLore);
+            lore.addAll(elementalLore);
         }
 
-        newMeta.lore(newLore);
+        newMeta.lore(lore);
 
         /*
          * ========================================
-         * IDENTIDAD ELEMENTAL
+         * ELIMINAR ENCANTAMIENTOS INNECESARIOS
          * ========================================
          *
-         * Mantener los datos personalizados
-         * anteriores y copiar encima el ID
-         * auténtico de la Armadura Elemental.
+         * El resto de encantamientos permanece.
+         */
+        newMeta.removeEnchant(
+                Enchantment.MENDING
+        );
+
+        newMeta.removeEnchant(
+                Enchantment.UNBREAKING
+        );
+
+        /*
+         * ========================================
+         * REPARAR COMPLETAMENTE
+         * ========================================
+         *
+         * Incluso si la armadura original
+         * solamente tenía 1 punto restante.
+         */
+        if (newMeta instanceof Damageable damageable) {
+
+            damageable.resetDamage();
+        }
+
+        /*
+         * ========================================
+         * HACER IRROMPIBLE LA PIEZA
+         * ========================================
+         *
+         * Esta propiedad no es el
+         * encantamiento Irrompibilidad.
+         */
+        newMeta.setUnbreakable(true);
+
+        /*
+         * ========================================
+         * ASIGNAR IDENTIDAD ELEMENTAL
+         * ========================================
+         *
+         * Conservar PDC anteriores, pero
+         * sobrescribir nuestra identificación
+         * con el ID de Armadura Elemental.
          */
         elementalMeta.getPersistentDataContainer()
                 .copyTo(
@@ -316,12 +334,8 @@ public final class ElementalArmorPiece extends CustomItem {
                 );
 
         /*
-         * ========================================
-         * MODELO DE LA ARMADURA ELEMENTAL
-         * ========================================
-         *
-         * No conservar el modelo viejo.
-         * Usar el modelo definido por ItemIds.
+         * Utilizar el modelo elemental.
+         * No conservar el modelo original.
          */
         newMeta.setCustomModelDataComponent(
                 elementalMeta.getCustomModelDataComponent()
@@ -333,25 +347,11 @@ public final class ElementalArmorPiece extends CustomItem {
 
         /*
          * ========================================
-         * IRROMPIBLE Y SIN DESGASTE
-         * ========================================
-         */
-        newMeta.setUnbreakable(true);
-
-        if (newMeta instanceof Damageable damageable) {
-            damageable.setDamage(0);
-        }
-
-        /*
-         * ========================================
-         * REEMPLAZAR ATRIBUTOS DEFENSIVOS
+         * ATRIBUTOS DEFENSIVOS ELEMENTALES
          * ========================================
          *
-         * Eliminamos los valores defensivos
-         * anteriores para evitar duplicarlos.
-         *
-         * Los atributos adicionales que pudiera
-         * tener la armadura original permanecen.
+         * Quitar estadísticas anteriores para
+         * evitar que se acumulen.
          */
         newMeta.removeAttributeModifier(
                 Attribute.ARMOR
@@ -366,24 +366,38 @@ public final class ElementalArmorPiece extends CustomItem {
         );
 
         /*
-         * Incorporar los atributos definitivos
-         * de la Armadura Elemental.
+         * Restaurar la protección de netherite.
          */
-        if (elementalMeta.hasAttributeModifiers()) {
+        addModifier(
+                newMeta,
+                Attribute.ARMOR,
+                kind.id + "_armor",
+                kind.armor
+        );
 
-            elementalMeta.getAttributeModifiers()
-                    .forEach(
-                            (attribute, modifier) ->
-                                    newMeta.addAttributeModifier(
-                                            attribute,
-                                            modifier
-                                    )
-                    );
-        }
+        /*
+         * Dureza elemental: 4 por pieza.
+         */
+        addModifier(
+                newMeta,
+                Attribute.ARMOR_TOUGHNESS,
+                kind.id + "_toughness",
+                4.0
+        );
+
+        /*
+         * Resistencia al empuje de netherite.
+         */
+        addModifier(
+                newMeta,
+                Attribute.KNOCKBACK_RESISTANCE,
+                kind.id + "_knockback",
+                0.1
+        );
 
         /*
          * ========================================
-         * FINALIZAR TRANSFORMACION
+         * ENTREGAR PIEZA ELEMENTAL
          * ========================================
          */
         elemental.setItemMeta(newMeta);

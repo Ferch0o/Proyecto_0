@@ -1623,6 +1623,21 @@ public final class Day20Bootstrap {
         );
 
         /*
+         * ========================================
+         * PROTEGER ENCANTAMIENTOS ELEMENTALES
+         * ========================================
+         */
+        pm.registerEvents(
+                new ElementalArmorEnchantProtectionListener(
+                        helmet,
+                        chestplate,
+                        leggings,
+                        boots
+                ),
+                plugin
+        );
+
+        /*
          * Detecta cambios de armadura,
          * dimensión y día.
          */
