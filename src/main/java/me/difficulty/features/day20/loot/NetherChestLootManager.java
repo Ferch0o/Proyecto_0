@@ -14,38 +14,36 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 
-import org.bukkit.entity.Player;
+import org.bukkit.entity.HumanEntity;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkPopulateEvent;
 import org.bukkit.event.world.LootGenerateEvent;
 
+import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import org.bukkit.loot.LootTable;
-
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.UUID;
+import java.util.logging.Level;
 
 public final class NetherChestLootManager implements Listener {
 
     /*
      * ========================================
-     * CONFIGURACION
+     * CONFIGURACION GENERAL
      * ========================================
      */
 
@@ -53,6 +51,8 @@ public final class NetherChestLootManager implements Listener {
             "nether-loot.refill-round";
 
     private static final int CHUNKS_PER_TICK = 3;
+
+    private static final long RETRY_TICKS = 20L;
 
     private final JavaPlugin plugin;
     private final DayManager dayManager;
@@ -67,6 +67,19 @@ public final class NetherChestLootManager implements Listener {
     private final Set<String> queuedChunks =
             new HashSet<>();
 
+    /*
+     * Cofres cuya LootTable se esta generando.
+     *
+     * Evita que InventoryOpenEvent o el escaneo
+     * intenten rellenarlos por segunda vez.
+     */
+    private final Set<String> generatingLoot =
+            new HashSet<>();
+
+    /*
+     * Evita registrar un cofre nuevo colocado
+     * inmediatamente tras destruir el original.
+     */
     private final Set<String> recentlyBroken =
             new HashSet<>();
 
@@ -81,7 +94,8 @@ public final class NetherChestLootManager implements Listener {
         this.plugin = plugin;
         this.dayManager = dayManager;
 
-        this.generator = new NetherLootGenerator(items);
+        this.generator =
+                new NetherLootGenerator(items);
 
         this.chestTypeKey = new NamespacedKey(
                 plugin,
@@ -95,23 +109,30 @@ public final class NetherChestLootManager implements Listener {
 
         this.currentRound = Math.max(
                 0,
-                plugin.getConfig().getInt(ROUND_CONFIG, 0)
+                plugin.getConfig().getInt(
+                        ROUND_CONFIG,
+                        0
+                )
         );
 
         /*
-         * Soporte para instalar el sistema
-         * en un servidor que ya esta en dia 20.
+         * Si el plugin se instala cuando el
+         * servidor ya esta en el dia 20.
          */
-        if (dayManager.isAtLeast(20) && currentRound == 0) {
+        if (dayManager.isAtLeast(20)
+                && currentRound == 0) {
+
             saveRound(1);
         }
 
-        dayManager.addDayChangeListener(this::onDayChange);
+        dayManager.addDayChangeListener(
+                this::onDayChange
+        );
     }
 
     /*
      * ========================================
-     * INICIAR SISTEMA
+     * INICIAR EL SISTEMA
      * ========================================
      */
     public void start() {
@@ -122,29 +143,27 @@ public final class NetherChestLootManager implements Listener {
         );
 
         /*
-         * Procesar chunks gradualmente.
-         * No cargar chunks lejanos a la fuerza.
+         * Revisar hasta tres chunks por tick.
+         * No cargamos regiones lejanas.
          */
         Bukkit.getScheduler().runTaskTimer(
                 plugin,
                 () -> {
 
                     for (int i = 0;
-                         i < CHUNKS_PER_TICK &&
-                                 !pendingChunks.isEmpty();
+                         i < CHUNKS_PER_TICK
+                                 && !pendingChunks.isEmpty();
                          i++) {
 
                         Chunk chunk = pendingChunks.poll();
 
                         queuedChunks.remove(
-                                getChunkKey(chunk)
+                                chunkKey(chunk)
                         );
 
-                        if (!chunk.isLoaded()) {
-                            continue;
+                        if (chunk.isLoaded()) {
+                            inspectChunk(chunk);
                         }
-
-                        inspectChunk(chunk);
                     }
 
                 },
@@ -160,11 +179,24 @@ public final class NetherChestLootManager implements Listener {
 
     /*
      * ========================================
-     * CAMBIO DE DIA
+     * CONTROL DE DIAS Y RONDAS
      * ========================================
      */
-    private void onDayChange(int previous, int current) {
+    private void onDayChange(
+            int previous,
+            int current
+    ) {
 
+        /*
+         * Una nueva ronda ocurre solamente
+         * al cruzar desde antes del dia 20
+         * al dia 20 o superior.
+         *
+         * Ejemplo de testeo:
+         * 19 -> 20 : ronda 1
+         * 20 -> 19 : sin refill
+         * 19 -> 20 : ronda 2
+         */
         if (previous < 20 && current >= 20) {
 
             saveRound(currentRound + 1);
@@ -172,7 +204,7 @@ public final class NetherChestLootManager implements Listener {
             enqueueLoadedChunks();
 
             plugin.getLogger().info(
-                    "Nueva ronda de loot Nether: " +
+                    "Loot del Nether: ronda de refill " +
                             currentRound
             );
         }
@@ -192,9 +224,10 @@ public final class NetherChestLootManager implements Listener {
 
     /*
      * ========================================
-     * DETECTAR CHUNKS
+     * COLA DE CHUNKS
      * ========================================
      */
+
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) {
 
@@ -202,17 +235,7 @@ public final class NetherChestLootManager implements Listener {
             return;
         }
 
-        Chunk chunk = event.getChunk();
-
-        Bukkit.getScheduler().runTaskLater(
-                plugin,
-                () -> {
-                    if (chunk.isLoaded()) {
-                        enqueueChunk(chunk);
-                    }
-                },
-                2L
-        );
+        scheduleChunk(event.getChunk(), 2L);
     }
 
     @EventHandler
@@ -222,16 +245,24 @@ public final class NetherChestLootManager implements Listener {
             return;
         }
 
-        Chunk chunk = event.getChunk();
+        scheduleChunk(event.getChunk(), 2L);
+    }
+
+    private void scheduleChunk(
+            Chunk chunk,
+            long delay
+    ) {
 
         Bukkit.getScheduler().runTaskLater(
                 plugin,
                 () -> {
+
                     if (chunk.isLoaded()) {
                         enqueueChunk(chunk);
                     }
+
                 },
-                2L
+                delay
         );
     }
 
@@ -244,6 +275,7 @@ public final class NetherChestLootManager implements Listener {
             }
 
             for (Chunk chunk : world.getLoadedChunks()) {
+
                 enqueueChunk(chunk);
             }
         }
@@ -255,29 +287,39 @@ public final class NetherChestLootManager implements Listener {
             return;
         }
 
-        String key = getChunkKey(chunk);
+        String key = chunkKey(chunk);
 
         if (queuedChunks.add(key)) {
+
             pendingChunks.add(chunk);
         }
     }
 
-    private String getChunkKey(Chunk chunk) {
+    private String chunkKey(Chunk chunk) {
 
         return chunk.getWorld().getUID() +
                 ":" + chunk.getX() +
                 ":" + chunk.getZ();
     }
 
+    private String blockKey(Location location) {
+
+        return location.getWorld().getUID() +
+                ":" + location.getBlockX() +
+                ":" + location.getBlockY() +
+                ":" + location.getBlockZ();
+    }
+
     private boolean isNether(World world) {
 
-        return world.getEnvironment() ==
-                World.Environment.NETHER;
+        return world != null &&
+                world.getEnvironment() ==
+                        World.Environment.NETHER;
     }
 
     /*
      * ========================================
-     * REVISAR COFRES DE UN CHUNK
+     * INSPECCIONAR CHUNK
      * ========================================
      */
     private void inspectChunk(Chunk chunk) {
@@ -285,25 +327,53 @@ public final class NetherChestLootManager implements Listener {
         for (BlockState state :
                 chunk.getTileEntities(true)) {
 
-            if (!(state instanceof Chest chest)) {
+            if (!(state instanceof Chest snapshot)) {
                 continue;
             }
 
-            NetherLootType type = identifyChest(chest);
+            String key = blockKey(
+                    snapshot.getLocation()
+            );
+
+            /*
+             * No intervenir mientras Minecraft
+             * esta generando el loot inicial.
+             */
+            if (generatingLoot.contains(key)) {
+                continue;
+            }
+
+            /*
+             * Recuperar el estado actual.
+             */
+            BlockState current =
+                    snapshot.getBlock().getState();
+
+            if (!(current instanceof Chest chest)) {
+                continue;
+            }
+
+            NetherLootType type =
+                    identifyChest(chest);
 
             if (type == null) {
                 continue;
             }
 
-            if (dayManager.isAtLeast(20) &&
-                    currentRound > 0) {
+            if (dayManager.isAtLeast(20)
+                    && currentRound > 0) {
 
-                // Recuperar estado actualizado del bloque.
-                BlockState fresh =
+                /*
+                 * El cofre puede seguir teniendo
+                 * una tabla vanilla pendiente.
+                 * El refill la sustituira.
+                 */
+                BlockState refreshed =
                         chest.getBlock().getState();
 
-                if (fresh instanceof Chest freshChest) {
-                    refill(freshChest, type, null);
+                if (refreshed instanceof Chest actual) {
+
+                    refill(actual, type, null);
                 }
             }
         }
@@ -314,14 +384,16 @@ public final class NetherChestLootManager implements Listener {
      * IDENTIFICAR COFRE NATURAL
      * ========================================
      */
-    private NetherLootType identifyChest(Chest chest) {
+    private NetherLootType identifyChest(
+            Chest chest
+    ) {
 
         PersistentDataContainer data =
                 chest.getPersistentDataContainer();
 
         /*
-         * Primero revisar si el cofre ya
-         * fue identificado anteriormente.
+         * Prioridad 1:
+         * marcador guardado previamente.
          */
         String stored = data.get(
                 chestTypeKey,
@@ -336,8 +408,12 @@ public final class NetherChestLootManager implements Listener {
         }
 
         /*
-         * Si no tiene marcador, comprobar
-         * su LootTable original.
+         * Prioridad 2:
+         * LootTable vanilla sin consumir.
+         *
+         * Cofres antiguos que ya perdieron
+         * su tabla y no tienen marcador
+         * NO se identifican a la fuerza.
          */
         LootTable table = chest.getLootTable();
 
@@ -354,8 +430,8 @@ public final class NetherChestLootManager implements Listener {
         }
 
         /*
-         * Guardar identificacion sin abrir
-         * el inventario ni generar su loot.
+         * Guardar el tipo sin abrir
+         * ni modificar el inventario.
          */
         data.set(
                 chestTypeKey,
@@ -363,91 +439,137 @@ public final class NetherChestLootManager implements Listener {
                 type.name()
         );
 
-        chest.update(false, false);
+        if (!chest.update(false, false)) {
+
+            plugin.getLogger().warning(
+                    "No se pudo marcar el cofre en " +
+                            chest.getLocation()
+            );
+
+            return null;
+        }
 
         return type;
     }
 
     /*
      * ========================================
-     * REFILL DE UN COFRE
+     * COMPROBAR RONDA DEL COFRE
      * ========================================
      */
-    private void refill(
-            Chest chest,
-            NetherLootType type,
-            UUID openingPlayer
+    private boolean isCurrentRound(
+            Chest chest
     ) {
 
-        if (!dayManager.isAtLeast(20) ||
-                currentRound <= 0) {
-            return;
-        }
-
-        Integer previousRound =
+        Integer round =
                 chest.getPersistentDataContainer().get(
                         lastRoundKey,
                         PersistentDataType.INTEGER
                 );
 
-        if (previousRound != null &&
-                previousRound >= currentRound) {
-            return;
+        return round != null &&
+                round >= currentRound;
+    }
+
+    /*
+     * ========================================
+     * REFILL DEL COFRE
+     * ========================================
+     *
+     * Devuelve true cuando el cofre ya tiene
+     * la ronda actual o se relleno bien.
+     *
+     * Devuelve false cuando hay que esperar
+     * o se produjo un error.
+     */
+    private boolean refill(
+            Chest chest,
+            NetherLootType type,
+            UUID openingPlayer
+    ) {
+
+        if (!dayManager.isAtLeast(20)
+                || currentRound <= 0) {
+
+            return true;
+        }
+
+        if (isCurrentRound(chest)) {
+            return true;
+        }
+
+        String key = blockKey(
+                chest.getLocation()
+        );
+
+        /*
+         * Proteccion frente a doble
+         * generacion en el mismo tick.
+         */
+        if (generatingLoot.contains(key)) {
+            return false;
         }
 
         /*
-         * No alterar un cofre mientras otro
-         * jugador ya esta viendo su contenido.
+         * Si otro jugador esta utilizando
+         * este cofre o cualquiera de sus
+         * mitades, aplazar el refill.
          */
         if (isBeingViewed(chest, openingPlayer)) {
 
-            Chunk chunk = chest.getChunk();
-
-            Bukkit.getScheduler().runTaskLater(
-                    plugin,
-                    () -> {
-                        if (chunk.isLoaded()) {
-                            enqueueChunk(chunk);
-                        }
-                    },
-                    20L
+            scheduleChunk(
+                    chest.getChunk(),
+                    RETRY_TICKS
             );
 
-            return;
+            return false;
         }
 
         try {
 
             /*
-             * Generar primero todo el loot.
-             * Si falla, no borrar el contenido.
+             * Generar primero.
+             * Si ocurre un error, no tocamos
+             * el contenido del cofre.
              */
-            List<ItemStack> loot = generator.generate(
-                    type,
-                    ThreadLocalRandom.current()
-            );
+            List<ItemStack> loot =
+                    generator.generate(
+                            type,
+                            ThreadLocalRandom.current()
+                    );
 
             /*
-             * IMPORTANTE:
-             * Usar el inventario snapshot evita
-             * activar el loot vanilla pendiente.
+             * Inventario capturado.
+             * No fuerza la generacion de
+             * la LootTable pendiente.
+             *
+             * Un cofre doble se procesa
+             * por cada mitad natural.
              */
             Inventory inventory =
                     chest.getSnapshotInventory();
 
             if (loot.size() > inventory.getSize()) {
+
                 throw new IllegalStateException(
-                        "Sin espacio para loot de " + type
+                        "Loot mayor al inventario: " +
+                                type
                 );
             }
 
+            /*
+             * Reemplazar todo el contenido
+             * anterior de esta mitad.
+             */
             inventory.clear();
 
-            List<Integer> slots = new ArrayList<>();
+            List<Integer> slots =
+                    new ArrayList<>();
 
             for (int i = 0;
                  i < inventory.getSize();
                  i++) {
+
                 slots.add(i);
             }
 
@@ -457,6 +579,7 @@ public final class NetherChestLootManager implements Listener {
             );
 
             for (int i = 0; i < loot.size(); i++) {
+
                 inventory.setItem(
                         slots.get(i),
                         loot.get(i)
@@ -464,11 +587,15 @@ public final class NetherChestLootManager implements Listener {
             }
 
             /*
-             * El nuevo loot reemplaza al
-             * anterior por completo.
+             * Eliminar la generacion vanilla
+             * pendiente para este cofre.
              */
             chest.setLootTable(null);
 
+            /*
+             * Marcar la ronda solamente
+             * tras generar exitosamente.
+             */
             chest.getPersistentDataContainer().set(
                     lastRoundKey,
                     PersistentDataType.INTEGER,
@@ -476,120 +603,223 @@ public final class NetherChestLootManager implements Listener {
             );
 
             if (!chest.update(false, false)) {
+
                 throw new IllegalStateException(
-                        "No se pudo actualizar el cofre"
+                        "No se pudo guardar el refill"
                 );
             }
 
+            return true;
+
         } catch (Exception exception) {
 
-            plugin.getLogger().warning(
+            plugin.getLogger().log(
+                    Level.SEVERE,
                     "Error rellenando cofre " +
                             type + " en " +
-                            chest.getLocation() + ": " +
-                            exception.getMessage()
+                            chest.getLocation(),
+                    exception
             );
+
+            return false;
         }
     }
 
     /*
      * ========================================
-     * COFRES ABIERTOS POR JUGADORES
+     * DETECTAR INVENTARIOS ABIERTOS
      * ========================================
+     *
+     * getInventory() incluye ambas mitades
+     * si el bloque forma un cofre doble.
+     *
+     * Este metodo solo se utiliza cuando
+     * el cofre no esta generando loot.
      */
     private boolean isBeingViewed(
             Chest chest,
             UUID excludedPlayer
     ) {
 
-        Location target = chest.getLocation();
+        for (HumanEntity viewer :
+                chest.getInventory().getViewers()) {
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (excludedPlayer != null
+                    && viewer.getUniqueId().equals(
+                    excludedPlayer
+            )) {
 
-            if (excludedPlayer != null &&
-                    player.getUniqueId().equals(excludedPlayer)) {
                 continue;
             }
 
-            Location opened =
-                    player.getOpenInventory()
-                            .getTopInventory()
-                            .getLocation();
-
-            if (opened == null) {
-                continue;
-            }
-
-            if (opened.getWorld() != null &&
-                    opened.getWorld().equals(target.getWorld()) &&
-                    opened.getBlockX() == target.getBlockX() &&
-                    opened.getBlockY() == target.getBlockY() &&
-                    opened.getBlockZ() == target.getBlockZ()) {
-
-                return true;
-            }
+            return true;
         }
 
         return false;
     }
 
     /*
-     * Si un jugador abre un cofre registrado
-     * mientras su refill sigue pendiente,
-     * intentar aplicarlo antes de mostrarlo.
+     * ========================================
+     * UBICACIONES DE INVENTARIO
+     * ========================================
+     *
+     * Permite reconocer un cofre simple
+     * o las dos mitades de un cofre doble.
      */
-    @EventHandler(priority = EventPriority.HIGHEST,
-            ignoreCancelled = true)
-    public void onInventoryOpen(InventoryOpenEvent event) {
+    private List<Location> getChestLocations(
+            Inventory inventory
+    ) {
 
-        if (!dayManager.isAtLeast(20)) {
-            return;
+        List<Location> locations =
+                new ArrayList<>();
+
+        if (inventory instanceof DoubleChestInventory both) {
+
+            Location left =
+                    both.getLeftSide().getLocation();
+
+            Location right =
+                    both.getRightSide().getLocation();
+
+            if (left != null) {
+                locations.add(left);
+            }
+
+            if (right != null) {
+                locations.add(right);
+            }
+
+        } else {
+
+            Location location =
+                    inventory.getLocation();
+
+            if (location != null) {
+                locations.add(location);
+            }
         }
 
-        Location location =
-                event.getInventory().getLocation();
-
-        if (location == null ||
-                !isNether(location.getWorld())) {
-            return;
-        }
-
-        BlockState state =
-                location.getBlock().getState();
-
-        if (!(state instanceof Chest chest)) {
-            return;
-        }
-
-        NetherLootType type = identifyChest(chest);
-
-        if (type == null) {
-            return;
-        }
-
-        refill(
-                chest,
-                type,
-                event.getPlayer().getUniqueId()
-        );
+        return locations;
     }
 
     /*
      * ========================================
-     * GENERACION ORIGINAL DE LOOT
+     * APERTURA DE COFRES
      * ========================================
      *
-     * Respaldo cuando un cofre se abre antes
-     * de que el escaneo llegue a su chunk.
+     * Respaldo por si un jugador abre
+     * un cofre ya registrado antes de
+     * que termine el escaneo del chunk.
      */
     @EventHandler(
             priority = EventPriority.HIGHEST,
             ignoreCancelled = true
     )
-    public void onLootGenerate(LootGenerateEvent event) {
+    public void onInventoryOpen(
+            InventoryOpenEvent event
+    ) {
 
-        if (event.isPlugin() ||
-                !isNether(event.getWorld())) {
+        if (!dayManager.isAtLeast(20)
+                || currentRound <= 0) {
+
+            return;
+        }
+
+        for (Location location :
+                getChestLocations(event.getInventory())) {
+
+            if (!isNether(location.getWorld())) {
+                continue;
+            }
+
+            String key = blockKey(location);
+
+            /*
+             * Si LootGenerateEvent ya intervino,
+             * nunca generar otra vez.
+             */
+            if (generatingLoot.contains(key)) {
+                continue;
+            }
+
+            BlockState state =
+                    location.getBlock().getState();
+
+            if (!(state instanceof Chest chest)) {
+                continue;
+            }
+
+            NetherLootType type =
+                    identifyChest(chest);
+
+            if (type == null) {
+                continue;
+            }
+
+            /*
+             * Si la LootTable original sigue
+             * pendiente, dejar que el evento
+             * de generacion se encargue.
+             */
+            if (chest.getLootTable() != null) {
+                continue;
+            }
+
+            /*
+             * Si ya recibio esta ronda,
+             * no hay nada que hacer.
+             */
+            if (isCurrentRound(chest)) {
+                continue;
+            }
+
+            /*
+             * Cofre abierto anteriormente,
+             * pero pendiente del refill.
+             */
+            boolean success = refill(
+                    chest,
+                    type,
+                    event.getPlayer().getUniqueId()
+            );
+
+            if (!success) {
+
+                /*
+                 * Evitar mostrar loot antiguo
+                 * cuando el refill esta pendiente.
+                 */
+                event.setCancelled(true);
+
+                scheduleChunk(
+                        chest.getChunk(),
+                        RETRY_TICKS
+                );
+
+                return;
+            }
+        }
+    }
+
+    /*
+     * ========================================
+     * GENERACION INICIAL DE LOOT
+     * ========================================
+     *
+     * Se ejecuta cuando Minecraft consume
+     * una LootTable natural por primera vez.
+     */
+    @EventHandler(
+            priority = EventPriority.HIGHEST,
+            ignoreCancelled = true
+    )
+    public void onLootGenerate(
+            LootGenerateEvent event
+    ) {
+
+        if (event.isPlugin()
+                || !isNether(event.getWorld())) {
+
             return;
         }
 
@@ -602,98 +832,156 @@ public final class NetherChestLootManager implements Listener {
             return;
         }
 
-        boolean day20 = dayManager.isAtLeast(20) &&
-                currentRound > 0;
+        boolean day20 =
+                dayManager.isAtLeast(20)
+                        && currentRound > 0;
 
         /*
-         * Desde el dia 20 sustituir
-         * las recompensas vanilla.
+         * Esta variable es diferente del dia.
+         * Solo sera true si el loot personalizado
+         * se genero correctamente.
          */
+        boolean customSuccess = false;
+
         if (day20) {
 
             try {
+
                 event.setLoot(
                         generator.generate(
                                 type,
                                 ThreadLocalRandom.current()
                         )
                 );
+
+                customSuccess = true;
+
             } catch (Exception exception) {
 
                 plugin.getLogger().log(
-                        java.util.logging.Level.SEVERE,
-                        "Error generando loot personalizado de " + type +
-                                ". Se conserva el loot vanilla como respaldo.",
+                        Level.SEVERE,
+                        "Error generando loot de " + type +
+                                ". Se mantiene el loot vanilla.",
                         exception
                 );
-
             }
         }
 
+        /*
+         * El evento puede no tener
+         * InventoryHolder, por ejemplo
+         * cuando se destruye un cofre.
+         */
         InventoryHolder holder =
                 event.getInventoryHolder();
 
-        /*
-         * Puede ser null si el cofre se
-         * destruye al generar el loot.
-         */
-        if (!(holder instanceof Chest chest)) {
+        if (!(holder instanceof Chest source)) {
             return;
         }
 
-        Location location = chest.getLocation();
-        int generatedRound = day20 ? currentRound : 0;
+        Location location =
+                source.getLocation();
+
+        String key = blockKey(location);
+
+        final boolean succeeded =
+                customSuccess;
+
+        final int generatedRound =
+                customSuccess ? currentRound : 0;
 
         /*
-         * Registrar en el siguiente tick,
-         * cuando Minecraft haya terminado
-         * de generar el contenido.
+         * La marca temporal evita que
+         * InventoryOpenEvent genere otra
+         * recompensa en el mismo acceso.
          */
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        generatingLoot.add(key);
 
-            if (!location.getWorld().isChunkLoaded(
-                    location.getBlockX() >> 4,
-                    location.getBlockZ() >> 4
-            )) {
-                return;
-            }
+        /*
+         * Registrar la identificacion
+         * en el siguiente tick, despues de
+         * que Minecraft termine de llenar
+         * el inventario.
+         */
+        Bukkit.getScheduler().runTask(
+                plugin,
+                () -> {
 
-            if (recentlyBroken.contains(getBlockKey(location))) {
-                return;
-            }
+                    try {
 
-            BlockState state =
-                    location.getBlock().getState();
+                        if (event.isCancelled()) {
+                            return;
+                        }
 
-            if (!(state instanceof Chest actual)) {
-                return;
-            }
+                        if (recentlyBroken.contains(key)) {
+                            return;
+                        }
 
-            PersistentDataContainer data =
-                    actual.getPersistentDataContainer();
+                        World world =
+                                location.getWorld();
 
-            data.set(
-                    chestTypeKey,
-                    PersistentDataType.STRING,
-                    type.name()
-            );
+                        if (world == null
+                                || !world.isChunkLoaded(
+                                location.getBlockX() >> 4,
+                                location.getBlockZ() >> 4
+                        )) {
 
-            if (generatedRound > 0) {
-                data.set(
-                        lastRoundKey,
-                        PersistentDataType.INTEGER,
-                        generatedRound
-                );
-            }
+                            return;
+                        }
 
-            actual.update(false, false);
-        });
+                        BlockState state =
+                                location.getBlock().getState();
+
+                        if (!(state instanceof Chest chest)) {
+                            return;
+                        }
+
+                        PersistentDataContainer data =
+                                chest.getPersistentDataContainer();
+
+                        data.set(
+                                chestTypeKey,
+                                PersistentDataType.STRING,
+                                type.name()
+                        );
+
+                        /*
+                         * Nunca marcar como completada
+                         * una generacion personalizada
+                         * que haya fallado.
+                         */
+                        if (succeeded && generatedRound > 0) {
+
+                            data.set(
+                                    lastRoundKey,
+                                    PersistentDataType.INTEGER,
+                                    generatedRound
+                            );
+                        }
+
+                        if (!chest.update(false, false)) {
+
+                            plugin.getLogger().warning(
+                                    "No se pudo registrar el loot de " +
+                                            type + " en " + location
+                            );
+                        }
+
+                    } finally {
+
+                        generatingLoot.remove(key);
+                    }
+                }
+        );
     }
 
     /*
      * ========================================
-     * EVITAR MARCAR UN COFRE REEMPLAZADO
+     * DESTRUCCION DE COFRES
      * ========================================
+     *
+     * Si un cofre natural se destruye,
+     * el bloque nuevo no hereda el marcador.
      */
     @EventHandler(
             priority = EventPriority.MONITOR,
@@ -703,12 +991,16 @@ public final class NetherChestLootManager implements Listener {
 
         Block block = event.getBlock();
 
-        if (!isNether(block.getWorld()) ||
-                block.getType() != org.bukkit.Material.CHEST) {
+        if (!isNether(block.getWorld())
+                || block.getType() !=
+                org.bukkit.Material.CHEST) {
+
             return;
         }
 
-        String key = getBlockKey(block.getLocation());
+        String key = blockKey(
+                block.getLocation()
+        );
 
         recentlyBroken.add(key);
 
@@ -717,13 +1009,5 @@ public final class NetherChestLootManager implements Listener {
                 () -> recentlyBroken.remove(key),
                 2L
         );
-    }
-
-    private String getBlockKey(Location location) {
-
-        return location.getWorld().getUID() +
-                ":" + location.getBlockX() +
-                ":" + location.getBlockY() +
-                ":" + location.getBlockZ();
     }
 }
